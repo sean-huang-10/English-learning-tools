@@ -983,6 +983,63 @@
       overflow: hidden;
     }
 
+    /* ── Full Translation ── */
+    .translate-all-btn {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 18px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.92rem;
+      color: var(--ink-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .translate-all-btn:active { opacity: 0.8; }
+    .translate-all-btn.loaded {
+      color: var(--ink);
+      border-color: #b0c4b1;
+    }
+    .translation-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.08em;
+    }
+    .translation-divider::before,
+    .translation-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .translation-body {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: var(--ink-muted);
+      white-space: pre-wrap;
+    }
+    .translation-loading {
+      text-align: center;
+      padding: 24px;
+      color: var(--ink-muted);
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.88rem;
+    }
+
     /* ── Reading Progress Bar ── */
     #reading-progress-bar {
       position: sticky;
@@ -1202,6 +1259,22 @@
       </button>
     </div>
     <div id="article-body"></div>
+
+```
+<!-- Full Translation -->
+<div id="translation-section" style="display:none;">
+  <div class="translation-divider">
+    <span>中文翻譯</span>
+  </div>
+  <div id="translation-body" class="translation-body"></div>
+</div>
+
+<button class="translate-all-btn" id="translate-all-btn">
+  <span id="translate-all-icon">🌐</span>
+  <span id="translate-all-label">顯示全文翻譯</span>
+</button>
+```
+
   </div>
 
   <!-- Vocab View -->
@@ -1376,6 +1449,18 @@ Scientists have discovered that trees communicate through these underground netw
 
     body.innerHTML = html;
     document.getElementById('word-count').textContent = `${wordCount} 個單字`;
+
+    // Reset translation panel
+    const tSection = document.getElementById('translation-section');
+    if (tSection) {
+      tSection.style.display = 'none';
+      document.getElementById('translation-body').textContent = '';
+      document.getElementById('translate-all-icon').textContent = '🌐';
+      document.getElementById('translate-all-label').textContent = '顯示全文翻譯';
+      const tBtn = document.getElementById('translate-all-btn');
+      tBtn.classList.remove('loaded');
+      tBtn.disabled = false;
+    }
 
     body.querySelectorAll('.word').forEach(el => {
       el.addEventListener('click', (e) => {
@@ -2215,6 +2300,82 @@ Scientists have discovered that trees communicate through these underground netw
   });
 
   renderExplore();
+
+  // ── Full Article Translation ──
+  var fullTranslationCache = {};
+
+  async function translateFullArticle() {
+    const text = document.getElementById('article-body').innerText.trim();
+    if (!text) return;
+
+    const btn = document.getElementById('translate-all-btn');
+    const section = document.getElementById('translation-section');
+    const body = document.getElementById('translation-body');
+    const icon = document.getElementById('translate-all-icon');
+    const label = document.getElementById('translate-all-label');
+
+    // Already loaded — toggle show/hide
+    if (fullTranslationCache[text]) {
+      const visible = section.style.display !== 'none';
+      section.style.display = visible ? 'none' : 'block';
+      label.textContent = visible ? '顯示全文翻譯' : '隱藏全文翻譯';
+      return;
+    }
+
+    // Loading
+    icon.textContent = '⏳';
+    label.textContent = '翻譯中...';
+    btn.disabled = true;
+    section.style.display = 'block';
+    body.innerHTML = '<div class="translation-loading">正在翻譯全文，請稍候...</div>';
+
+    try {
+      // Try Gemini first if key exists
+      if (anthropicKey) {
+        const prompt = `將以下英文文章翻譯成繁體中文，保持段落結構，只輸出翻譯結果，不要加任何說明：
+
+${text}`;
+        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': anthropicKey },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        if (!data.error) {
+          const translation = data.candidates[0].content.parts[0].text.trim();
+          fullTranslationCache[text] = translation;
+          body.textContent = translation;
+          icon.textContent = '🌐';
+          label.textContent = '隱藏全文翻譯';
+          btn.classList.add('loaded');
+          btn.disabled = false;
+          return;
+        }
+      }
+      // Fallback: MyMemory paragraph by paragraph
+      const paragraphs = text.split(/\n\n+/);
+      const translated = [];
+      for (const para of paragraphs) {
+        if (!para.trim()) continue;
+        const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(para.slice(0,500)) + '&langpair=en|zh-TW');
+        const data = await res.json();
+        translated.push(data?.responseData?.translatedText || para);
+      }
+      const result = translated.join('\n\n');
+      fullTranslationCache[text] = result;
+      body.textContent = result;
+      icon.textContent = '🌐';
+      label.textContent = '隱藏全文翻譯';
+      btn.classList.add('loaded');
+    } catch(e) {
+      body.innerHTML = '<div class="translation-loading">翻譯失敗，請確認網路連線</div>';
+      icon.textContent = '🌐';
+      label.textContent = '顯示全文翻譯';
+    }
+    btn.disabled = false;
+  }
+
+  document.getElementById('translate-all-btn').addEventListener('click', translateFullArticle);
 
   // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
