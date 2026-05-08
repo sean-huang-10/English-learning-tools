@@ -806,6 +806,104 @@
       font-size: 0.9rem;
       color: var(--ink-muted);
     }
+    /* ── Daily Articles ── */
+    .daily-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .daily-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .daily-refresh {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .daily-refresh:active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+    .daily-refresh.spinning { opacity: 0.5; pointer-events: none; }
+
+    .rss-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .rss-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .rss-card:active { transform: scale(0.98); }
+    .rss-card:hover { border-color: #d4c8bc; box-shadow: 0 4px 12px rgba(44,40,37,0.08); }
+    .rss-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .rss-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.4;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .rss-meta {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+    }
+    .rss-loading {
+      text-align: center;
+      padding: 20px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+    }
+
+    .art-date {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      margin-top: 4px;
+    }
+    .art-style-badge {
+      display: inline-block;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.7rem;
+      padding: 1px 7px;
+      border-radius: 10px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .badge-news { background: #fee2e2; color: #991b1b; }
+    .badge-magazine { background: #e0e7ff; color: #3730a3; }
+    .badge-article { background: #d1fae5; color: #065f46; }
+
     /* ── Explore View ── */
     #explore-view { display: flex; flex-direction: column; gap: 14px; }
 
@@ -1379,38 +1477,67 @@
   <!-- Explore View -->
   <div id="explore-view">
     <!-- AI Generate -->
-    <div class="gen-card" id="gen-section">
-      <div class="gen-title">✨ 用AI幫我生成文章</div>
-      <div class="gen-filters">
-        <select class="gen-select" id="gen-level">
-          <option value="A1">A1 入門</option>
-          <option value="A2">A2 基礎</option>
-          <option value="B1" selected>B1 中級</option>
-          <option value="B2">B2 中高級</option>
-          <option value="C1">C1 高級</option>
-        </select>
-        <select class="gen-select" id="gen-topic">
-          <option value="Science">🔬 科學</option>
-          <option value="Culture">🎭 文化</option>
-          <option value="Travel">✈️ 旅遊</option>
-          <option value="Food">🍜 飲食</option>
-          <option value="Technology">💻 科技</option>
-          <option value="Nature">🌿 自然</option>
-          <option value="History">🏛️ 歷史</option>
-          <option value="Sports">⚽ 運動</option>
-        </select>
-      </div>
-      <div class="api-key-row" id="api-key-row">
-        <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
-        <button class="api-key-save" id="api-key-save">儲存</button>
-      </div>
-      <div id="api-key-status"></div>
-      <button class="btn-primary" id="gen-btn" style="margin-top:0;">
-        <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
-      </button>
+    <!-- 每日精選 -->
+    <div class="daily-header">
+      <div class="daily-title">📰 今日精選</div>
+      <button class="daily-refresh" id="daily-refresh-btn">↺ 更新</button>
     </div>
+    <div id="daily-articles"></div>
 
 ```
+<!-- RSS 即時新聞 -->
+<div class="rss-header">
+  <div class="daily-title">📡 VOA Learning English</div>
+  <button class="daily-refresh" id="rss-refresh-btn">↺ 載入</button>
+</div>
+<div class="filter-row" id="rss-source-filter" style="padding-bottom:2px;">
+  <button class="filter-btn active" data-feed="https://learningenglish.voanews.com/api/zmmpql-vomx-tpey-_q">健康生活</button>
+  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zmg_pl-vomx-tpeymtm">科技</button>
+  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zpyp_l-vomx-tpe_rym">文化</button>
+  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zkm-ql-vomx-tpej-rqi">雜誌</button>
+  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zmypyl-vomx-tpeyry_">英語學習</button>
+</div>
+<div id="rss-articles"></div>
+
+<div class="gen-card" id="gen-section">
+  <div class="gen-title">✨ 用AI幫我生成文章</div>
+  <div class="gen-filters">
+    <select class="gen-select" id="gen-level">
+      <option value="A1">A1 入門</option>
+      <option value="A2">A2 基礎</option>
+      <option value="B1" selected>B1 中級</option>
+      <option value="B2">B2 中高級</option>
+      <option value="C1">C1 高級</option>
+    </select>
+    <select class="gen-select" id="gen-topic">
+      <optgroup label="── 新聞 / 雜誌 ──">
+      <option value="World News">🌍 世界新聞</option>
+      <option value="Business">💹 商業財經</option>
+      <option value="Health">🏥 健康醫療</option>
+      <option value="Lifestyle">✨ 生活風格</option>
+      <option value="Tech News">📱 科技新知</option>
+      </optgroup>
+      <optgroup label="── 一般主題 ──">
+      <option value="Science">🔬 科學</option>
+      <option value="Culture">🎭 文化</option>
+      <option value="Travel">✈️ 旅遊</option>
+      <option value="Food">🍜 飲食</option>
+      <option value="Nature">🌿 自然</option>
+      <option value="History">🏛️ 歷史</option>
+      <option value="Sports">⚽ 運動</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="api-key-row" id="api-key-row">
+    <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
+    <button class="api-key-save" id="api-key-save">儲存</button>
+  </div>
+  <div id="api-key-status"></div>
+  <button class="btn-primary" id="gen-btn" style="margin-top:0;">
+    <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
+  </button>
+</div>
+
 <!-- Paste custom -->
 <details class="paste-section">
   <summary>📋 貼上自己的文章</summary>
@@ -1433,11 +1560,15 @@
 <!-- Topic filter -->
 <div class="filter-row topic-filter" id="topic-filter">
   <button class="filter-btn active" data-topic="all">全部</button>
+  <button class="filter-btn" data-topic="World News">🌍 新聞</button>
+  <button class="filter-btn" data-topic="Business">💹 財經</button>
+  <button class="filter-btn" data-topic="Health">🏥 健康</button>
+  <button class="filter-btn" data-topic="Lifestyle">✨ 生活</button>
+  <button class="filter-btn" data-topic="Tech News">📱 科技</button>
   <button class="filter-btn" data-topic="Science">🔬 科學</button>
   <button class="filter-btn" data-topic="Culture">🎭 文化</button>
   <button class="filter-btn" data-topic="Travel">✈️ 旅遊</button>
   <button class="filter-btn" data-topic="Food">🍜 飲食</button>
-  <button class="filter-btn" data-topic="Technology">💻 科技</button>
   <button class="filter-btn" data-topic="Nature">🌿 自然</button>
   <button class="filter-btn" data-topic="History">🏛️ 歷史</button>
   <button class="filter-btn" data-topic="Sports">⚽ 運動</button>
@@ -2393,6 +2524,11 @@ Scientists have discovered that trees communicate through these underground netw
 
   // ── Article Library ──
   const TOPIC_COLORS = {
+    'World News': ['#fee2e2','#991b1b','🌍'],
+    'Business':   ['#fef3c7','#92400e','💹'],
+    'Health':     ['#d1fae5','#065f46','🏥'],
+    'Lifestyle':  ['#ede9fe','#4c1d95','✨'],
+    'Tech News':  ['#dbeafe','#1e40af','📱'],
     Science:    ['#dbeafe','#1e40af','🔬'],
     Culture:    ['#fce7f3','#9d174d','🎭'],
     Travel:     ['#d1fae5','#065f46','✈️'],
@@ -2426,15 +2562,19 @@ Scientists have discovered that trees communicate through these underground netw
     list.innerHTML = filtered.map(art => {
       const [bg, , emoji] = TOPIC_COLORS[art.topic] || ['#f3f4f6','#374151','📄'];
       const preview = art.content.slice(0, 100) + '...';
+      const badgeCls = art.style === 'news' ? 'badge-news' : art.style === 'magazine' ? 'badge-magazine' : '';
+      const badgeLabel = art.style === 'news' ? '新聞' : art.style === 'magazine' ? '雜誌' : '';
+      const dateStr = art.date ? new Date(art.date).toLocaleDateString('zh-TW',{month:'short',day:'numeric'}) : '';
       return `<div class="art-card" data-id="${art.id}">
         <div class="art-cover" style="background:${bg};">
           ${emoji}
           <div class="art-level-badge" style="background:${LEVEL_COLORS[art.level] || '#ccc'};color:#1a1a1a;">${art.level}</div>
-          <div class="art-topic-badge">${emoji}</div>
         </div>
         <div class="art-body">
+          ${badgeCls ? `<span class="art-style-badge ${badgeCls}">${badgeLabel}</span>` : ''}
           <div class="art-title-zh">${art.titleZh}</div>
           <div class="art-preview">${preview}</div>
+          ${dateStr ? `<div class="art-date">${dateStr}</div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -2942,6 +3082,216 @@ ${convo}`;
     document.getElementById('chat-home').style.display = 'flex';
     renderChatHome();
   });
+
+
+  // ── Daily Articles ──
+  const NEWS_PROMPTS = [
+    { topic:'World News', style:'news', titleHint:'international current event' },
+    { topic:'Business',   style:'news', titleHint:'business or economy story' },
+    { topic:'Health',     style:'magazine', titleHint:'health or wellness feature' },
+    { topic:'Lifestyle',  style:'magazine', titleHint:'lifestyle or trend story' },
+    { topic:'Tech News',  style:'news', titleHint:'technology news' },
+  ];
+
+  async function generateDailyArticle(prompt, level) {
+    const styleGuide = prompt.style === 'news'
+      ? 'Write in AP news style: strong lead sentence with who/what/when/where, inverted pyramid structure, quote one expert, end with context.'
+      : 'Write in magazine feature style: engaging opening anecdote, narrative flow, pull in the reader, end with a memorable takeaway.';
+    const p = `Write a ${level} CEFR graded reading ${prompt.style} article about a ${prompt.titleHint}. ${styleGuide} Make it feel current and real. Return ONLY valid JSON: {"title":"English headline","titleZh":"中文標題","content":"article text","style":"${prompt.style}"}. No markdown.`;
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
+      body: JSON.stringify({ contents:[{parts:[{text:p}]}], generationConfig:{temperature:0.9,maxOutputTokens:700} })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+    return JSON.parse(raw);
+  }
+
+  var dailyCache = JSON.parse(localStorage.getItem('wordlens-daily') || 'null');
+  var todayKey = new Date().toISOString().slice(0,10);
+
+  function renderDailyArticles() {
+    const el = document.getElementById('daily-articles');
+    if (!dailyCache || dailyCache.date !== todayKey || !dailyCache.articles?.length) {
+      el.innerHTML = '<div class="vocab-empty" style="padding:20px 0 4px;">今天還沒有精選文章<br><span style="font-size:0.8rem;">設定 Gemini Key 後按「↺ 更新」生成</span></div>';
+      return;
+    }
+    el.innerHTML = dailyCache.articles.map(art => {
+      const [bg,,emoji] = TOPIC_COLORS[art.topic] || ['#f3f4f6','#374151','📄'];
+      const badgeCls = art.style === 'news' ? 'badge-news' : art.style === 'magazine' ? 'badge-magazine' : 'badge-article';
+      const badgeLabel = art.style === 'news' ? '新聞' : art.style === 'magazine' ? '雜誌' : '文章';
+      return `<div class="art-card" data-id="${art.id}">
+        <div class="art-cover" style="background:${bg};">${emoji}
+          <div class="art-level-badge" style="background:${LEVEL_COLORS[art.level]||'#ccc'};color:#1a1a1a;">${art.level}</div>
+        </div>
+        <div class="art-body">
+          <span class="art-style-badge ${badgeCls}">${badgeLabel}</span>
+          <div class="art-title-zh">${art.titleZh}</div>
+          <div class="art-preview">${art.content.slice(0,100)}...</div>
+          <div class="art-date">今日精選</div>
+        </div>
+      </div>`;
+    }).join('');
+    el.querySelectorAll('.art-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const art = dailyCache.articles.find(a => a.id === card.dataset.id);
+        if (art) loadArticle(art);
+      });
+    });
+  }
+
+  document.getElementById('daily-refresh-btn').addEventListener('click', async () => {
+    if (!anthropicKey) { alert('請先設定 Gemini API Key'); return; }
+    const btn = document.getElementById('daily-refresh-btn');
+    btn.classList.add('spinning');
+    btn.textContent = '生成中...';
+    const el = document.getElementById('daily-articles');
+    el.innerHTML = '<div class="translation-loading">正在生成今日精選文章...</div>';
+
+    try {
+      const level = 'B1';
+      const picks = NEWS_PROMPTS.sort(() => Math.random()-0.5).slice(0,3);
+      const articles = [];
+      for (const p of picks) {
+        const art = await generateDailyArticle(p, level);
+        articles.push({ ...art, id:'daily_'+Date.now()+'_'+Math.random().toString(36).slice(2), topic:p.topic, level, date:Date.now() });
+        await new Promise(r => setTimeout(r, 300));
+      }
+      dailyCache = { date: todayKey, articles };
+      localStorage.setItem('wordlens-daily', JSON.stringify(dailyCache));
+      // Also add to main article library
+      storedArticles = [...articles, ...storedArticles];
+      allArticles = [...SEED_ARTICLES, ...storedArticles];
+      localStorage.setItem('wordlens-articles', JSON.stringify(storedArticles));
+      renderDailyArticles();
+    } catch(e) {
+      el.innerHTML = '<div class="translation-loading">生成失敗：' + e.message + '</div>';
+    }
+    btn.classList.remove('spinning');
+    btn.textContent = '↺ 更新';
+  });
+
+  renderDailyArticles();
+
+
+  // ── RSS Feed Reader ──
+  const PROXY = 'https://api.allorigins.win/get?url=';
+  var activeRssFeed = document.querySelector('#rss-source-filter .filter-btn.active')?.dataset.feed || '';
+  var rssCache = {};
+
+  const FEED_META = {
+    'https://learningenglish.voanews.com/api/zmmpql-vomx-tpey-_q': { icon:'🏥', label:'Health & Lifestyle' },
+    'https://learningenglish.voanews.com/api/zmg_pl-vomx-tpeymtm': { icon:'🔬', label:'Science & Tech' },
+    'https://learningenglish.voanews.com/api/zpyp_l-vomx-tpe_rym': { icon:'🎭', label:'Arts & Culture' },
+    'https://learningenglish.voanews.com/api/zkm-ql-vomx-tpej-rqi': { icon:'📰', label:'As It Is' },
+    'https://learningenglish.voanews.com/api/zmypyl-vomx-tpeyry_': { icon:'📚', label:'Words & Stories' },
+  };
+
+  document.querySelectorAll('#rss-source-filter .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#rss-source-filter .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeRssFeed = btn.dataset.feed;
+      loadRssFeed(activeRssFeed);
+    });
+  });
+
+  document.getElementById('rss-refresh-btn').addEventListener('click', () => {
+    delete rssCache[activeRssFeed];
+    loadRssFeed(activeRssFeed);
+  });
+
+  async function loadRssFeed(feedUrl) {
+    if (!feedUrl) return;
+    const el = document.getElementById('rss-articles');
+    if (rssCache[feedUrl]) { renderRssItems(rssCache[feedUrl]); return; }
+    const btn = document.getElementById('rss-refresh-btn');
+    btn.classList.add('spinning'); btn.textContent = '載入中...';
+    el.innerHTML = '<div class="rss-loading">載入 VOA 文章中...</div>';
+    try {
+      const res = await fetch(PROXY + encodeURIComponent(feedUrl));
+      const data = await res.json();
+      const xml = new DOMParser().parseFromString(data.contents, 'text/xml');
+      const items = Array.from(xml.querySelectorAll('item')).slice(0, 8).map(item => ({
+        title: item.querySelector('title')?.textContent?.trim() || '',
+        link:  item.querySelector('link')?.textContent?.trim() || '',
+        desc:  item.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim() || '',
+        date:  item.querySelector('pubDate')?.textContent?.trim() || '',
+        feed:  feedUrl,
+      }));
+      rssCache[feedUrl] = items;
+      renderRssItems(items);
+    } catch(e) {
+      el.innerHTML = '<div class="rss-loading">載入失敗，請確認網路連線</div>';
+    }
+    btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
+  }
+
+  function renderRssItems(items) {
+    const el = document.getElementById('rss-articles');
+    if (!items.length) { el.innerHTML = '<div class="rss-loading">沒有文章</div>'; return; }
+    el.innerHTML = items.map((item, i) => {
+      const meta = FEED_META[item.feed] || { icon:'📰', label:'VOA' };
+      const d = new Date(item.date);
+      const dateStr = isNaN(d) ? '' : d.toLocaleDateString('zh-TW',{month:'short',day:'numeric'});
+      return `<div class="rss-card" data-index="${i}">
+        <div class="rss-icon">${meta.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="rss-title">${item.title}</div>
+          <div class="rss-meta">${meta.label}${dateStr ? ' · ' + dateStr : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    el.querySelectorAll('.rss-card').forEach(card => {
+      card.addEventListener('click', () => openRssArticle(items[parseInt(card.dataset.index)]));
+    });
+  }
+
+  async function openRssArticle(item) {
+    // Show loading in read tab immediately
+    switchTab('read');
+    document.getElementById('article-body').innerHTML = '<div class="translation-loading" style="padding:40px 0;">正在載入文章...</div>';
+    document.getElementById('word-count').textContent = 'VOA Learning English';
+    document.getElementById('translation-section').style.display = 'none';
+
+    try {
+      // Fetch full article via CORS proxy
+      const res = await fetch(PROXY + encodeURIComponent(item.link));
+      const data = await res.json();
+      const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+
+      // Extract article body text from VOA article page
+      let text = '';
+      const selectors = ['.article-content', '.wsw', '.intro', 'article p', '.story-content'];
+      for (const sel of selectors) {
+        const els = doc.querySelectorAll(sel + ' p, ' + sel);
+        if (els.length) {
+          text = Array.from(els).map(e => e.textContent.trim()).filter(t => t.length > 40).join('\n\n');
+          if (text.length > 200) break;
+        }
+      }
+
+      // Fallback to RSS description
+      if (text.length < 100) text = item.desc;
+
+      if (!text || text.length < 50) {
+        document.getElementById('article-body').innerHTML = '<div class="translation-loading">無法取得文章內容，請直接前往 VOA 網站閱讀。</div>';
+        return;
+      }
+
+      renderArticle(text);
+      document.getElementById('word-count').textContent = item.title.slice(0,30) + (item.title.length>30?'...':'') + '　B1';
+    } catch(e) {
+      // Fallback to description only
+      if (item.desc && item.desc.length > 50) {
+        renderArticle(item.desc);
+      } else {
+        document.getElementById('article-body').innerHTML = '<div class="translation-loading">載入失敗：' + e.message + '</div>';
+      }
+    }
+  }
 
   // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
