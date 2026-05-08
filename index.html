@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
@@ -8,10 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="WordLens" />
   <meta name="theme-color" content="#2c2825" />
-  <link rel="manifest" href="manifest.json" />
   <title>WordLens</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
 
   <style>
     :root {
@@ -22,14 +20,18 @@
       --accent: #c0622f;
       --accent-light: #f5e6dc;
       --border: #e8e2d8;
-      --word-hover: #fdebd8;
       --popup-bg: #2c2825;
       --popup-text: #faf8f4;
       --radius: 14px;
       --shadow: 0 8px 32px rgba(44,40,37,0.18);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     body {
       font-family: 'Lora', Georgia, serif;
@@ -40,243 +42,286 @@
       flex-direction: column;
     }
 
-    /* ── Header ── */
     header {
       background: var(--ink);
       color: var(--bg);
-      padding: 16px 20px 14px;
+      padding: 16px 14px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       position: sticky;
       top: 0;
       z-index: 50;
     }
+
     .logo {
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
+      font-size: 1.15rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
-    .logo span { color: var(--accent); }
+
+    .logo span {
+      color: var(--accent);
+    }
+
     .tab-bar {
       display: flex;
       gap: 4px;
       background: rgba(255,255,255,0.1);
       border-radius: 8px;
       padding: 3px;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+
+    .tab-bar::-webkit-scrollbar {
+      display: none;
+    }
+
     .tab-btn {
       border: none;
       background: transparent;
-      color: rgba(255,255,255,0.6);
+      color: rgba(255,255,255,0.65);
       font-family: 'Noto Sans TC', sans-serif;
       font-size: 0.72rem;
-      padding: 5px 8px;
+      padding: 6px 8px;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s;
+      white-space: nowrap;
     }
+
     .tab-btn.active {
       background: var(--accent);
       color: white;
     }
 
-    /* ── Main ── */
-    main { flex: 1; padding: 20px; max-width: 700px; margin: 0 auto; width: 100%; }
-
-    /* ── Input View ── */
-    #input-view { display: flex; flex-direction: column; gap: 16px; }
-
-    .input-label {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.8rem;
-      color: var(--ink-muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    textarea {
+    main {
+      flex: 1;
       width: 100%;
-      min-height: 220px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      font-family: 'Lora', serif;
-      font-size: 1rem;
-      line-height: 1.7;
-      color: var(--ink);
-      background: var(--surface);
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px;
     }
-    textarea:focus { border-color: var(--accent); }
-    textarea::placeholder { color: var(--ink-muted); font-style: italic; }
 
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      padding: 15px 24px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
+    .view {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      animation: viewIn 0.2s ease both;
+    }
+
+    .view.active {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: opacity 0.2s, transform 0.15s;
-      -webkit-tap-highlight-color: transparent;
     }
-    .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
 
-    .sample-btn {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 20px;
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.88rem;
-      color: var(--ink-muted);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .sample-btn:active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-
-    /* ── Read View ── */
-    #read-view { display: none; flex-direction: column; gap: 16px; }
-
-    .article-header {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .word-count {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.78rem;
-      color: var(--ink-muted);
-    }
-    .back-btn {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 6px 14px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.82rem;
-      color: var(--ink-muted);
-      cursor: pointer;
-    }
-    .back-btn:active { background: var(--border); }
 
-    .speed-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .muted {
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--ink-muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .card {
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 12px 16px;
+      padding: 14px 16px;
     }
-    .speed-label {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.82rem;
-      color: var(--ink-muted);
-      white-space: nowrap;
-    }
-    .speed-slider-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex: 1;
-    }
-    .speed-value {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--accent);
-      min-width: 36px;
-      text-align: right;
-    }
-    .custom-slider {
-      flex: 1;
-      padding: 10px 0;
-      cursor: pointer;
-      touch-action: none;
-    }
-    .custom-track {
-      position: relative;
-      height: 4px;
-      background: #e8e2d8;
-      border-radius: 2px;
-    }
-    .custom-fill {
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      background: #c0622f;
-      border-radius: 2px;
-      width: 56%;
-      pointer-events: none;
-    }
-    .custom-thumb {
-      position: absolute;
-      top: 50%;
-      left: 56%;
-      transform: translate(-50%, -50%);
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #c0622f;
-      box-shadow: 0 2px 8px rgba(192,98,47,0.4);
-      pointer-events: none;
-    }
-    .custom-thumb.dragging { transform: translate(-50%, -50%) scale(1.2); }
 
-    .read-aloud-row {
-      display: flex;
-      gap: 8px;
-    }
-    .read-aloud-btn {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
+    .btn-primary,
+    .btn-secondary {
+      border: none;
       border-radius: var(--radius);
       padding: 13px 18px;
       font-family: 'Noto Sans TC', sans-serif;
       font-size: 0.95rem;
-      color: var(--ink);
+      font-weight: 500;
       cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--ink-muted);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-primary:active,
+    .btn-secondary:active,
+    .article-card:active,
+    .rss-card:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-family: 'Lora', serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.9rem;
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 3px;
+      scrollbar-width: none;
+    }
+
+    .filter-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-btn {
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 7px 14px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .filter-btn.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: white;
+    }
+
+    .article-card,
+    .rss-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: all 0.15s;
+    }
+
+    .article-icon,
+    .rss-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--accent-light);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .read-aloud-main { flex: 1; }
-    .read-aloud-pause {
-      width: 52px;
+      font-size: 1.4rem;
       flex-shrink: 0;
-      font-size: 1.1rem;
     }
-    .read-aloud-btn:active { opacity: 0.8; }
-    .read-aloud-btn.playing {
-      background: var(--accent-light);
-      border-color: var(--accent);
-      color: var(--accent);
+
+    .article-title,
+    .rss-title {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+      line-height: 1.4;
     }
-    .read-aloud-btn.paused {
-      background: #eef3ff;
-      border-color: #7b9cde;
-      color: #3a5fa8;
+
+    .article-preview,
+    .rss-meta {
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--ink-muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
     }
-    .read-aloud-btn.playing #read-aloud-icon {
-      animation: pulse-speak 0.55s ease-in-out infinite alternate;
-      display: inline-block;
+
+    #article-body {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      font-size: 1.08rem;
+      line-height: 1.9;
+      min-height: 260px;
+      white-space: normal;
     }
-    @keyframes icon-pulse {
-      from { transform: scale(1); }
-      to   { transform: scale(1.2); }
+
+    .word {
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 1px 2px;
+    }
+
+    .word:hover,
+    .word.looked-up {
+      background: #fdebd8;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .word.word-speaking {
+      background: var(--accent);
+      color: white;
+      border-bottom: none;
+    }
+
+    .word.word-read {
+      color: #b8a898;
     }
 
     .hint-bar {
@@ -285,3021 +330,1078 @@
       border-radius: 10px;
       padding: 10px 14px;
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.82rem;
       color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 0.86rem;
     }
 
-    #article-body {
+    .translation-body {
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 22px 20px;
-      font-size: 1.05rem;
-      line-height: 1.85;
-      color: var(--ink);
-      min-height: 300px;
-    }
-
-    .word {
-      display: inline;
-      cursor: pointer;
-      border-radius: 4px;
-      padding: 1px 2px;
-      transition: background 0.12s, color 0.12s;
-      position: relative;
-    }
-    .word:hover { background: var(--word-hover); }
-    .word:active { background: #f8d5b8; transform: scale(0.97); }
-    .word.loading { background: var(--accent-light); }
-    .word.looked-up {
-      background: #fef0e6;
-      border-bottom: 2px solid var(--accent);
-      border-radius: 4px 4px 2px 2px;
-    }
-    .word.looked-up:hover { background: #fde3cc; }
-    .word.word-read {
-      color: #b8a898;
-      transition: color 0.2s;
-    }
-    .word.word-speaking {
-      background: #c0622f;
-      color: white !important;
-      border-radius: 4px;
-      padding: 1px 3px;
-      box-shadow: 0 2px 8px rgba(192,98,47,0.4);
-      transition: background 0.1s, color 0.1s;
-    }
-
-    /* ── Vocab List ── */
-    #vocab-view { display: none; flex-direction: column; gap: 12px; }
-
-    .vocab-empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--ink-muted);
-      font-style: italic;
-    }
-    .vocab-count {
+      padding: 18px;
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.8rem;
       color: var(--ink-muted);
+      font-size: 0.95rem;
+      line-height: 1.9;
+      white-space: pre-wrap;
     }
+
     .vocab-card {
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px 18px;
+      padding: 14px 16px;
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
+      align-items: flex-start;
     }
+
     .vocab-en {
       font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--ink);
+      font-weight: 700;
       margin-bottom: 4px;
     }
+
     .vocab-zh {
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.9rem;
       color: var(--ink-muted);
+      font-size: 0.9rem;
     }
-    .vocab-del {
-      background: none;
-      border: none;
-      color: var(--border);
-      font-size: 1.1rem;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 6px;
-      flex-shrink: 0;
-    }
-    .vocab-del:active { background: #fde8e8; color: #c0392b; }
 
-    /* ── Popup ── */
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: #c9beb3;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
     #popup-overlay {
       position: fixed;
       inset: 0;
       z-index: 300;
-      pointer-events: none;
+      display: none;
+      background: rgba(0,0,0,0.05);
     }
-    #popup-overlay.active { pointer-events: all; }
+
+    #popup-overlay.active {
+      display: block;
+    }
 
     #popup {
       position: absolute;
+      width: min(330px, 90vw);
       background: var(--popup-bg);
       color: var(--popup-text);
       border-radius: 16px;
-      padding: 0;
-      width: min(320px, 88vw);
       box-shadow: var(--shadow);
-      transform: scale(0.85) translateY(8px);
-      opacity: 0;
-      transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-      pointer-events: none;
       overflow: hidden;
-    }
-    #popup.show {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-      pointer-events: all;
     }
 
     .popup-header {
       background: rgba(255,255,255,0.08);
-      padding: 14px 18px 12px;
+      padding: 14px 16px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      align-items: center;
+      gap: 12px;
     }
+
     .popup-word {
-      font-size: 1.3rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-    .popup-close {
-      background: rgba(255,255,255,0.12);
-      border: none;
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
     }
 
-    .popup-speak-btn {
-      background: rgba(255,255,255,0.12);
-      border: none;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, transform 0.15s;
-    }
-    .popup-speak-btn:active { background: rgba(255,255,255,0.28); transform: scale(0.88); }
-    .popup-speak-btn.speaking { animation: pulse-speak 0.55s ease-in-out infinite alternate; }
-    @keyframes pulse-speak {
-      from { background: rgba(192,98,47,0.35); }
-      to   { background: rgba(192,98,47,0.75); }
-    }
-
-    .popup-body { padding: 14px 18px; }
-
-    .popup-translation {
+    .popup-body {
+      padding: 14px 16px;
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 1.05rem;
-      color: #f0ece6;
-      margin-bottom: 14px;
-      min-height: 24px;
-    }
-    .popup-translation.loading-text::after {
-      content: '';
-      display: inline-block;
-      width: 60px;
-      height: 14px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1s infinite;
-      border-radius: 4px;
-      vertical-align: middle;
+      line-height: 1.7;
     }
 
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
+    .popup-close,
+    .popup-speak {
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      cursor: pointer;
     }
 
     .popup-actions {
       display: flex;
       gap: 8px;
+      margin-top: 12px;
     }
-    .popup-save-btn {
+
+    .popup-actions button {
       flex: 1;
-      background: var(--accent);
-      color: white;
       border: none;
       border-radius: 10px;
       padding: 10px;
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .popup-save-btn:active { opacity: 0.8; }
-    .popup-meta {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-      min-height: 0;
-    }
-    .pos-badge {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.72rem;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-    }
-    .pos-noun     { background: rgba(96,165,250,0.2);  color: #93c5fd; }
-    .pos-verb     { background: rgba(167,243,208,0.2); color: #6ee7b7; }
-    .pos-adj      { background: rgba(253,230,138,0.2); color: #fcd34d; }
-    .pos-adv      { background: rgba(216,180,254,0.2); color: #c4b5fd; }
-    .pos-prep     { background: rgba(253,186,116,0.2); color: #fdba74; }
-    .pos-conj     { background: rgba(249,168,212,0.2); color: #f9a8d4; }
-    .pos-pron     { background: rgba(134,239,172,0.2); color: #86efac; }
-    .pos-other    { background: rgba(148,163,184,0.2); color: #94a3b8; }
-    .popup-phonetic {
-      font-family: 'Lora', serif;
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 8px;
-      font-style: italic;
-    }
-    .popup-example {
-      font-family: 'Lora', serif;
-      font-size: 0.82rem;
-      color: rgba(255,255,255,0.55);
-      font-style: italic;
-      line-height: 1.5;
-      margin-bottom: 10px;
-      border-left: 2px solid rgba(192,98,47,0.5);
-      padding-left: 8px;
-    }
-    .popup-speed-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 10px;
-      padding: 8px 12px;
-    }
-    .popup-speed-adj {
-      background: rgba(255,255,255,0.12);
-      border: none;
       color: white;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      font-size: 1.1rem;
+      background: var(--accent);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
     }
-    .popup-speed-adj:active { background: rgba(255,255,255,0.28); }
-    .popup-speed-display {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.9rem;
-      color: #c0622f;
-      font-weight: 600;
-      min-width: 40px;
-      text-align: center;
-    }
-    .popup-save-btn.saved {
+
+    .popup-actions button:last-child {
       background: #4a7c59;
     }
 
-
-
-    /* ── Library ── */
-    #library-view { display: none; flex-direction: column; gap: 12px; }
-    .library-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .review-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 9px 16px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .review-btn:active { opacity: 0.8; }
-    .lib-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-    }
-    .lib-card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-    .lib-en {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--ink);
-    }
-    .lib-phonetic {
-      font-family: 'Lora', serif;
-      font-size: 0.78rem;
-      color: var(--ink-muted);
-      font-style: italic;
-      margin-top: 2px;
-    }
-    .lib-zh {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.88rem;
-      color: var(--ink-muted);
-      margin-bottom: 4px;
-    }
-    .lib-pos-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px; }
-    .lib-example {
-      font-family: 'Lora', serif;
-      font-size: 0.8rem;
-      color: var(--ink-muted);
-      font-style: italic;
-      border-left: 2px solid var(--border);
-      padding-left: 8px;
-      line-height: 1.5;
-    }
-    .lib-del {
-      background: none;
-      border: none;
-      color: var(--border);
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 6px;
-      flex-shrink: 0;
-    }
-    .lib-del:active { background: #fde8e8; color: #c0392b; }
-
-    /* ── Flashcard ── */
-    #flashcard-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 400;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-    .flashcard-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      height: 100%;
-    }
-    .flashcard-progress {
-      width: 100%;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-    }
-    .flashcard-progress-bar {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: width 0.3s;
-      width: 0%;
-    }
-    .flashcard {
-      flex: 1;
-      width: 100%;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 24px;
+    .empty {
       text-align: center;
-      cursor: pointer;
-      user-select: none;
-      box-shadow: 0 4px 20px rgba(44,40,37,0.08);
-    }
-    .fc-front, .fc-back { width: 100%; }
-    .fc-word {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 8px;
-    }
-    .fc-phonetic {
-      font-family: 'Lora', serif;
-      font-size: 0.95rem;
+      padding: 44px 12px;
       color: var(--ink-muted);
-      font-style: italic;
-      margin-bottom: 16px;
-    }
-    .fc-tap-hint {
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.82rem;
-      color: var(--border);
-      margin-top: 24px;
-    }
-    .fc-pos {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-    .fc-translation {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 16px;
-    }
-    .fc-example {
-      font-family: 'Lora', serif;
-      font-size: 0.88rem;
-      color: var(--ink-muted);
-      font-style: italic;
-      line-height: 1.6;
-      border-top: 1px solid var(--border);
-      padding-top: 12px;
-      margin-top: 4px;
-    }
-    .fc-btn-row {
-      display: flex;
-      gap: 12px;
-      width: 100%;
-    }
-    .fc-btn {
-      flex: 1;
-      padding: 16px;
-      border: none;
-      border-radius: 14px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .fc-btn:active { opacity: 0.8; }
-    .fc-wrong { background: #fde8e8; color: #c0392b; }
-    .fc-right { background: #e8f5ee; color: #2d7a4f; }
-    .lib-io-row {
-      display: flex;
-      gap: 8px;
-    }
-    .lib-io-btn {
-      flex: 1;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.82rem;
-      color: var(--ink-muted);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-      display: block;
-    }
-    .lib-io-btn:active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
-
-    .fc-close {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 20px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.85rem;
-      color: var(--ink-muted);
-      cursor: pointer;
-    }
-    .fc-done {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-    .fc-done-emoji { font-size: 3rem; }
-    .fc-done-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--ink);
-    }
-    .fc-done-sub {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.9rem;
-      color: var(--ink-muted);
-    }
-    /* ── Daily Articles ── */
-    .daily-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .daily-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--ink);
-    }
-    .daily-refresh {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 5px 12px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.78rem;
-      color: var(--ink-muted);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .daily-refresh:active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
-    .daily-refresh.spinning { opacity: 0.5; pointer-events: none; }
-
-    .rss-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 4px;
-    }
-    .rss-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-    .rss-card:active { transform: scale(0.98); }
-    .rss-card:hover { border-color: #d4c8bc; box-shadow: 0 4px 12px rgba(44,40,37,0.08); }
-    .rss-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-    .rss-title {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--ink);
-      line-height: 1.4;
-      margin-bottom: 4px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .rss-meta {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.75rem;
-      color: var(--ink-muted);
-    }
-    .rss-loading {
-      text-align: center;
-      padding: 20px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.85rem;
-      color: var(--ink-muted);
+      line-height: 1.8;
     }
 
-    .art-date {
+    details summary {
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.75rem;
-      color: var(--ink-muted);
-      margin-top: 4px;
-    }
-    .art-style-badge {
-      display: inline-block;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.7rem;
-      padding: 1px 7px;
-      border-radius: 10px;
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-    .badge-news { background: #fee2e2; color: #991b1b; }
-    .badge-magazine { background: #e0e7ff; color: #3730a3; }
-    .badge-article { background: #d1fae5; color: #065f46; }
-
-    /* ── Explore View ── */
-    #explore-view { display: flex; flex-direction: column; gap: 14px; }
-
-    .gen-card {
-      background: linear-gradient(135deg, #2c2825 0%, #3d3530 100%);
-      border-radius: var(--radius);
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .gen-title {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      color: white;
-    }
-    .gen-filters { display: flex; gap: 8px; }
-    .gen-select {
-      flex: 1;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      color: white;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.85rem;
-      padding: 8px 10px;
-      outline: none;
-      -webkit-appearance: none;
-    }
-    .gen-select option { background: #2c2825; color: white; }
-
-    .api-key-row {
-      display: flex;
-      gap: 6px;
-    }
-    .api-key-input {
-      flex: 1;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      color: white;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.82rem;
-      padding: 8px 10px;
-      outline: none;
-      min-width: 0;
-    }
-    .api-key-input::placeholder { color: rgba(255,255,255,0.4); }
-    .api-key-save {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 10px;
-      color: white;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.82rem;
-      padding: 8px 12px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.15s;
-    }
-    .api-key-save:active { background: rgba(255,255,255,0.3); }
-    #api-key-status {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.78rem;
-      min-height: 0;
-    }
-
-    .paste-section {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .paste-section summary {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.88rem;
-      color: var(--ink-muted);
-      padding: 13px 16px;
-      cursor: pointer;
-      list-style: none;
-    }
-    .paste-section summary::-webkit-details-marker { display: none; }
-    .paste-inner {
-      padding: 0 16px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .paste-inner textarea {
-      min-height: 140px;
-    }
-
-    .filter-row {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-    .filter-row::-webkit-scrollbar { display: none; }
-    .filter-btn {
-      flex-shrink: 0;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.8rem;
       color: var(--ink-muted);
       cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-    .filter-btn.active {
-      background: var(--ink);
-      border-color: var(--ink);
-      color: white;
+      padding: 12px 0;
     }
 
-    .art-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .art-card:active { transform: scale(0.98); }
-    .art-card:hover { box-shadow: 0 6px 20px rgba(44,40,37,0.1); }
-
-    .art-cover {
-      height: 130px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3.5rem;
-      position: relative;
-    }
-    .art-level-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(4px);
-      color: white;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 20px;
-      letter-spacing: 0.05em;
-    }
-    .art-topic-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 1.1rem;
-    }
-    .art-body { padding: 14px 16px; }
-    .art-title-zh {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 4px;
-    }
-    .art-preview {
-      font-size: 0.85rem;
-      color: var(--ink-muted);
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* ── Full Translation ── */
-    .translate-all-btn {
-      width: 100%;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 13px 18px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.92rem;
-      color: var(--ink-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .translate-all-btn:active { opacity: 0.8; }
-    .translate-all-btn.loaded {
-      color: var(--ink);
-      border-color: #b0c4b1;
-    }
-    .translation-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.78rem;
-      color: var(--ink-muted);
-      letter-spacing: 0.08em;
-    }
-    .translation-divider::before,
-    .translation-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    .translation-body {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.95rem;
-      line-height: 1.9;
-      color: var(--ink-muted);
-      white-space: pre-wrap;
-    }
-    .translation-loading {
+    .loading {
       text-align: center;
       padding: 24px;
       color: var(--ink-muted);
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.88rem;
     }
 
-    /* ── Chat View ── */
-    #chat-view { display:none; flex-direction:column; gap:0; flex:1; min-height:0; }
+    @media (max-width: 560px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
 
-    .mode-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
-    .mode-card:active { transform: scale(0.98); border-color: var(--accent); }
-    .mode-icon { font-size: 1.8rem; flex-shrink: 0; }
-    .mode-title { font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
-    .mode-desc { font-family:'Noto Sans TC',sans-serif; font-size:0.82rem; color:var(--ink-muted); line-height:1.5; }
+      .tab-bar {
+        width: 100%;
+      }
 
-    .scenario-grid { display:flex; flex-direction:column; gap:10px; }
-    .scenario-pill {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 16px;
-      cursor: pointer;
-      font-family:'Noto Sans TC',sans-serif;
-      font-size:0.9rem;
-      color:var(--ink);
-      transition: all 0.15s;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .scenario-pill:active { background:var(--accent-light); border-color:var(--accent); }
+      main {
+        padding: 14px;
+      }
 
-    .chat-topbar {
-      background: var(--ink);
-      padding: 10px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-radius: var(--radius) var(--radius) 0 0;
-    }
-    .chat-scenario-label {
-      font-family:'Noto Sans TC',sans-serif;
-      font-size:0.82rem;
-      color:rgba(255,255,255,0.7);
-    }
-    .chat-top-btn {
-      background: rgba(255,255,255,0.12);
-      border: none;
-      color:white;
-      border-radius:8px;
-      padding:6px 12px;
-      font-family:'Noto Sans TC',sans-serif;
-      font-size:0.78rem;
-      cursor:pointer;
-      transition:background 0.15s;
-    }
-    .chat-top-btn:active { background:rgba(255,255,255,0.25); }
-    .chat-top-btn.danger { background:rgba(192,98,47,0.4); }
-    .chat-top-btn.active { background:var(--accent); }
-
-    #chat-messages {
-      flex:1;
-      overflow-y:auto;
-      padding:16px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      background:var(--bg);
-      min-height:200px;
-      max-height: calc(100dvh - 280px);
-    }
-
-    .msg-wrap { display:flex; flex-direction:column; gap:4px; }
-    .msg-wrap.user { align-items:flex-end; }
-    .msg-wrap.ai   { align-items:flex-start; }
-
-    .msg-bubble {
-      max-width:80%;
-      padding:10px 14px;
-      border-radius:18px;
-      font-size:0.95rem;
-      line-height:1.55;
-    }
-    .msg-wrap.user .msg-bubble {
-      background:var(--accent);
-      color:white;
-      border-bottom-right-radius:4px;
-    }
-    .msg-wrap.ai .msg-bubble {
-      background:var(--surface);
-      border:1.5px solid var(--border);
-      color:var(--ink);
-      border-bottom-left-radius:4px;
-    }
-    .msg-translation {
-      font-family:'Noto Sans TC',sans-serif;
-      font-size:0.8rem;
-      color:var(--ink-muted);
-      max-width:80%;
-      padding:4px 8px;
-      background:rgba(0,0,0,0.04);
-      border-radius:8px;
-      display:none;
-      line-height:1.5;
-    }
-    .msg-translation.visible { display:block; }
-
-    .chat-input-bar {
-      display:flex;
-      gap:8px;
-      padding:12px 14px;
-      background:var(--surface);
-      border-top:1.5px solid var(--border);
-      align-items:flex-end;
-    }
-    .chat-input {
-      flex:1;
-      border:1.5px solid var(--border);
-      border-radius:12px;
-      padding:10px 14px;
-      font-family:'Lora',serif;
-      font-size:0.95rem;
-      color:var(--ink);
-      background:var(--bg);
-      outline:none;
-      resize:none;
-      max-height:100px;
-      line-height:1.4;
-    }
-    .chat-input:focus { border-color:var(--accent); }
-    .chat-send-btn {
-      background:var(--accent);
-      color:white;
-      border:none;
-      border-radius:50%;
-      width:40px;
-      height:40px;
-      font-size:1rem;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-shrink:0;
-      transition:opacity 0.15s;
-    }
-    .chat-send-btn:active { opacity:0.8; }
-    .chat-send-btn:disabled { opacity:0.4; }
-
-    .typing-bubble {
-      background:var(--surface);
-      border:1.5px solid var(--border);
-      border-radius:18px;
-      border-bottom-left-radius:4px;
-      padding:12px 16px;
-      display:inline-flex;
-      gap:4px;
-      align-items:center;
-    }
-    .typing-dot {
-      width:6px; height:6px;
-      border-radius:50%;
-      background:var(--ink-muted);
-      animation: typingBounce 1s infinite;
-    }
-    .typing-dot:nth-child(2) { animation-delay:0.15s; }
-    .typing-dot:nth-child(3) { animation-delay:0.3s; }
-    @keyframes typingBounce {
-      0%,60%,100% { transform:translateY(0); }
-      30% { transform:translateY(-5px); }
-    }
-
-    /* Feedback */
-    .feedback-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .feedback-title {
-      font-size:1.1rem;
-      font-weight:600;
-      color:var(--ink);
-    }
-    .feedback-score {
-      background:var(--accent);
-      color:white;
-      border-radius:var(--radius);
-      padding:16px;
-      text-align:center;
-      font-family:'Noto Sans TC',sans-serif;
-    }
-    .feedback-score-num { font-size:2.5rem; font-weight:700; }
-    .feedback-score-label { font-size:0.85rem; opacity:0.85; }
-    .feedback-section {
-      background:var(--surface);
-      border:1.5px solid var(--border);
-      border-radius:var(--radius);
-      padding:16px;
-    }
-    .feedback-section-title {
-      font-family:'Noto Sans TC',sans-serif;
-      font-size:0.8rem;
-      color:var(--ink-muted);
-      margin-bottom:10px;
-      text-transform:uppercase;
-      letter-spacing:0.06em;
-    }
-    .feedback-item {
-      font-family:'Noto Sans TC',sans-serif;
-      font-size:0.88rem;
-      color:var(--ink);
-      line-height:1.6;
-      padding:8px 0;
-      border-bottom:1px solid var(--border);
-    }
-    .feedback-item:last-child { border-bottom:none; }
-    .feedback-item .wrong { color:#c0392b; font-family:'Lora',serif; }
-    .feedback-item .right { color:#2d7a4f; font-family:'Lora',serif; }
-
-    /* ── Reading Progress Bar ── */
-    #reading-progress-bar {
-      position: sticky;
-      top: 53px;
-      z-index: 49;
-      height: 3px;
-      background: var(--border);
-    }
-    #reading-progress-fill {
-      height: 100%;
-      background: linear-gradient(to right, var(--accent), #e8854a);
-      width: 0%;
-      transition: width 0.1s linear;
-    }
-
-    /* ── View transition animations ── */
-    .view-enter {
-      animation: viewIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-    @keyframes viewIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── Card hover effects ── */
-    .vocab-card {
-      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
-    }
-    .vocab-card:hover {
-      border-color: #d4c8bc;
-      box-shadow: 0 4px 16px rgba(44,40,37,0.07);
-      transform: translateY(-1px);
-    }
-    .lib-card {
-      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
-    }
-    .lib-card:hover {
-      border-color: #d4c8bc;
-      box-shadow: 0 4px 16px rgba(44,40,37,0.07);
-      transform: translateY(-1px);
-    }
-
-    /* ── Popup spring upgrade ── */
-    #popup.show {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* ── Tab active indicator ── */
-    .tab-btn {
-      position: relative;
-    }
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      background: white;
-      border-radius: 50%;
-    }
-
-    /* ── Article word appear animation ── */
-    @keyframes wordFadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    #article-body {
-      animation: wordFadeIn 0.3s ease both;
-    }
-
-    /* ── Flashcard flip animation ── */
-    .flashcard {
-      transition: box-shadow 0.2s;
-    }
-    .flashcard:hover {
-      box-shadow: 0 8px 32px rgba(44,40,37,0.13);
-    }
-    .flashcard:active {
-      transform: scale(0.985);
-    }
-
-    /* ── Save btn pulse ── */
-    @keyframes savePulse {
-      0%   { transform: scale(1); }
-      40%  { transform: scale(1.06); }
-      100% { transform: scale(1); }
-    }
-    .popup-save-btn.pulse {
-      animation: savePulse 0.3s ease;
+      .row {
+        flex-direction: column;
+      }
     }
   </style>
-
 </head>
+
 <body>
-
-<header>
-  <div class="logo">Word<span>Lens</span></div>
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="explore">探索</button>
-    <button class="tab-btn" data-tab="read">閱讀</button>
-    <button class="tab-btn" data-tab="vocab">單字本</button>
-    <button class="tab-btn" data-tab="library">單字庫</button>
-    <button class="tab-btn" data-tab="chat">對話</button>
-  </div>
-</header>
-<div id="reading-progress-bar" style="display:none;">
-  <div id="reading-progress-fill"></div>
-</div>
-
-<main>
-  <!-- Explore View -->
-  <div id="explore-view">
-    <!-- AI Generate -->
-    <!-- 每日精選 -->
-    <div class="daily-header">
-      <div class="daily-title">📰 今日精選</div>
-      <button class="daily-refresh" id="daily-refresh-btn">↺ 更新</button>
+  <header>
+    <div class="logo">Word<span>Lens</span></div>
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="explore">探索</button>
+      <button class="tab-btn" data-tab="read">閱讀</button>
+      <button class="tab-btn" data-tab="vocab">單字本</button>
+      <button class="tab-btn" data-tab="library">單字庫</button>
+      <button class="tab-btn" data-tab="chat">對話</button>
     </div>
-    <div id="daily-articles"></div>
+  </header>
 
-```
-<!-- RSS 即時新聞 -->
-<div class="rss-header">
-  <div class="daily-title">📡 VOA Learning English</div>
-  <button class="daily-refresh" id="rss-refresh-btn">↺ 載入</button>
-</div>
-<div class="filter-row" id="rss-source-filter" style="padding-bottom:2px;">
-  <button class="filter-btn active" data-feed="https://learningenglish.voanews.com/api/zmmpql-vomx-tpey-_q">健康生活</button>
-  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zmg_pl-vomx-tpeymtm">科技</button>
-  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zpyp_l-vomx-tpe_rym">文化</button>
-  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zkm-ql-vomx-tpej-rqi">雜誌</button>
-  <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zmypyl-vomx-tpeyry_">英語學習</button>
-</div>
-<div id="rss-articles"></div>
+  <main>
+    <section id="explore-view" class="view active">
+      <div class="section-title">
+        <span>📰 VOA Learning English</span>
+        <button class="btn-secondary" id="rss-refresh-btn" style="padding:7px 12px;flex:0;">↺ 載入</button>
+      </div>
 
-<div class="gen-card" id="gen-section">
-  <div class="gen-title">✨ 用AI幫我生成文章</div>
-  <div class="gen-filters">
-    <select class="gen-select" id="gen-level">
-      <option value="A1">A1 入門</option>
-      <option value="A2">A2 基礎</option>
-      <option value="B1" selected>B1 中級</option>
-      <option value="B2">B2 中高級</option>
-      <option value="C1">C1 高級</option>
-    </select>
-    <select class="gen-select" id="gen-topic">
-      <optgroup label="── 新聞 / 雜誌 ──">
-      <option value="World News">🌍 世界新聞</option>
-      <option value="Business">💹 商業財經</option>
-      <option value="Health">🏥 健康醫療</option>
-      <option value="Lifestyle">✨ 生活風格</option>
-      <option value="Tech News">📱 科技新知</option>
-      </optgroup>
-      <optgroup label="── 一般主題 ──">
-      <option value="Science">🔬 科學</option>
-      <option value="Culture">🎭 文化</option>
-      <option value="Travel">✈️ 旅遊</option>
-      <option value="Food">🍜 飲食</option>
-      <option value="Nature">🌿 自然</option>
-      <option value="History">🏛️ 歷史</option>
-      <option value="Sports">⚽ 運動</option>
-      </optgroup>
-    </select>
-  </div>
-  <div class="api-key-row" id="api-key-row">
-    <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
-    <button class="api-key-save" id="api-key-save">儲存</button>
-  </div>
-  <div id="api-key-status"></div>
-  <button class="btn-primary" id="gen-btn" style="margin-top:0;">
-    <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
-  </button>
-</div>
+      <div class="filter-row" id="rss-source-filter">
+        <button class="filter-btn active" data-feed="https://learningenglish.voanews.com/api/zmmpql-vomx-tpey-_q">健康生活</button>
+        <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zmg_pl-vomx-tpeymtm">科技</button>
+        <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zpyp_l-vomx-tpe_rym">文化</button>
+        <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zkm-ql-vomx-tpej-rqi">雜誌</button>
+        <button class="filter-btn" data-feed="https://learningenglish.voanews.com/api/zmypyl-vomx-tpeyry_">英語學習</button>
+      </div>
 
-<!-- Paste custom -->
-<details class="paste-section">
-  <summary>📋 貼上自己的文章</summary>
-  <div class="paste-inner">
-    <textarea id="article-input" placeholder="Paste your English article here..."></textarea>
-    <button class="btn-primary" id="start-btn"><span>📖</span> 開始閱讀</button>
-  </div>
-</details>
+      <div id="rss-articles"></div>
 
-<!-- Level filter -->
-<div class="filter-row" id="level-filter">
-  <button class="filter-btn active" data-level="all">全部</button>
-  <button class="filter-btn" data-level="A1">A1</button>
-  <button class="filter-btn" data-level="A2">A2</button>
-  <button class="filter-btn" data-level="B1">B1</button>
-  <button class="filter-btn" data-level="B2">B2</button>
-  <button class="filter-btn" data-level="C1">C1</button>
-</div>
-
-<!-- Topic filter -->
-<div class="filter-row topic-filter" id="topic-filter">
-  <button class="filter-btn active" data-topic="all">全部</button>
-  <button class="filter-btn" data-topic="World News">🌍 新聞</button>
-  <button class="filter-btn" data-topic="Business">💹 財經</button>
-  <button class="filter-btn" data-topic="Health">🏥 健康</button>
-  <button class="filter-btn" data-topic="Lifestyle">✨ 生活</button>
-  <button class="filter-btn" data-topic="Tech News">📱 科技</button>
-  <button class="filter-btn" data-topic="Science">🔬 科學</button>
-  <button class="filter-btn" data-topic="Culture">🎭 文化</button>
-  <button class="filter-btn" data-topic="Travel">✈️ 旅遊</button>
-  <button class="filter-btn" data-topic="Food">🍜 飲食</button>
-  <button class="filter-btn" data-topic="Nature">🌿 自然</button>
-  <button class="filter-btn" data-topic="History">🏛️ 歷史</button>
-  <button class="filter-btn" data-topic="Sports">⚽ 運動</button>
-</div>
-
-<!-- Article list -->
-<div id="article-list"></div>
-```
-
-  </div>
-
-  <!-- Read View -->
-
-  <div id="read-view">
-    <div class="article-header">
-      <button class="back-btn" id="back-btn">← 返回</button>
-      <div class="word-count" id="word-count"></div>
-    </div>
-    <div class="hint-bar">
-      <span>👆</span>
-      <span>點任何單字查看翻譯</span>
-    </div>
-    <div class="speed-bar">
-      <span class="speed-label">語速</span>
-      <div class="speed-slider-wrap">
-        <div class="custom-slider" id="speed-slider">
-          <div class="custom-track">
-            <div class="custom-fill" id="speed-fill"></div>
-            <div class="custom-thumb" id="speed-thumb"></div>
-          </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="section-title">✨ 用 AI 生成文章</div>
+        <div class="row">
+          <select id="gen-level">
+            <option value="A1">A1 入門</option>
+            <option value="A2">A2 基礎</option>
+            <option value="B1" selected>B1 中級</option>
+            <option value="B2">B2 中高級</option>
+            <option value="C1">C1 高級</option>
+          </select>
+          <select id="gen-topic">
+            <option value="World News">🌍 世界新聞</option>
+            <option value="Business">💹 商業財經</option>
+            <option value="Health">🏥 健康醫療</option>
+            <option value="Lifestyle">✨ 生活風格</option>
+            <option value="Tech News">📱 科技新知</option>
+            <option value="Science">🔬 科學</option>
+            <option value="Culture">🎭 文化</option>
+            <option value="Travel">✈️ 旅遊</option>
+            <option value="Food">🍜 飲食</option>
+            <option value="Nature">🌿 自然</option>
+            <option value="History">🏛️ 歷史</option>
+            <option value="Sports">⚽ 運動</option>
+          </select>
         </div>
-        <span class="speed-value" id="speed-value">0.9x</span>
+
+        <div class="row" id="api-key-row">
+          <input type="password" id="api-key-input" placeholder="輸入 Gemini API Key，AIza 開頭" autocomplete="off" />
+          <button class="btn-secondary" id="api-key-save">儲存</button>
+        </div>
+        <div class="muted" id="api-key-status"></div>
+        <button class="btn-primary" id="gen-btn">生成文章</button>
       </div>
-    </div>
-    <div class="read-aloud-row" id="read-aloud-row">
-      <button class="read-aloud-btn read-aloud-main" id="read-aloud-btn">
-        <span id="read-aloud-icon">🔊</span>
-        <span id="read-aloud-label">朗讀全文</span>
-      </button>
-      <button class="read-aloud-btn read-aloud-pause" id="pause-btn" style="display:none;">
-        <span id="pause-icon">⏸</span>
-      </button>
-    </div>
-    <div id="article-body"></div>
 
-```
-<!-- Full Translation -->
-<div id="translation-section" style="display:none;">
-  <div class="translation-divider">
-    <span>中文翻譯</span>
-  </div>
-  <div id="translation-body" class="translation-body"></div>
-</div>
+      <details class="card">
+        <summary>📋 貼上自己的文章</summary>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <textarea id="article-input" placeholder="Paste your English article here..."></textarea>
+          <button class="btn-primary" id="start-btn">📖 開始閱讀</button>
+        </div>
+      </details>
 
-<button class="translate-all-btn" id="translate-all-btn">
-  <span id="translate-all-icon">🌐</span>
-  <span id="translate-all-label">顯示全文翻譯</span>
-</button>
-```
+      <div class="section-title">📚 內建文章</div>
+      <div id="article-list"></div>
+    </section>
 
-  </div>
-
-  <!-- Vocab View -->
-
-  <div id="vocab-view">
-    <div class="vocab-count" id="vocab-count"></div>
-    <div id="vocab-list"></div>
-  </div>
-
-  <!-- Library View -->
-
-  <div id="library-view">
-    <div class="library-header">
-      <div class="vocab-count" id="library-count"></div>
-      <button class="review-btn" id="review-btn">🎴 開始複習</button>
-    </div>
-    <div class="lib-io-row">
-      <button class="lib-io-btn" id="export-btn">⬇ 匯出備份</button>
-      <label class="lib-io-btn" id="import-label">
-        ⬆ 匯入還原
-        <input type="file" id="import-input" accept=".json" style="display:none;" />
-      </label>
-    </div>
-    <div id="library-list"></div>
-
-```
-<!-- Flashcard overlay -->
-<div id="flashcard-overlay" style="display:none;">
-  <div class="flashcard-wrap">
-    <div class="flashcard-progress">
-      <div class="flashcard-progress-bar" id="fc-progress-bar"></div>
-    </div>
-    <div id="flashcard" class="flashcard">
-      <div class="fc-front">
-        <div class="fc-word" id="fc-word"></div>
-        <div class="fc-phonetic" id="fc-phonetic"></div>
-        <div class="fc-tap-hint">點擊翻面</div>
+    <section id="read-view" class="view">
+      <div class="row">
+        <button class="btn-secondary" id="back-btn">← 返回探索</button>
+        <div class="muted" id="word-count" style="text-align:right;"></div>
       </div>
-      <div class="fc-back" id="fc-back" style="display:none;">
-        <div class="fc-word" id="fc-word-back"></div>
-        <div class="fc-pos" id="fc-pos"></div>
-        <div class="fc-translation" id="fc-translation"></div>
-        <div class="fc-example" id="fc-example"></div>
+
+      <div class="hint-bar">👆 點任何英文單字查看翻譯</div>
+
+      <div class="row">
+        <button class="btn-secondary" id="read-aloud-btn">🔊 朗讀全文</button>
+        <select id="speech-rate">
+          <option value="0.6">0.6x</option>
+          <option value="0.8">0.8x</option>
+          <option value="0.9" selected>0.9x</option>
+          <option value="1.0">1.0x</option>
+          <option value="1.2">1.2x</option>
+          <option value="1.5">1.5x</option>
+        </select>
       </div>
-    </div>
-    <div class="fc-btn-row" id="fc-btn-row" style="display:none;">
-      <button class="fc-btn fc-wrong" id="fc-wrong">✗ 不熟</button>
-      <button class="fc-btn fc-right" id="fc-right">✓ 認識</button>
-    </div>
-    <button class="fc-close" id="fc-close">✕ 結束複習</button>
-  </div>
-</div>
-```
 
-  </div>
+      <div id="article-body"></div>
 
-  <!-- Chat View -->
+      <button class="btn-secondary" id="translate-all-btn">🌐 顯示全文翻譯</button>
+      <div id="translation-section" style="display:none;">
+        <div class="translation-body" id="translation-body"></div>
+      </div>
+    </section>
 
-  <div id="chat-view">
-    <div id="chat-home"></div>
-    <div id="chat-screen" style="display:none;flex-direction:column;flex:1;">
-      <div class="chat-topbar">
-        <div class="chat-scenario-label" id="chat-scenario-label"></div>
+    <section id="vocab-view" class="view">
+      <div class="section-title">📘 單字本</div>
+      <div class="muted" id="vocab-count"></div>
+      <div id="vocab-list"></div>
+    </section>
+
+    <section id="library-view" class="view">
+      <div class="section-title">📗 單字庫</div>
+      <div class="muted" id="library-count"></div>
+      <div class="row">
+        <button class="btn-secondary" id="export-btn">⬇ 匯出備份</button>
+        <label class="btn-secondary" style="text-align:center;">
+          ⬆ 匯入還原
+          <input type="file" id="import-input" accept=".json" style="display:none;" />
+        </label>
+      </div>
+      <div id="library-list"></div>
+    </section>
+
+    <section id="chat-view" class="view">
+      <div class="card">
+        <div class="section-title">💬 英文對話練習</div>
+        <p class="muted" style="margin-top:8px;">此功能需要 Gemini API Key。輸入英文後，AI 會用英文回覆。</p>
+      </div>
+      <div id="chat-messages" class="card" style="min-height:280px;display:flex;flex-direction:column;gap:10px;"></div>
+      <div class="row">
+        <textarea id="chat-input" placeholder="Type your message in English..." style="min-height:60px;"></textarea>
+        <button class="btn-primary" id="chat-send-btn">送出</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="popup-overlay">
+    <div id="popup">
+      <div class="popup-header">
+        <div class="popup-word" id="popup-word"></div>
         <div style="display:flex;gap:8px;">
-          <button class="chat-top-btn" id="translate-toggle-btn">🌐 查翻譯</button>
-          <button class="chat-top-btn danger" id="end-chat-btn">結束</button>
+          <button class="popup-speak" id="popup-speak">🔊</button>
+          <button class="popup-close" id="popup-close">✕</button>
         </div>
       </div>
-      <div id="chat-messages"></div>
-      <div class="chat-input-bar">
-        <textarea id="chat-input" class="chat-input" placeholder="Type your message in English..." rows="1"></textarea>
-        <button class="chat-send-btn" id="chat-send-btn">➤</button>
-      </div>
-    </div>
-    <div id="chat-feedback" style="display:none;flex-direction:column;gap:14px;">
-      <div class="feedback-header">
-        <div class="feedback-title">📊 對話分析</div>
-        <button class="chat-top-btn" id="new-chat-btn">重新開始</button>
-      </div>
-      <div id="feedback-body"></div>
-    </div>
-  </div>
-
-</main>
-
-<!-- Popup -->
-
-<div id="popup-overlay">
-  <div id="popup">
-    <div class="popup-header">
-      <div class="popup-word" id="popup-word"></div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="popup-speak-btn" id="popup-speak" title="發音">🔊</button>
-        <button class="popup-close" id="popup-close">✕</button>
-      </div>
-    </div>
-    <div class="popup-body">
-      <div class="popup-meta" id="popup-meta"></div>
-      <div class="popup-translation" id="popup-translation"></div>
-      <div class="popup-phonetic" id="popup-phonetic"></div>
-      <div class="popup-example" id="popup-example"></div>
-      <div class="popup-speed-row">
-        <button class="popup-speed-adj" id="popup-speed-down">－</button>
-        <span class="popup-speed-display" id="popup-speed-display">0.9x</span>
-        <button class="popup-speed-adj" id="popup-speed-up">＋</button>
-      </div>
-      <div class="popup-actions">
-        <button class="popup-save-btn" id="popup-save">＋ 加入單字本</button>
-        <button class="popup-save-btn" id="popup-lib-save" style="background:#4a7c59;">＋ 單字庫</button>
+      <div class="popup-body">
+        <div id="popup-translation">翻譯中...</div>
+        <div class="muted" id="popup-phonetic" style="margin-top:6px;color:rgba(255,255,255,0.55);"></div>
+        <div class="popup-actions">
+          <button id="popup-save">＋ 單字本</button>
+          <button id="popup-lib-save">＋ 單字庫</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  // ── State ──
-  let vocab = JSON.parse(localStorage.getItem('wordlens-vocab') || '[]');
-  let currentWord = '';
-  let currentTranslation = '';
-  let currentWordEl = null;
-  let translationCache = {};
+  <script>
+    let vocab = JSON.parse(localStorage.getItem('wordlens-vocab') || '[]');
+    let library = JSON.parse(localStorage.getItem('wordlens-library') || '[]');
+    let translationCache = {};
+    let dictCache = {};
+    let currentWord = '';
+    let currentTranslation = '';
+    let currentWordEl = null;
+    let currentArticleText = '';
+    let isReading = false;
+    let currentUtterance = null;
 
-  const SAMPLE = `The ancient forests of the Pacific Northwest are among the most biodiverse ecosystems on Earth. Towering Douglas firs and Sitka spruces create a dense canopy that filters sunlight, casting the forest floor in a perpetual, emerald twilight. Beneath this canopy, an intricate web of life thrives — from delicate mosses clinging to every surface, to the complex fungal networks that connect the roots of trees across vast distances.
+    const views = {
+      explore: document.getElementById('explore-view'),
+      read: document.getElementById('read-view'),
+      vocab: document.getElementById('vocab-view'),
+      library: document.getElementById('library-view'),
+      chat: document.getElementById('chat-view')
+    };
 
-Scientists have discovered that trees communicate through these underground networks, sharing nutrients and even warning signals when pests or disease threaten. This remarkable phenomenon has transformed how we understand forests: not as collections of individual trees competing for resources, but as collaborative communities with a sophisticated, silent language of their own.`;
+    const tabs = document.querySelectorAll('.tab-btn');
 
-  // ── Tabs ──
-  const tabs = document.querySelectorAll('.tab-btn');
-  const views = { explore: document.getElementById('explore-view'), read: document.getElementById('read-view'), vocab: document.getElementById('vocab-view'), library: document.getElementById('library-view'), chat: document.getElementById('chat-view') };
-
-  function switchTab(tab) {
-    tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    Object.entries(views).forEach(([k, v]) => {
-      const showing = k === tab;
-      v.style.display = showing ? 'flex' : 'none';
-      if (showing) {
-        v.classList.remove('view-enter');
-        void v.offsetWidth; // reflow
-        v.classList.add('view-enter');
+    const SEED_ARTICLES = [
+      {
+        id: 's1',
+        level: 'A1',
+        topic: 'Food',
+        icon: '🍎',
+        titleZh: '每天一個蘋果',
+        title: 'An Apple a Day',
+        content: 'Apples are one of the most popular fruits in the world. They come in many colors, like red, green, and yellow. People eat apples every day because they are healthy. Apples have vitamins that help your body stay strong. You can eat an apple in the morning for breakfast, or as a snack in the afternoon. Some people like to make apple juice or apple pie.'
+      },
+      {
+        id: 's2',
+        level: 'A2',
+        topic: 'Nature',
+        icon: '🐝',
+        titleZh: '神奇的蜜蜂',
+        title: 'The Amazing Honey Bee',
+        content: 'Honey bees are small insects, but they do very important work. Bees fly from flower to flower to collect nectar. They use this nectar to make honey in their hive. Bees also help plants grow by carrying pollen between flowers. Without bees, many fruits and vegetables would not exist.'
+      },
+      {
+        id: 's3',
+        level: 'B1',
+        topic: 'Science',
+        icon: '😴',
+        titleZh: '睡眠的力量',
+        title: 'The Power of Sleep',
+        content: 'Sleep is one of the most essential activities for human health, yet many people treat it as optional. During sleep, the brain processes memories from the day, consolidating important information and discarding irrelevant details. The body also uses this time to repair tissue, build muscle, and strengthen the immune system.'
+      },
+      {
+        id: 's4',
+        level: 'B1',
+        topic: 'Travel',
+        icon: '✈️',
+        titleZh: '我最喜歡的城市',
+        title: 'My Favourite City',
+        content: 'I love visiting cities. My favourite city is Tokyo in Japan. Tokyo is very big and very clean. There are many trains in Tokyo. You can go everywhere by train. The food in Tokyo is delicious. I like to eat sushi and ramen. Tokyo also has many interesting shops and parks.'
       }
+    ];
+
+    let storedArticles = JSON.parse(localStorage.getItem('wordlens-articles') || '[]');
+    let allArticles = [...storedArticles, ...SEED_ARTICLES];
+
+    function switchTab(tab) {
+      tabs.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+      Object.entries(views).forEach(([name, view]) => {
+        view.classList.toggle('active', name === tab);
+      });
+
+      if (tab !== 'read') stopReadAloud();
+      if (tab === 'explore') renderExplore();
+      if (tab === 'vocab') renderVocab();
+      if (tab === 'library') renderLibrary();
+    }
+
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
-    progressBar.style.display = tab === 'read' ? 'block' : 'none';
-    if (tab === 'vocab') renderVocab();
-    if (tab === 'explore') renderExplore();
-    if (tab === 'library') renderLibrary();
-    if (tab === 'chat' && chatPhase === 'select') renderChatHome();
-    if (tab === 'read') { updateProgress(); }
-  }
 
-  tabs.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+    document.getElementById('back-btn').addEventListener('click', () => {
+      switchTab('explore');
+    });
 
-  // ── Sample ──
-  document.getElementById('sample-btn')?.addEventListener('click', () => {
-    document.getElementById('article-input').value = SAMPLE;
-  });
+    function renderExplore() {
+      const list = document.getElementById('article-list');
+      list.innerHTML = allArticles.map(article => {
+        return `
+          <div class="article-card" data-id="${article.id}">
+            <div class="article-icon">${article.icon || '📄'}</div>
+            <div>
+              <div class="article-title">${article.titleZh} <span class="muted">(${article.level || 'B1'})</span></div>
+              <div class="article-preview">${article.content.slice(0, 95)}...</div>
+            </div>
+          </div>
+        `;
+      }).join('');
 
-  // ── Start reading ──
-  document.getElementById('start-btn')?.addEventListener('click', () => {
-    const text = document.getElementById('article-input').value.trim();
-    if (!text) { alert('請先貼上文章！'); return; }
-    renderArticle(text);
-    switchTab('read');
-  });
+      list.querySelectorAll('.article-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const article = allArticles.find(item => item.id === card.dataset.id);
+          loadArticle(article);
+        });
+      });
+    }
 
-  document.getElementById('back-btn').addEventListener('click', () => {
-    stopReadAloud();
-    isPaused = false;
-    switchTab('input');
-  });
+    function loadArticle(article) {
+      renderArticle(article.content);
+      document.getElementById('word-count').textContent = `${article.title}　${article.level || ''}`;
+      switchTab('read');
+    }
 
-  // ── Render article with clickable words ──
-  function renderArticle(text) {
-    currentArticleText = text;
-    const body = document.getElementById('article-body');
-    const words = text.split(/(\s+|[\n\r]+)/);
-    let wordCount = 0;
-    let html = '';
-    let charPos = 0;
+    function renderArticle(text) {
+      currentArticleText = text;
 
-    words.forEach(part => {
-      if (/\n/.test(part)) {
-        html += '<br><br>';
-        charPos += part.length;
-      } else if (/\s+/.test(part)) {
-        html += ' ';
-        charPos += part.length;
-      } else if (part) {
+      const body = document.getElementById('article-body');
+      const parts = text.split(/(\s+|[\n\r]+)/);
+      let html = '';
+      let wordCount = 0;
+      let charPos = 0;
+
+      parts.forEach(part => {
+        if (/\n/.test(part)) {
+          html += '<br><br>';
+          charPos += part.length;
+          return;
+        }
+
+        if (/^\s+$/.test(part)) {
+          html += ' ';
+          charPos += part.length;
+          return;
+        }
+
         const clean = part.replace(/[^a-zA-Z'-]/g, '');
         const prefix = part.match(/^[^a-zA-Z'-]*/)?.[0] || '';
         const suffix = part.match(/[^a-zA-Z'-]*$/)?.[0] || '';
+
         if (clean) {
           wordCount++;
           const wordStart = charPos + prefix.length;
-          const isLooked = vocab.some(v => v.en.toLowerCase() === clean.toLowerCase());
-          html += `${prefix}<span class="word${isLooked ? ' looked-up' : ''}" data-word="${clean}" data-start="${wordStart}">${clean}</span>${suffix}`;
+          const saved = vocab.some(item => item.en.toLowerCase() === clean.toLowerCase());
+          html += `${prefix}<span class="word ${saved ? 'looked-up' : ''}" data-word="${clean}" data-start="${wordStart}">${clean}</span>${suffix}`;
         } else {
           html += part;
         }
+
         charPos += part.length;
-      }
-    });
+      });
 
-    body.innerHTML = html;
-    document.getElementById('word-count').textContent = `${wordCount} 個單字`;
-
-    // Reset translation panel
-    const tSection = document.getElementById('translation-section');
-    if (tSection) {
-      tSection.style.display = 'none';
+      body.innerHTML = html;
+      document.getElementById('word-count').textContent = `${wordCount} 個單字`;
+      document.getElementById('translation-section').style.display = 'none';
       document.getElementById('translation-body').textContent = '';
-      document.getElementById('translate-all-icon').textContent = '🌐';
-      document.getElementById('translate-all-label').textContent = '顯示全文翻譯';
-      const tBtn = document.getElementById('translate-all-btn');
-      tBtn.classList.remove('loaded');
-      tBtn.disabled = false;
-    }
+      document.getElementById('translate-all-btn').textContent = '🌐 顯示全文翻譯';
 
-    body.querySelectorAll('.word').forEach(el => {
-      el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showPopup(el.dataset.word, el);
-      });
-    });
-  }
-
-  // ── Translation ──
-  async function translate(word) {
-    const key = word.toLowerCase();
-    if (translationCache[key]) return translationCache[key];
-    try {
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const result = data?.[0]?.[0]?.[0] || '（翻譯失敗）';
-      translationCache[key] = result;
-      return result;
-    } catch {
-      // Fallback to MyMemory
-      try {
-        const res2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
-        const data2 = await res2.json();
-        const result2 = data2?.responseData?.translatedText || '（翻譯失敗）';
-        translationCache[key] = result2;
-        return result2;
-      } catch {
-        return '❌ 請確認網路連線';
-      }
-    }
-  }
-
-  // ── Dictionary ──
-  let dictCache = {};
-  const POS_MAP = {
-    'noun': ['noun','名詞','pos-noun'],
-    'verb': ['verb','動詞','pos-verb'],
-    'adjective': ['adj','形容詞','pos-adj'],
-    'adverb': ['adv','副詞','pos-adv'],
-    'preposition': ['prep','介係詞','pos-prep'],
-    'conjunction': ['conj','連接詞','pos-conj'],
-    'pronoun': ['pron','代名詞','pos-pron'],
-    'article': ['art','冠詞','pos-other'],
-    'exclamation': ['excl','感嘆詞','pos-other'],
-  };
-
-  async function fetchDictionary(word) {
-    const key = word.toLowerCase();
-    if (dictCache[key]) return dictCache[key];
-    try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(key)}`);
-      if (!res.ok) { dictCache[key] = null; return null; }
-      const data = await res.json();
-      const entry = data[0];
-      const phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
-      const meanings = entry.meanings || [];
-      const result = { phonetic, meanings: [] };
-      meanings.forEach(m => {
-        const posKey = Object.keys(POS_MAP).find(k => m.partOfSpeech?.toLowerCase().includes(k));
-        const [short, zh, cls] = posKey ? POS_MAP[posKey] : ['?','?','pos-other'];
-        const def = m.definitions?.[0];
-        const example = def?.example || '';
-        result.meanings.push({ pos: m.partOfSpeech, short, zh, cls, example });
-      });
-      dictCache[key] = result;
-      return result;
-    } catch {
-      dictCache[key] = null;
-      return null;
-    }
-  }
-
-  // ── Popup ──
-  const popup = document.getElementById('popup');
-  const overlay = document.getElementById('popup-overlay');
-
-  function showPopup(word, el) {
-    currentWord = word;
-    currentWordEl = el;
-    currentTranslation = '';
-
-    document.getElementById('popup-word').textContent = word;
-    const transEl = document.getElementById('popup-translation');
-    transEl.textContent = '';
-    transEl.classList.add('loading-text');
-    document.getElementById('popup-meta').innerHTML = '';
-    document.getElementById('popup-phonetic').textContent = '';
-    document.getElementById('popup-example').textContent = '';
-
-    const saveBtn = document.getElementById('popup-save');
-    const alreadySaved = vocab.some(v => v.en.toLowerCase() === word.toLowerCase());
-    saveBtn.textContent = alreadySaved ? '✓ 已在單字本' : '＋ 加入單字本';
-    saveBtn.classList.toggle('saved', alreadySaved);
-    const libBtn = document.getElementById('popup-lib-save');
-    const inLib = library.some(v => v.en.toLowerCase() === word.toLowerCase());
-    libBtn.textContent = inLib ? '✓ 已在單字庫' : '＋ 單字庫';
-    libBtn.style.opacity = inLib ? '0.7' : '1';
-
-    // Position popup
-    const rect = el.getBoundingClientRect();
-    const popupEl = popup;
-    const margin = 12;
-    const popupW = Math.min(320, window.innerWidth * 0.88);
-    const popupH = 160;
-
-    let top = rect.bottom + margin;
-    let left = rect.left;
-    if (left + popupW > window.innerWidth - margin) left = window.innerWidth - popupW - margin;
-    if (left < margin) left = margin;
-    if (top + popupH > window.innerHeight - margin) top = rect.top - popupH - margin;
-
-    popupEl.style.top = top + 'px';
-    popupEl.style.left = left + 'px';
-    popupEl.style.width = popupW + 'px';
-
-    popup.classList.add('show');
-    syncPopupSpeed();
-    overlay.classList.add('active');
-
-    Promise.all([translate(word), fetchDictionary(word)]).then(([translation, dict]) => {
-      currentTranslation = translation;
-      transEl.classList.remove('loading-text');
-      transEl.textContent = translation;
-
-      if (dict) {
-        // Phonetic
-        if (dict.phonetic) {
-          document.getElementById('popup-phonetic').textContent = dict.phonetic;
-        }
-        // Part of speech badges
-        const metaEl = document.getElementById('popup-meta');
-        const seen = new Set();
-        dict.meanings.forEach(m => {
-          if (!seen.has(m.short)) {
-            seen.add(m.short);
-            const badge = document.createElement('span');
-            badge.className = 'pos-badge ' + m.cls;
-            badge.textContent = m.short + ' ' + m.zh;
-            metaEl.appendChild(badge);
-          }
+      body.querySelectorAll('.word').forEach(wordEl => {
+        wordEl.addEventListener('click', event => {
+          event.stopPropagation();
+          showPopup(wordEl.dataset.word, wordEl);
         });
-        // Example - prefer preposition/verb, else first available
-        const priority = ['preposition','verb','noun','adjective'];
-        let bestExample = '';
-        for (const p of priority) {
-          const m = dict.meanings.find(m => m.pos?.includes(p) && m.example);
-          if (m) { bestExample = m.example; break; }
-        }
-        if (!bestExample) {
-          const m = dict.meanings.find(m => m.example);
-          if (m) bestExample = m.example;
-        }
-        if (bestExample) {
-          document.getElementById('popup-example').textContent = '"' + bestExample + '"';
-        }
-      }
-    });
-  }
-
-  function hidePopup() {
-    popup.classList.remove('show');
-    overlay.classList.remove('active');
-  }
-
-  overlay.addEventListener('click', hidePopup);
-  document.getElementById('popup-close').addEventListener('click', (e) => { e.stopPropagation(); hidePopup(); });
-  document.getElementById('popup').addEventListener('click', (e) => e.stopPropagation());
-
-  // ── Speech Rate ──
-  var speechRate = 0.9;
-  var currentArticleText = '';
-  var isReadingAloud = false;
-  var isRestarting = false;
-  var articleText = '';
-  var currentCharIndex = 0;
-  const sliderEl   = document.getElementById('speed-slider');
-  const fillEl     = document.getElementById('speed-fill');
-  const thumbEl    = document.getElementById('speed-thumb');
-  const speedLabel = document.getElementById('speed-value');
-  const MIN = 0.1, MAX = 1.5, STEP = 0.1;
-
-  function setRate(pct) {
-    pct = Math.max(0, Math.min(1, pct));
-    const raw = MIN + pct * (MAX - MIN);
-    speechRate = Math.round(raw / STEP) * STEP;
-    speechRate = Math.round(speechRate * 10) / 10;
-    const dp = (speechRate - MIN) / (MAX - MIN) * 100;
-    fillEl.style.width = dp + '%';
-    thumbEl.style.left = dp + '%';
-    speedLabel.textContent = speechRate.toFixed(1) + 'x';
-    // 朗讀中：取消後從目前位置以新語速重新開始
-    if (isReadingAloud && !isPaused) {
-      startSpeakingFrom(currentCharIndex);
-    }
-  }
-
-  function pctFromEvent(e) {
-    const rect = sliderEl.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return (clientX - rect.left) / rect.width;
-  }
-
-  sliderEl.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    thumbEl.classList.add('dragging');
-    setRate(pctFromEvent(e));
-  }, { passive: false });
-
-  sliderEl.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    setRate(pctFromEvent(e));
-  }, { passive: false });
-
-  sliderEl.addEventListener('touchend', () => thumbEl.classList.remove('dragging'));
-
-  sliderEl.addEventListener('mousedown', (e) => {
-    thumbEl.classList.add('dragging');
-    setRate(pctFromEvent(e));
-    const onMove = (e) => setRate(pctFromEvent(e));
-    const onUp = () => {
-      thumbEl.classList.remove('dragging');
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-  });
-
-  setRate((0.9 - MIN) / (MAX - MIN));
-
-  // ── Read Aloud ──
-
-  // ── Word Highlight Helpers ──
-  function clearHighlights() {
-    document.querySelectorAll('.word-speaking, .word-read').forEach(el => {
-      el.classList.remove('word-speaking', 'word-read');
-    });
-  }
-
-  function highlightAt(absCharIndex) {
-    const allWords = Array.from(document.querySelectorAll('#article-body .word[data-start]'));
-    if (!allWords.length) return;
-
-    let speakingEl = null;
-    let minDiff = Infinity;
-    allWords.forEach(el => {
-      const start = parseInt(el.dataset.start);
-      const diff = Math.abs(start - absCharIndex);
-      if (diff < minDiff) { minDiff = diff; speakingEl = el; }
-    });
-
-    allWords.forEach(el => {
-      el.classList.remove('word-speaking');
-      const start = parseInt(el.dataset.start);
-      if (speakingEl && start < parseInt(speakingEl.dataset.start)) {
-        el.classList.add('word-read');
-      } else {
-        el.classList.remove('word-read');
-      }
-    });
-    if (speakingEl) {
-      speakingEl.classList.add('word-speaking');
-      speakingEl.classList.remove('word-read');
-      // Auto-scroll into view smoothly
-      speakingEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-    }
-  }
-
-  function startSpeakingFrom(charIndex) {
-    isRestarting = true;
-    window.speechSynthesis.cancel();
-    const textToSpeak = articleText.slice(charIndex);
-    if (!textToSpeak.trim()) { isRestarting = false; stopReadAloud(); return; }
-    const utter = new SpeechSynthesisUtterance(textToSpeak);
-    utter.lang = 'en-US';
-    utter.rate = speechRate;
-    utter.onboundary = (e) => {
-      if (e.name === 'word') {
-        currentCharIndex = charIndex + e.charIndex;
-        highlightAt(currentCharIndex);
-      }
-    };
-    utter.onend = () => {
-      if (!isRestarting && isReadingAloud) stopReadAloud();
-    };
-    utter.onerror = (e) => {
-      if (!isRestarting && e.error !== 'interrupted' && isReadingAloud) stopReadAloud();
-    };
-    setTimeout(() => { isRestarting = false; window.speechSynthesis.speak(utter); }, 80);
-  }
-
-  var isPaused = false;
-
-  function setReadAloudUI(state) {
-    // state: 'stopped' | 'playing' | 'paused'
-    const mainBtn  = document.getElementById('read-aloud-btn');
-    const pauseBtn = document.getElementById('pause-btn');
-    const icon     = document.getElementById('read-aloud-icon');
-    const label    = document.getElementById('read-aloud-label');
-    const pauseIcon = document.getElementById('pause-icon');
-    mainBtn.classList.remove('playing', 'paused');
-    pauseBtn.style.display = 'none';
-    if (state === 'playing') {
-      mainBtn.classList.add('playing');
-      icon.textContent = '⏹';
-      label.textContent = '停止朗讀';
-      pauseBtn.style.display = 'flex';
-      pauseBtn.classList.remove('paused');
-      pauseBtn.classList.add('playing');
-      pauseIcon.textContent = '⏸';
-    } else if (state === 'paused') {
-      mainBtn.classList.add('paused');
-      icon.textContent = '▶';
-      label.textContent = '繼續朗讀';
-      pauseBtn.style.display = 'flex';
-      pauseBtn.classList.remove('playing');
-      pauseBtn.classList.add('paused');
-      pauseIcon.textContent = '⏹';
-    } else {
-      icon.textContent = '🔊';
-      label.textContent = '朗讀全文';
-    }
-  }
-
-  function stopReadAloud() {
-    window.speechSynthesis.cancel();
-    isReadingAloud = false;
-    isPaused = false;
-    currentCharIndex = 0;
-    clearHighlights();
-    setReadAloudUI('stopped');
-  }
-
-  function pauseReadAloud() {
-    if (!isReadingAloud || isPaused) return;
-    isRestarting = true;
-    window.speechSynthesis.cancel();
-    setTimeout(() => { isRestarting = false; }, 100);
-    isPaused = true;
-    isReadingAloud = false;
-    setReadAloudUI('paused');
-  }
-
-  function resumeReadAloud() {
-    if (!isPaused) return;
-    isPaused = false;
-    isReadingAloud = true;
-    setReadAloudUI('playing');
-    startSpeakingFrom(currentCharIndex);
-  }
-
-  document.getElementById('read-aloud-btn').addEventListener('click', () => {
-    if (!window.speechSynthesis) { alert('你的瀏覽器不支援語音功能'); return; }
-    if (isPaused) { resumeReadAloud(); return; }
-    if (isReadingAloud) { stopReadAloud(); return; }
-    articleText = document.getElementById('article-body').innerText;
-    if (!articleText.trim()) return;
-    isReadingAloud = true;
-    isPaused = false;
-    currentCharIndex = 0;
-    setReadAloudUI('playing');
-    startSpeakingFrom(0);
-  });
-
-  // pause btn: when playing → pause; when paused → stop
-  document.getElementById('pause-btn').addEventListener('click', () => {
-    if (isReadingAloud) { pauseReadAloud(); }
-    else if (isPaused) { stopReadAloud(); }
-  });
-
-  // ── Speak single word ──
-  function speak(word) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(word);
-    utter.lang = 'en-US';
-    utter.rate = speechRate;
-    const speakBtn = document.getElementById('popup-speak');
-    speakBtn.classList.add('speaking');
-    utter.onend = () => speakBtn.classList.remove('speaking');
-    utter.onerror = () => speakBtn.classList.remove('speaking');
-    // iOS Safari needs a tiny delay after cancel()
-    setTimeout(() => window.speechSynthesis.speak(utter), 50);
-  }
-
-  // ── Popup speed controls ──
-  function syncPopupSpeed() {
-    const el = document.getElementById('popup-speed-display');
-    if (el) el.textContent = speechRate.toFixed(1) + 'x';
-    // Also sync main slider
-    const pct = (speechRate - MIN) / (MAX - MIN);
-    const dp = pct * 100;
-    if (fillEl) fillEl.style.width = dp + '%';
-    if (thumbEl) thumbEl.style.left = dp + '%';
-    if (speedLabel) speedLabel.textContent = speechRate.toFixed(1) + 'x';
-  }
-
-  document.getElementById('popup-speed-down').addEventListener('click', (e) => {
-    e.stopPropagation();
-    speechRate = Math.max(0.1, Math.round((speechRate - 0.1) * 10) / 10);
-    syncPopupSpeed();
-    if (isReadingAloud) startSpeakingFrom(currentCharIndex);
-  });
-
-  document.getElementById('popup-speed-up').addEventListener('click', (e) => {
-    e.stopPropagation();
-    speechRate = Math.min(1.5, Math.round((speechRate + 0.1) * 10) / 10);
-    syncPopupSpeed();
-    if (isReadingAloud) startSpeakingFrom(currentCharIndex);
-  });
-
-  document.getElementById('popup-speak').addEventListener('click', (e) => {
-    e.stopPropagation(); // 防止冒泡觸發 backdrop 關閉
-    speak(currentWord);
-  });
-
-  // ── Save to library ──
-  document.getElementById('popup-lib-save').addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!currentTranslation) return;
-    const dict = dictCache[currentWord.toLowerCase()];
-    const added = saveToLibrary(currentWord, currentTranslation, dict);
-    const btn = document.getElementById('popup-lib-save');
-    btn.textContent = added ? '✓ 已存入單字庫' : '✓ 已在單字庫';
-    btn.style.opacity = '0.7';
-  });
-
-  // ── Save to vocab ──
-  document.getElementById('popup-save').addEventListener('click', () => {
-    if (!currentTranslation) return;
-    const key = currentWord.toLowerCase();
-    const alreadySaved = vocab.some(v => v.en.toLowerCase() === key);
-    if (!alreadySaved) {
-      vocab.unshift({ en: currentWord, zh: currentTranslation });
-      localStorage.setItem('wordlens-vocab', JSON.stringify(vocab));
-      // Mark word in article
-      document.querySelectorAll(`.word[data-word="${currentWord}"]`).forEach(el => el.classList.add('looked-up'));
-    }
-    const saveBtn = document.getElementById('popup-save');
-    saveBtn.textContent = '✓ 已在單字本';
-    saveBtn.classList.add('saved', 'pulse');
-    setTimeout(() => saveBtn.classList.remove('pulse'), 400);
-  });
-
-  // ── Vocab ──
-  function renderVocab() {
-    const list = document.getElementById('vocab-list');
-    const count = document.getElementById('vocab-count');
-    if (vocab.length === 0) {
-      count.textContent = '';
-      list.innerHTML = '<div class="vocab-empty">單字本是空的<br>閱讀時點單字並儲存 📚</div>';
-      return;
-    }
-    count.textContent = `已收錄 ${vocab.length} 個單字`;
-    list.innerHTML = vocab.map((v, i) => `
-      <div class="vocab-card">
-        <div>
-          <div class="vocab-en">${v.en}</div>
-          <div class="vocab-zh">${v.zh}</div>
-        </div>
-        <button class="vocab-del" data-index="${i}">✕</button>
-      </div>
-    `).join('');
-    list.querySelectorAll('.vocab-del').forEach(btn => {
-      btn.addEventListener('click', () => {
-        vocab.splice(parseInt(btn.dataset.index), 1);
-        localStorage.setItem('wordlens-vocab', JSON.stringify(vocab));
-        renderVocab();
       });
-    });
-  }
-
-  // ── Library (永久單字庫) ──
-  var library = JSON.parse(localStorage.getItem('wordlens-library') || '[]');
-
-  function saveToLibrary(word, translation, dict) {
-    if (library.some(w => w.en.toLowerCase() === word.toLowerCase())) return false;
-    const entry = { en: word, zh: translation, phonetic: '', posList: [], example: '' };
-    if (dict) {
-      entry.phonetic = dict.phonetic || '';
-      const seen = new Set();
-      dict.meanings.forEach(m => {
-        if (!seen.has(m.short)) { seen.add(m.short); entry.posList.push({ short: m.short, zh: m.zh, cls: m.cls }); }
-      });
-      const priority = ['preposition','verb','noun','adjective'];
-      for (const p of priority) {
-        const m = dict.meanings.find(m => m.pos?.includes(p) && m.example);
-        if (m) { entry.example = m.example; break; }
-      }
-      if (!entry.example) {
-        const m = dict.meanings.find(m => m.example);
-        if (m) entry.example = m.example;
-      }
-    }
-    library.unshift(entry);
-    localStorage.setItem('wordlens-library', JSON.stringify(library));
-    return true;
-  }
-
-  function renderLibrary() {
-    const list = document.getElementById('library-list');
-    const count = document.getElementById('library-count');
-    if (library.length === 0) {
-      count.textContent = '';
-      list.innerHTML = '<div class="vocab-empty">單字庫是空的<br>從單字本中加入單字 📚</div>';
-      return;
-    }
-    count.textContent = `單字庫共 ${library.length} 個單字`;
-    list.innerHTML = library.map((w, i) => `
-      <div class="lib-card">
-        <div class="lib-card-top">
-          <div>
-            <div class="lib-en">${w.en}</div>
-            ${w.phonetic ? `<div class="lib-phonetic">${w.phonetic}</div>` : ''}
-          </div>
-          <button class="lib-del" data-index="${i}">✕</button>
-        </div>
-        ${w.posList?.length ? `<div class="lib-pos-row">${w.posList.map(p => `<span class="pos-badge ${p.cls}">${p.short} ${p.zh}</span>`).join('')}</div>` : ''}
-        <div class="lib-zh">${w.zh}</div>
-        ${w.example ? `<div class="lib-example">"${w.example}"</div>` : ''}
-      </div>
-    `).join('');
-    list.querySelectorAll('.lib-del').forEach(btn => {
-      btn.addEventListener('click', () => {
-        library.splice(parseInt(btn.dataset.index), 1);
-        localStorage.setItem('wordlens-library', JSON.stringify(library));
-        renderLibrary();
-      });
-    });
-  }
-
-  // ── Flashcard ──
-  let fcQueue = [], fcIndex = 0, fcFlipped = false, fcWrong = [];
-
-  function startReview() {
-    if (library.length === 0) return;
-    fcQueue = [...library].sort(() => Math.random() - 0.5);
-    fcWrong = [];
-    fcIndex = 0;
-    fcFlipped = false;
-    document.getElementById('flashcard-overlay').style.display = 'flex';
-    showCard();
-  }
-
-  function showCard() {
-    const w = fcQueue[fcIndex];
-    if (!w) { showDone(); return; }
-    fcFlipped = false;
-    document.getElementById('fc-word').textContent = w.en;
-    document.getElementById('fc-phonetic').textContent = w.phonetic || '';
-    document.getElementById('fc-back').style.display = 'none';
-    document.querySelector('.fc-front').style.display = 'block';
-    document.getElementById('fc-btn-row').style.display = 'none';
-    document.getElementById('fc-word-back').textContent = w.en;
-    document.getElementById('fc-translation').textContent = w.zh;
-    document.getElementById('fc-pos').innerHTML = (w.posList || []).map(p => `<span class="pos-badge ${p.cls}">${p.short} ${p.zh}</span>`).join('');
-    document.getElementById('fc-example').textContent = w.example ? `"${w.example}"` : '';
-    const pct = (fcIndex / fcQueue.length * 100).toFixed(0);
-    document.getElementById('fc-progress-bar').style.width = pct + '%';
-  }
-
-  function showDone() {
-    const card = document.getElementById('flashcard');
-    card.style.cursor = 'default';
-    card.innerHTML = `<div class="fc-done">
-      <div class="fc-done-emoji">🎉</div>
-      <div class="fc-done-title">複習完成！</div>
-      <div class="fc-done-sub">共 ${fcQueue.length} 個單字，${fcWrong.length} 個需要加強</div>
-      ${fcWrong.length ? `<button class="review-btn" id="retry-btn">重複練習不熟的</button>` : ''}
-    </div>`;
-    document.getElementById('fc-btn-row').style.display = 'none';
-    document.getElementById('fc-progress-bar').style.width = '100%';
-    const retry = document.getElementById('retry-btn');
-    if (retry) retry.addEventListener('click', () => {
-      fcQueue = [...fcWrong].sort(() => Math.random() - 0.5);
-      fcWrong = []; fcIndex = 0; fcFlipped = false;
-      card.style.cursor = 'pointer';
-      card.innerHTML = `<div class="fc-front"><div class="fc-word" id="fc-word"></div><div class="fc-phonetic" id="fc-phonetic"></div><div class="fc-tap-hint">點擊翻面</div></div><div class="fc-back" id="fc-back" style="display:none;"><div class="fc-word" id="fc-word-back"></div><div class="fc-pos" id="fc-pos"></div><div class="fc-translation" id="fc-translation"></div><div class="fc-example" id="fc-example"></div></div>`;
-      showCard();
-    });
-  }
-
-  document.getElementById('flashcard').addEventListener('click', () => {
-    if (fcFlipped) return;
-    fcFlipped = true;
-    document.querySelector('.fc-front').style.display = 'none';
-    document.getElementById('fc-back').style.display = 'block';
-    document.getElementById('fc-btn-row').style.display = 'flex';
-  });
-
-  document.getElementById('fc-wrong').addEventListener('click', () => {
-    fcWrong.push(fcQueue[fcIndex]);
-    fcIndex++; fcFlipped = false; showCard();
-  });
-  document.getElementById('fc-right').addEventListener('click', () => {
-    fcIndex++; fcFlipped = false; showCard();
-  });
-  document.getElementById('review-btn').addEventListener('click', startReview);
-  document.getElementById('fc-close').addEventListener('click', () => {
-    document.getElementById('flashcard-overlay').style.display = 'none';
-  });
-
-  // ── Export / Import ──
-  document.getElementById('export-btn').addEventListener('click', () => {
-    const data = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      library: library,
-      vocab: vocab
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'wordlens-backup-' + new Date().toLocaleDateString('zh-TW').replace(/\//g, '-') + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  document.getElementById('import-input').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (!data.library && !data.vocab) throw new Error('格式錯誤');
-        let added = 0;
-        if (data.library) {
-          data.library.forEach(w => {
-            if (!library.some(v => v.en.toLowerCase() === w.en.toLowerCase())) {
-              library.push(w);
-              added++;
-            }
-          });
-          localStorage.setItem('wordlens-library', JSON.stringify(library));
-        }
-        if (data.vocab) {
-          data.vocab.forEach(w => {
-            if (!vocab.some(v => v.en.toLowerCase() === w.en.toLowerCase())) {
-              vocab.push(w);
-            }
-          });
-          localStorage.setItem('wordlens-vocab', JSON.stringify(vocab));
-        }
-        renderLibrary();
-        alert(`✅ 匯入成功！新增了 ${added} 個單字`);
-      } catch {
-        alert('❌ 檔案格式錯誤，請選擇正確的備份檔');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-  });
-
-  // ── Reading Progress Bar ──
-  const progressBar = document.getElementById('reading-progress-bar');
-  const progressFill = document.getElementById('reading-progress-fill');
-
-  function updateProgress() {
-    const body = document.getElementById('article-body');
-    if (!body || views.read.style.display === 'none') return;
-    const rect = body.getBoundingClientRect();
-    const total = body.offsetHeight;
-    const scrolled = Math.max(0, -rect.top + window.innerHeight * 0.3);
-    const pct = Math.min(100, (scrolled / total) * 100);
-    progressFill.style.width = pct.toFixed(1) + '%';
-  }
-
-  window.addEventListener('scroll', updateProgress, { passive: true });
-
-  // Show/hide progress bar with tab
-  const origSwitch = switchTab;
-
-
-  // ── Article Library ──
-  const TOPIC_COLORS = {
-    'World News': ['#fee2e2','#991b1b','🌍'],
-    'Business':   ['#fef3c7','#92400e','💹'],
-    'Health':     ['#d1fae5','#065f46','🏥'],
-    'Lifestyle':  ['#ede9fe','#4c1d95','✨'],
-    'Tech News':  ['#dbeafe','#1e40af','📱'],
-    Science:    ['#dbeafe','#1e40af','🔬'],
-    Culture:    ['#fce7f3','#9d174d','🎭'],
-    Travel:     ['#d1fae5','#065f46','✈️'],
-    Food:       ['#fef3c7','#92400e','🍜'],
-    Technology: ['#ede9fe','#4c1d95','💻'],
-    Nature:     ['#dcfce7','#14532d','🌿'],
-    History:    ['#fee2e2','#7f1d1d','🏛️'],
-    Sports:     ['#ffedd5','#7c2d12','⚽'],
-  };
-  const LEVEL_COLORS = { A1:'#bfdbfe', A2:'#99f6e4', B1:'#fde68a', B2:'#fca5a5', C1:'#e9d5ff' };
-
-  const _now = Date.now();
-  const SEED_ARTICLES = JSON.parse("[{\"id\": \"s1\", \"level\": \"A1\", \"topic\": \"Food\", \"titleZh\": \"\u6bcf\u5929\u4e00\u500b\u860b\u679c\", \"title\": \"An Apple a Day\", \"content\": \"Apples are one of the most popular fruits in the world. They come in many colors, like red, green, and yellow. People eat apples every day because they are healthy. Apples have vitamins that help your body stay strong. You can eat an apple in the morning for breakfast, or as a snack in the afternoon. Some people like to make apple juice or apple pie. Doctors say that eating fruit every day is good for you. Apples are also easy to carry. You can put one in your bag and eat it later. Try to eat one apple every day and you will feel better!\", \"date\": 0}, {\"id\": \"s2\", \"level\": \"A2\", \"topic\": \"Nature\", \"titleZh\": \"\u795e\u5947\u7684\u871c\u8702\", \"title\": \"The Amazing Honey Bee\", \"content\": \"Honey bees are small insects, but they do very important work. Bees fly from flower to flower to collect nectar. They use this nectar to make honey in their hive. A single bee visits hundreds of flowers each day. Bees also help plants grow by carrying pollen between flowers. This is called pollination. Without bees, many fruits and vegetables would not exist. A beehive can have up to 60,000 bees! The queen bee lays eggs all day long. Worker bees build the hive, find food, and protect the colony. Next time you see a bee, remember how important it is to our world.\", \"date\": 0}, {\"id\": \"s3\", \"level\": \"B1\", \"topic\": \"Science\", \"titleZh\": \"\u7761\u7720\u7684\u529b\u91cf\", \"title\": \"The Power of Sleep\", \"content\": \"Sleep is one of the most essential activities for human health, yet many people treat it as optional. During sleep, the brain processes memories from the day, consolidating important information and discarding irrelevant details. The body also uses this time to repair tissue, build muscle, and strengthen the immune system. Scientists have discovered that sleep deprivation affects cognitive performance just as severely as alcohol intoxication. A person who has been awake for 17 hours shows impairment similar to someone with a blood alcohol level of 0.05%. Most adults need between seven and nine hours of sleep per night, yet surveys suggest that a significant portion of the population regularly gets less than six. Establishing a consistent sleep schedule is the single most effective strategy for improving sleep quality.\", \"date\": 0}, {\"id\": \"s4\", \"level\": \"B2\", \"topic\": \"Technology\", \"titleZh\": \"\u793e\u7fa4\u5a92\u9ad4\u7684\u5169\u9762\", \"title\": \"The Double Edge of Social Media\", \"content\": \"Social media platforms have fundamentally altered the way human beings communicate, share information, and perceive themselves and others. On one hand, these digital networks have democratized information, enabling grassroots movements to organize globally and allowing individuals to build communities around shared interests regardless of geographic boundaries. Yet the same mechanisms that empower activists also amplify misinformation at unprecedented speed. Algorithmic recommendation systems, optimized for engagement rather than accuracy, create echo chambers that reinforce existing beliefs and polarize discourse. Furthermore, research consistently links heavy social media use among adolescents with increased rates of anxiety, depression, and body image dissatisfaction \u2014 a correlation that raises urgent questions about platform design and the responsibilities of technology companies toward their youngest users.\", \"date\": 0}, {\"id\": \"s5\", \"level\": \"C1\", \"topic\": \"Culture\", \"titleZh\": \"\u8a18\u61b6\u7684\u53ef\u5851\u6027\", \"title\": \"The Malleability of Memory\", \"content\": \"The popular conception of memory as a faithful video recording of past experience is, neuroscience reveals, a profound misconception. Memory is not retrieved but reconstructed \u2014 an active process in which the brain assembles fragments of sensory impression, emotional context, and subsequent knowledge into a coherent narrative that feels experientially true but may diverge substantially from objective events. Elizabeth Loftus demonstrated that subjects could be induced to incorporate entirely fabricated details into their recollections simply through suggestive questioning. More troublingly, her research showed that false memories \u2014 including memories of childhood traumas that never occurred \u2014 could be implanted with high rates of conviction, challenging both the reliability of eyewitness testimony in legal proceedings and the therapeutic practice of memory recovery. The malleability of memory, while an evolutionary advantage, simultaneously renders the autobiographical self a continuous act of reconstruction rather than an archive of fixed truth.\", \"date\": 0}, {\"id\": \"s6\", \"level\": \"A1\", \"topic\": \"Travel\", \"titleZh\": \"\u6211\u6700\u559c\u6b61\u7684\u57ce\u5e02\", \"title\": \"My Favourite City\", \"content\": \"I love visiting cities. My favourite city is Tokyo in Japan. Tokyo is very big and very clean. There are many trains in Tokyo. You can go everywhere by train. The food in Tokyo is delicious. I like to eat sushi and ramen. Sushi is raw fish on rice. Ramen is noodle soup. Tokyo also has many interesting shops and parks. Ueno Park is a beautiful place to walk. In spring, the cherry blossom trees in the park are pink and white. Many people come to see the flowers. I want to visit Tokyo again one day. Maybe you can visit Tokyo too!\", \"date\": 0}, {\"id\": \"s7\", \"level\": \"B1\", \"topic\": \"History\", \"titleZh\": \"\u7d72\u8def\u7684\u6545\u4e8b\", \"title\": \"The Story of the Silk Road\", \"content\": \"For more than a thousand years, a network of trade routes connected the civilizations of China, Central Asia, the Middle East, and Europe. Known as the Silk Road, this network took its name from the lucrative silk trade that originated in China, where the technique of silk production was a closely guarded secret for centuries. Merchants, diplomats, monks, and explorers traveled these routes, exchanging not only goods such as spices, glass, and precious metals, but also ideas, religions, and technologies. Buddhism spread from India to China along the Silk Road, while paper-making and printing techniques traveled westward to the Islamic world and eventually Europe. The Mongol Empire of the 13th century temporarily unified much of Eurasia under a single political authority, creating conditions of relative safety that encouraged unprecedented levels of cultural and commercial exchange.\", \"date\": 0}, {\"id\": \"s8\", \"level\": \"A2\", \"topic\": \"Sports\", \"titleZh\": \"\u70ba\u4ec0\u9ebc\u904b\u52d5\u5c0d\u4f60\u6709\u76ca\", \"title\": \"Why Exercise is Good for You\", \"content\": \"Exercise is very important for a healthy life. When you exercise, your heart beats faster and your blood moves quickly around your body. This makes your heart stronger. Regular exercise also helps you maintain a healthy weight. Many people feel happier after they exercise. This is because the body releases chemicals called endorphins during physical activity. These chemicals make you feel good. You do not need to exercise for a long time to feel the benefits. Even a 30-minute walk every day can make a big difference to your health. Try to find an activity that you enjoy, like swimming, cycling, or playing football. When exercise is fun, it is easier to continue doing it regularly.\", \"date\": 0}]").map((a,i) => ({...a, date: _now - (i+1)*86400000}));
-
-  var storedArticles = JSON.parse(localStorage.getItem('wordlens-articles') || '[]');
-  var allArticles = [...SEED_ARTICLES, ...storedArticles];
-  var activeLevel = 'all';
-  var activeTopic = 'all';
-
-  function renderExplore() {
-    const list = document.getElementById('article-list');
-    let filtered = allArticles.filter(a =>
-      (activeLevel === 'all' || a.level === activeLevel) &&
-      (activeTopic === 'all' || a.topic === activeTopic)
-    );
-    filtered.sort((a,b) => b.date - a.date);
-    if (filtered.length === 0) {
-      list.innerHTML = '<div class="vocab-empty">沒有符合條件的文章<br>試試用AI生成一篇 ✨</div>';
-      return;
-    }
-    list.innerHTML = filtered.map(art => {
-      const [bg, , emoji] = TOPIC_COLORS[art.topic] || ['#f3f4f6','#374151','📄'];
-      const preview = art.content.slice(0, 100) + '...';
-      const badgeCls = art.style === 'news' ? 'badge-news' : art.style === 'magazine' ? 'badge-magazine' : '';
-      const badgeLabel = art.style === 'news' ? '新聞' : art.style === 'magazine' ? '雜誌' : '';
-      const dateStr = art.date ? new Date(art.date).toLocaleDateString('zh-TW',{month:'short',day:'numeric'}) : '';
-      return `<div class="art-card" data-id="${art.id}">
-        <div class="art-cover" style="background:${bg};">
-          ${emoji}
-          <div class="art-level-badge" style="background:${LEVEL_COLORS[art.level] || '#ccc'};color:#1a1a1a;">${art.level}</div>
-        </div>
-        <div class="art-body">
-          ${badgeCls ? `<span class="art-style-badge ${badgeCls}">${badgeLabel}</span>` : ''}
-          <div class="art-title-zh">${art.titleZh}</div>
-          <div class="art-preview">${preview}</div>
-          ${dateStr ? `<div class="art-date">${dateStr}</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-    list.querySelectorAll('.art-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const art = allArticles.find(a => a.id === card.dataset.id);
-        if (art) loadArticle(art);
-      });
-    });
-  }
-
-  function loadArticle(art) {
-    document.getElementById('article-input') && (document.getElementById('article-input').value = art.content);
-    renderArticle(art.content);
-    switchTab('read');
-    document.getElementById('word-count').textContent += '　' + art.level;
-  }
-
-  // Filter buttons
-  document.querySelectorAll('#level-filter .filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#level-filter .filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeLevel = btn.dataset.level;
-      renderExplore();
-    });
-  });
-  document.querySelectorAll('#topic-filter .filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#topic-filter .filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeTopic = btn.dataset.topic;
-      renderExplore();
-    });
-  });
-
-  // ── API Key ──
-  var anthropicKey = localStorage.getItem('wordlens-gemini-key') || '';
-
-  function updateKeyUI() {
-    const input = document.getElementById('api-key-input');
-    const status = document.getElementById('api-key-status');
-    const row = document.getElementById('api-key-row');
-    if (anthropicKey) {
-      row.style.display = 'none';
-      status.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">✓ API Key 已儲存 <span id="clear-key" style="cursor:pointer;text-decoration:underline;">清除</span></span>';
-      document.getElementById('clear-key')?.addEventListener('click', () => {
-        anthropicKey = '';
-        localStorage.removeItem('wordlens-gemini-key');
-        row.style.display = 'flex';
-        status.innerHTML = '';
-      });
-    } else {
-      row.style.display = 'flex';
-      status.innerHTML = '<span style="color:rgba(255,255,255,0.45);font-size:0.75rem;">👉 在 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#fbb36a;">aistudio.google.com</a> 申請免費 Key</span>';
-    }
-  }
-
-  document.getElementById('api-key-save').addEventListener('click', () => {
-    const val = document.getElementById('api-key-input').value.trim();
-    if (!val.startsWith('AIza')) { alert('請輸入正確的 Gemini API Key（以 AIza 開頭）'); return; }
-    anthropicKey = val;
-    localStorage.setItem('wordlens-gemini-key', val);
-    updateKeyUI();
-  });
-
-  document.getElementById('api-key-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('api-key-save').click();
-  });
-
-  updateKeyUI();
-
-  // AI Generate
-  document.getElementById('gen-btn').addEventListener('click', async () => {
-    const level = document.getElementById('gen-level').value;
-    const topic = document.getElementById('gen-topic').value;
-    const icon = document.getElementById('gen-icon');
-    const label = document.getElementById('gen-label');
-    icon.textContent = '⏳'; label.textContent = '生成中...';
-    document.getElementById('gen-btn').disabled = true;
-
-    const levelDesc = {A1:'very simple sentences, A1 CEFR level, under 150 words', A2:'simple sentences, A2 CEFR, 150-200 words', B1:'intermediate level, B1 CEFR, 200-280 words', B2:'upper-intermediate, B2 CEFR, 300-380 words', C1:'advanced, C1 CEFR, complex sentences, 380-450 words'};
-    try {
-      if (!anthropicKey) { alert('請先輸入 Gemini API Key'); document.getElementById('gen-btn').disabled = false; document.getElementById('gen-icon').textContent = '✨'; document.getElementById('gen-label').textContent = '生成文章'; return; }
-      const prompt = `Write an English graded reading article about "${topic}" at ${levelDesc[level]}. Return ONLY valid JSON with these exact fields: {"title": "English title", "titleZh": "中文標題", "content": "article text here"}. No markdown, no backticks, just raw JSON.`;
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': anthropicKey },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.8, maxOutputTokens: 1000 }
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message + ' (code: ' + data.error.code + ')');
-      const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
-      const parsed = JSON.parse(text);
-      const newArt = {
-        id: 'gen_' + Date.now(),
-        level, topic,
-        title: parsed.title,
-        titleZh: parsed.titleZh,
-        content: parsed.content,
-        date: Date.now()
-      };
-      storedArticles.unshift(newArt);
-      allArticles = [...SEED_ARTICLES, ...storedArticles];
-      localStorage.setItem('wordlens-articles', JSON.stringify(storedArticles));
-      activeLevel = level; activeTopic = topic;
-      document.querySelectorAll('#level-filter .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.level === level || (level !== 'all' && b.dataset.level === 'all')));
-      renderExplore();
-    } catch(e) {
-      alert('生成失敗：' + e.message);
-    }
-    icon.textContent = '✨'; label.textContent = '生成文章';
-    document.getElementById('gen-btn').disabled = false;
-  });
-
-  renderExplore();
-
-  // ── Full Article Translation ──
-  var fullTranslationCache = {};
-
-  async function translateFullArticle() {
-    const text = document.getElementById('article-body').innerText.trim();
-    if (!text) return;
-
-    const btn = document.getElementById('translate-all-btn');
-    const section = document.getElementById('translation-section');
-    const body = document.getElementById('translation-body');
-    const icon = document.getElementById('translate-all-icon');
-    const label = document.getElementById('translate-all-label');
-
-    // Already loaded — toggle show/hide
-    if (fullTranslationCache[text]) {
-      const visible = section.style.display !== 'none';
-      section.style.display = visible ? 'none' : 'block';
-      label.textContent = visible ? '顯示全文翻譯' : '隱藏全文翻譯';
-      return;
     }
 
-    // Loading
-    icon.textContent = '⏳';
-    label.textContent = '翻譯中...';
-    btn.disabled = true;
-    section.style.display = 'block';
-    body.innerHTML = '<div class="translation-loading">正在翻譯全文，請稍候...</div>';
-
-    try {
-      // Try Gemini first if key exists
-      if (anthropicKey) {
-        const prompt = `將以下英文文章翻譯成繁體中文，保持段落結構，只輸出翻譯結果，不要加任何說明：
-
-${text}`;
-        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': anthropicKey },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        const data = await res.json();
-        if (!data.error) {
-          const translation = data.candidates[0].content.parts[0].text.trim();
-          fullTranslationCache[text] = translation;
-          body.textContent = translation;
-          icon.textContent = '🌐';
-          label.textContent = '隱藏全文翻譯';
-          btn.classList.add('loaded');
-          btn.disabled = false;
-          return;
-        }
-      }
-      // Fallback: MyMemory paragraph by paragraph
-      const paragraphs = text.split(/\n\n+/);
-      const translated = [];
-      for (const para of paragraphs) {
-        if (!para.trim()) continue;
-        const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(para.slice(0,500)) + '&langpair=en|zh-TW');
-        const data = await res.json();
-        translated.push(data?.responseData?.translatedText || para);
-      }
-      const result = translated.join('\n\n');
-      fullTranslationCache[text] = result;
-      body.textContent = result;
-      icon.textContent = '🌐';
-      label.textContent = '隱藏全文翻譯';
-      btn.classList.add('loaded');
-    } catch(e) {
-      body.innerHTML = '<div class="translation-loading">翻譯失敗，請確認網路連線</div>';
-      icon.textContent = '🌐';
-      label.textContent = '顯示全文翻譯';
-    }
-    btn.disabled = false;
-  }
-
-  document.getElementById('translate-all-btn').addEventListener('click', translateFullArticle);
-
-
-  // ══════════════════════════════════════════
-  // ── CHAT MODULE ──
-  // ══════════════════════════════════════════
-  var chatPhase = 'select'; // 'select' | 'chat' | 'feedback'
-  var chatMode = '';
-  var chatScenario = {};
-  var chatHistory = [];
-  var showTranslations = false;
-  var chatTranslationCache = {};
-
-  const SCENARIOS = {
-    roleplay: [
-      { id:'cafe',      emoji:'☕', title:'咖啡廳點餐',     en:'Ordering at a Café',        role:'barista' },
-      { id:'hotel',     emoji:'🏨', title:'飯店 Check-in',  en:'Hotel Check-in',            role:'hotel receptionist' },
-      { id:'airport',   emoji:'✈️', title:'機場報到',       en:'Airport Check-in',          role:'airline staff' },
-      { id:'interview', emoji:'💼', title:'求職面試',       en:'Job Interview',             role:'interviewer' },
-      { id:'doctor',    emoji:'🏥', title:'看診',           en:'Doctor Appointment',     role:'doctor' },
-      { id:'shopping',  emoji:'🛍️', title:'購物',           en:'Shopping',                  role:'shop assistant' },
-    ],
-    free: [
-      { id:'travel',    emoji:'🌏', title:'旅遊',           en:'Travel & Destinations' },
-      { id:'food',      emoji:'🍽️', title:'飲食文化',       en:'Food & Culture' },
-      { id:'movie',     emoji:'🎬', title:'電影與音樂',     en:'Movies & Music' },
-      { id:'life',      emoji:'🌱', title:'日常生活',       en:'Daily Life' },
-      { id:'tech',      emoji:'💡', title:'科技趨勢',       en:'Technology' },
-    ],
-    task: [
-      { id:'book_hotel',  emoji:'🏨', title:'訂一間飯店',      en:'Book a Hotel Room',       goal:'successfully book a hotel room with specific dates, room type, and breakfast included' },
-      { id:'report_lost', emoji:'🔍', title:'報告遺失物品',    en:'Report a Lost Item',      goal:'report a lost wallet to airport lost and found with full details' },
-      { id:'complain',    emoji:'😤', title:'客訴處理',        en:'Handle a Complaint',      goal:'get a refund or replacement for a defective product from customer service' },
-      { id:'directions',  emoji:'🗺️', title:'問路到達目的地',  en:'Ask for Directions',      goal:'get clear directions to a museum and confirm arrival time' },
-    ]
-  };
-
-  const LEVEL_PROMPTS = {
-    A1: 'Use very simple English, short sentences, basic vocabulary only. Speak slowly and clearly.',
-    A2: 'Use simple English with common words. Keep sentences short.',
-    B1: 'Use intermediate English. Some complexity is fine.',
-    B2: 'Use natural English at upper-intermediate level.',
-    C1: 'Use advanced, natural English with varied vocabulary and complex structures.'
-  };
-
-  function renderChatHome() {
-    const home = document.getElementById('chat-home');
-    home.style.display = 'flex';
-    home.style.flexDirection = 'column';
-    home.style.gap = '12px';
-    document.getElementById('chat-screen').style.display = 'none';
-    document.getElementById('chat-feedback').style.display = 'none';
-    chatPhase = 'select';
-
-    home.innerHTML = '<div style="font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);letter-spacing:0.05em;text-transform:uppercase;">選擇練習模式</div>' +
-      [
-        { mode:'roleplay', icon:'🎭', title:'角色情境對話',   desc:'AI扮演咖啡師、面試官等角色，在真實情境中練習對話' },
-        { mode:'free',     icon:'💬', title:'自由對話練習',   desc:'選擇主題自由聊天，AI會配合你的程度調整，自然練習' },
-        { mode:'task',     icon:'🎯', title:'任務達成挑戰',   desc:'有明確目標要完成（如訂飯店），對話結束評估是否成功' },
-      ].map(m => `
-        <div class="mode-card" data-mode="${m.mode}">
-          <div class="mode-icon">${m.icon}</div>
-          <div>
-            <div class="mode-title">${m.title}</div>
-            <div class="mode-desc">${m.desc}</div>
-          </div>
-        </div>
-      `).join('');
-
-    home.querySelectorAll('.mode-card').forEach(card => {
-      card.addEventListener('click', () => showScenarioSelect(card.dataset.mode));
-    });
-  }
-
-  function showScenarioSelect(mode) {
-    chatMode = mode;
-    const home = document.getElementById('chat-home');
-    const list = SCENARIOS[mode];
-    const modeLabels = { roleplay:'角色情境對話', free:'自由對話練習', task:'任務達成挑戰' };
-
-    home.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px;">
-        <button id="back-to-modes" style="background:transparent;border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);cursor:pointer;">← 返回</button>
-        <div style="font-family:Noto Sans TC,sans-serif;font-size:0.88rem;color:var(--ink);">${modeLabels[mode]}</div>
-      </div>
-      <div style="font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);">選擇難度</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${['A1','A2','B1','B2','C1'].map(l => `<button class="filter-btn level-select-btn${l==='B1'?' active':''}" data-level="${l}">${l}</button>`).join('')}
-      </div>
-      <div style="font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);">選擇${mode==='task'?'任務':'情境'}</div>
-      <div class="scenario-grid">
-        ${list.map(s => `
-          <div class="scenario-pill" data-scenario='${JSON.stringify(s)}'>
-            <span style="font-size:1.4rem;">${s.emoji}</span>
-            <div>
-              <div style="font-weight:600;">${s.title}</div>
-              <div style="font-size:0.78rem;color:var(--ink-muted);">${s.en}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>`;
-
-    document.getElementById('back-to-modes').addEventListener('click', renderChatHome);
-    home.querySelectorAll('.level-select-btn').forEach(b => {
-      b.addEventListener('click', () => {
-        home.querySelectorAll('.level-select-btn').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
-      });
-    });
-    home.querySelectorAll('.scenario-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        const level = home.querySelector('.level-select-btn.active')?.dataset.level || 'B1';
-        const scenario = JSON.parse(pill.dataset.scenario);
-        startChat(mode, scenario, level);
-      });
-    });
-  }
-
-  async function startChat(mode, scenario, level) {
-    chatScenario = { mode, scenario, level };
-    chatHistory = [];
-    showTranslations = false;
-    chatTranslationCache = {};
-
-    document.getElementById('chat-home').style.display = 'none';
-    document.getElementById('chat-feedback').style.display = 'none';
-    const screen = document.getElementById('chat-screen');
-    screen.style.display = 'flex';
-    document.getElementById('chat-messages').innerHTML = '';
-    document.getElementById('chat-scenario-label').textContent = scenario.emoji + ' ' + scenario.title + '　' + level;
-    document.getElementById('translate-toggle-btn').classList.remove('active');
-
-    const systemPrompt = buildSystemPrompt(mode, scenario, level);
-    chatHistory.push({ role:'user', parts:[{ text: '__START__' }] });
-
-    await sendToAI(systemPrompt, true);
-  }
-
-  function buildSystemPrompt(mode, scenario, level) {
-    const lvl = LEVEL_PROMPTS[level];
-    if (mode === 'roleplay') {
-      return `You are a ${scenario.role} in a ${scenario.en} scenario. ${lvl} Keep responses to 2-3 sentences. Stay in character. If the user makes grammar mistakes, naturally model the correct form in your response without explicitly pointing it out. Start by setting the scene and greeting the user.`;
-    } else if (mode === 'free') {
-      return `You are a friendly English conversation partner discussing ${scenario.en}. ${lvl} Keep responses conversational and engaging, 2-4 sentences. Ask follow-up questions to keep the conversation going. If the user makes notable grammar mistakes, gently correct by modeling the correct form. Start with a warm greeting and an interesting opening question about the topic.`;
-    } else {
-      return `You are playing a role where the user must: "${scenario.goal}". ${lvl} Respond naturally but require the user to provide all necessary information to complete the task. Don't make it too easy — ask for details. Keep responses to 2-3 sentences. Start by setting the scene.`;
-    }
-  }
-
-  async function sendToAI(systemPrompt, isFirst) {
-    if (!anthropicKey) { addMessage('ai', '⚠️ 請先在探索頁面設定 Gemini API Key 才能使用對話功能。'); return; }
-    const typingId = showTyping();
-    try {
-      const messages = isFirst
-        ? [{ role:'user', parts:[{ text: systemPrompt + '\n\nStart the conversation now.' }] }]
-        : [{ role:'user', parts:[{ text: systemPrompt }] }, ...chatHistory];
-
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json', 'x-goog-api-key': anthropicKey },
-        body: JSON.stringify({ contents: messages, generationConfig:{ temperature:0.85, maxOutputTokens:200 } })
-      });
-      const data = await res.json();
-      removeTyping(typingId);
-      if (data.error) throw new Error(data.error.message);
-      const reply = data.candidates[0].content.parts[0].text.trim();
-      chatHistory.push({ role:'model', parts:[{ text: reply }] });
-      addMessage('ai', reply);
-    } catch(e) {
-      removeTyping(typingId);
-      addMessage('ai', '⚠️ 連線錯誤：' + e.message);
-    }
-  }
-
-  function addMessage(role, text) {
-    const msgs = document.getElementById('chat-messages');
-    const wrap = document.createElement('div');
-    wrap.className = 'msg-wrap ' + role;
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    bubble.textContent = text;
-    wrap.appendChild(bubble);
-    if (role === 'ai') {
-      const tranEl = document.createElement('div');
-      tranEl.className = 'msg-translation' + (showTranslations ? ' visible' : '');
-      tranEl.dataset.text = text;
-      if (showTranslations && !chatTranslationCache[text]) {
-        tranEl.textContent = '翻譯中...';
-        translate(text).then(t => { chatTranslationCache[text] = t; tranEl.textContent = t; });
-      } else if (chatTranslationCache[text]) {
-        tranEl.textContent = chatTranslationCache[text];
-      }
-      wrap.appendChild(tranEl);
-    }
-    msgs.appendChild(wrap);
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-
-  function showTyping() {
-    const msgs = document.getElementById('chat-messages');
-    const id = 'typing_' + Date.now();
-    const div = document.createElement('div');
-    div.id = id; div.className = 'msg-wrap ai';
-    div.innerHTML = '<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    return id;
-  }
-  function removeTyping(id) { document.getElementById(id)?.remove(); }
-
-  // Send message
-  document.getElementById('chat-send-btn').addEventListener('click', sendUserMessage);
-  document.getElementById('chat-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendUserMessage(); }
-  });
-
-  function sendUserMessage() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-    input.style.height = 'auto';
-    addMessage('user', text);
-    chatHistory.push({ role:'user', parts:[{ text }] });
-    const sys = buildSystemPrompt(chatScenario.mode, chatScenario.scenario, chatScenario.level);
-    sendToAI(sys, false);
-  }
-
-  // Auto resize textarea
-  document.getElementById('chat-input').addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-  });
-
-  // Toggle translation
-  document.getElementById('translate-toggle-btn').addEventListener('click', async () => {
-    showTranslations = !showTranslations;
-    document.getElementById('translate-toggle-btn').classList.toggle('active', showTranslations);
-    document.querySelectorAll('.msg-translation').forEach(async el => {
-      el.classList.toggle('visible', showTranslations);
-      if (showTranslations && !el.textContent) {
-        const t = el.dataset.text;
-        if (!chatTranslationCache[t]) {
-          el.textContent = '翻譯中...';
-          const result = await translate(t);
-          chatTranslationCache[t] = result;
-          el.textContent = result;
-        } else {
-          el.textContent = chatTranslationCache[t];
-        }
-      }
-    });
-  });
-
-  // End chat → get feedback
-  document.getElementById('end-chat-btn').addEventListener('click', async () => {
-    if (chatHistory.length < 3) { alert('對話太短，請多聊幾句再結束'); return; }
-    document.getElementById('chat-screen').style.display = 'none';
-    const feedback = document.getElementById('chat-feedback');
-    feedback.style.display = 'flex';
-    document.getElementById('feedback-body').innerHTML = '<div class="translation-loading">正在分析對話，請稍候...</div>';
-
-    try {
-      const convo = chatHistory.filter(m => m.parts[0].text !== '__START__')
-        .map(m => (m.role === 'user' ? 'User: ' : 'AI: ') + m.parts[0].text).join('\n');
-
-      const prompt = `Analyse this English conversation and respond ONLY in valid JSON with this structure:
-{"score": 75, "scoreLabel": "不錯", "corrections": [{"wrong": "I am go", "right": "I am going", "tip": "使用現在進行式"}], "vocab": ["suggestion 1", "suggestion 2"], "summary": "整體評語（繁體中文）"}
-Conversation:
-${convo}`;
-
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
-        body: JSON.stringify({ contents:[{ role:'user', parts:[{ text:prompt }] }], generationConfig:{temperature:0.3,maxOutputTokens:600} })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
-      const fb = JSON.parse(raw);
-      renderFeedback(fb);
-    } catch(e) {
-      document.getElementById('feedback-body').innerHTML = '<div class="translation-loading">分析失敗：' + e.message + '</div>';
-    }
-  });
-
-  function renderFeedback(fb) {
-    const corrections = (fb.corrections || []).map(c => `
-      <div class="feedback-item">
-        <span class="wrong">✗ ${c.wrong}</span> → <span class="right">✓ ${c.right}</span>
-        <div style="font-size:0.8rem;color:var(--ink-muted);margin-top:2px;">${c.tip}</div>
-      </div>`).join('') || '<div class="feedback-item">沒有發現明顯錯誤 🎉</div>';
-
-    const vocab = (fb.vocab || []).map(v => `<div class="feedback-item">💡 ${v}</div>`).join('');
-
-    document.getElementById('feedback-body').innerHTML = `
-      <div class="feedback-score">
-        <div class="feedback-score-num">${fb.score || '--'}</div>
-        <div class="feedback-score-label">${fb.scoreLabel || '分'}</div>
-      </div>
-      <div class="feedback-section">
-        <div class="feedback-section-title">整體評語</div>
-        <div style="font-family:Noto Sans TC,sans-serif;font-size:0.9rem;line-height:1.7;color:var(--ink);">${fb.summary || ''}</div>
-      </div>
-      ${fb.corrections?.length ? `<div class="feedback-section"><div class="feedback-section-title">語法修正</div>${corrections}</div>` : ''}
-      ${fb.vocab?.length ? `<div class="feedback-section"><div class="feedback-section-title">單字建議</div>${vocab}</div>` : ''}`;
-  }
-
-  document.getElementById('new-chat-btn').addEventListener('click', () => {
-    document.getElementById('chat-feedback').style.display = 'none';
-    document.getElementById('chat-home').style.display = 'flex';
-    renderChatHome();
-  });
-
-
-  // ── Daily Articles ──
-  const NEWS_PROMPTS = [
-    { topic:'World News', style:'news', titleHint:'international current event' },
-    { topic:'Business',   style:'news', titleHint:'business or economy story' },
-    { topic:'Health',     style:'magazine', titleHint:'health or wellness feature' },
-    { topic:'Lifestyle',  style:'magazine', titleHint:'lifestyle or trend story' },
-    { topic:'Tech News',  style:'news', titleHint:'technology news' },
-  ];
-
-  async function generateDailyArticle(prompt, level) {
-    const styleGuide = prompt.style === 'news'
-      ? 'Write in AP news style: strong lead sentence with who/what/when/where, inverted pyramid structure, quote one expert, end with context.'
-      : 'Write in magazine feature style: engaging opening anecdote, narrative flow, pull in the reader, end with a memorable takeaway.';
-    const p = `Write a ${level} CEFR graded reading ${prompt.style} article about a ${prompt.titleHint}. ${styleGuide} Make it feel current and real. Return ONLY valid JSON: {"title":"English headline","titleZh":"中文標題","content":"article text","style":"${prompt.style}"}. No markdown.`;
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
-      body: JSON.stringify({ contents:[{parts:[{text:p}]}], generationConfig:{temperature:0.9,maxOutputTokens:700} })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
-    return JSON.parse(raw);
-  }
-
-  var dailyCache = JSON.parse(localStorage.getItem('wordlens-daily') || 'null');
-  var todayKey = new Date().toISOString().slice(0,10);
-
-  function renderDailyArticles() {
-    const el = document.getElementById('daily-articles');
-    if (!dailyCache || dailyCache.date !== todayKey || !dailyCache.articles?.length) {
-      el.innerHTML = '<div class="vocab-empty" style="padding:20px 0 4px;">今天還沒有精選文章<br><span style="font-size:0.8rem;">設定 Gemini Key 後按「↺ 更新」生成</span></div>';
-      return;
-    }
-    el.innerHTML = dailyCache.articles.map(art => {
-      const [bg,,emoji] = TOPIC_COLORS[art.topic] || ['#f3f4f6','#374151','📄'];
-      const badgeCls = art.style === 'news' ? 'badge-news' : art.style === 'magazine' ? 'badge-magazine' : 'badge-article';
-      const badgeLabel = art.style === 'news' ? '新聞' : art.style === 'magazine' ? '雜誌' : '文章';
-      return `<div class="art-card" data-id="${art.id}">
-        <div class="art-cover" style="background:${bg};">${emoji}
-          <div class="art-level-badge" style="background:${LEVEL_COLORS[art.level]||'#ccc'};color:#1a1a1a;">${art.level}</div>
-        </div>
-        <div class="art-body">
-          <span class="art-style-badge ${badgeCls}">${badgeLabel}</span>
-          <div class="art-title-zh">${art.titleZh}</div>
-          <div class="art-preview">${art.content.slice(0,100)}...</div>
-          <div class="art-date">今日精選</div>
-        </div>
-      </div>`;
-    }).join('');
-    el.querySelectorAll('.art-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const art = dailyCache.articles.find(a => a.id === card.dataset.id);
-        if (art) loadArticle(art);
-      });
-    });
-  }
-
-  document.getElementById('daily-refresh-btn').addEventListener('click', async () => {
-    if (!anthropicKey) { alert('請先設定 Gemini API Key'); return; }
-    const btn = document.getElementById('daily-refresh-btn');
-    btn.classList.add('spinning');
-    btn.textContent = '生成中...';
-    const el = document.getElementById('daily-articles');
-    el.innerHTML = '<div class="translation-loading">正在生成今日精選文章...</div>';
-
-    try {
-      const level = 'B1';
-      const picks = NEWS_PROMPTS.sort(() => Math.random()-0.5).slice(0,3);
-      const articles = [];
-      for (const p of picks) {
-        const art = await generateDailyArticle(p, level);
-        articles.push({ ...art, id:'daily_'+Date.now()+'_'+Math.random().toString(36).slice(2), topic:p.topic, level, date:Date.now() });
-        await new Promise(r => setTimeout(r, 300));
-      }
-      dailyCache = { date: todayKey, articles };
-      localStorage.setItem('wordlens-daily', JSON.stringify(dailyCache));
-      // Also add to main article library
-      storedArticles = [...articles, ...storedArticles];
-      allArticles = [...SEED_ARTICLES, ...storedArticles];
-      localStorage.setItem('wordlens-articles', JSON.stringify(storedArticles));
-      renderDailyArticles();
-    } catch(e) {
-      el.innerHTML = '<div class="translation-loading">生成失敗：' + e.message + '</div>';
-    }
-    btn.classList.remove('spinning');
-    btn.textContent = '↺ 更新';
-  });
-
-  renderDailyArticles();
-
-
-  // ── RSS Feed Reader ──
-  const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
-  const CORSPROXY = 'https://corsproxy.io/?';
-  var activeRssFeed = document.querySelector('#rss-source-filter .filter-btn.active')?.dataset.feed || '';
-  var rssCache = {};
-
-  const FEED_META = {
-    'https://learningenglish.voanews.com/api/zmmpql-vomx-tpey-_q': { icon:'🏥', label:'Health & Lifestyle' },
-    'https://learningenglish.voanews.com/api/zmg_pl-vomx-tpeymtm': { icon:'🔬', label:'Science & Tech' },
-    'https://learningenglish.voanews.com/api/zpyp_l-vomx-tpe_rym': { icon:'🎭', label:'Arts & Culture' },
-    'https://learningenglish.voanews.com/api/zkm-ql-vomx-tpej-rqi': { icon:'📰', label:'As It Is' },
-    'https://learningenglish.voanews.com/api/zmypyl-vomx-tpeyry_': { icon:'📚', label:'Words & Stories' },
-  };
-
-  document.querySelectorAll('#rss-source-filter .filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#rss-source-filter .filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeRssFeed = btn.dataset.feed;
-      loadRssFeed(activeRssFeed);
-    });
-  });
-
-  document.getElementById('rss-refresh-btn').addEventListener('click', () => {
-    delete rssCache[activeRssFeed];
-    loadRssFeed(activeRssFeed);
-  });
-
-  async function loadRssFeed(feedUrl) {
-    if (!feedUrl) return;
-    const el = document.getElementById('rss-articles');
-    if (rssCache[feedUrl]) { renderRssItems(rssCache[feedUrl]); return; }
-    const btn = document.getElementById('rss-refresh-btn');
-    btn.classList.add('spinning'); btn.textContent = '載入中...';
-    el.innerHTML = '<div class="rss-loading">載入 VOA 文章中...</div>';
-    try {
-      const res = await fetch(RSS2JSON + encodeURIComponent(feedUrl) + '&count=8');
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if (data.status !== 'ok') throw new Error(data.message || 'RSS error');
-      const items = (data.items || []).map(item => ({
-        title: item.title || '',
-        link:  item.link || '',
-        desc:  (item.content || item.description || '').replace(/<[^>]+>/g,'').trim(),
-        date:  item.pubDate || '',
-        feed:  feedUrl,
-      }));
-      rssCache[feedUrl] = items;
-      renderRssItems(items);
-    } catch(e) {
-      el.innerHTML = '<div class="rss-loading">載入失敗，請確認網路連線</div>';
-    }
-    btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
-  }
-
-  function renderRssItems(items) {
-    const el = document.getElementById('rss-articles');
-    if (!items.length) { el.innerHTML = '<div class="rss-loading">沒有文章</div>'; return; }
-    el.innerHTML = items.map((item, i) => {
-      const meta = FEED_META[item.feed] || { icon:'📰', label:'VOA' };
-      const d = new Date(item.date);
-      const dateStr = isNaN(d) ? '' : d.toLocaleDateString('zh-TW',{month:'short',day:'numeric'});
-      return `<div class="rss-card" data-index="${i}">
-        <div class="rss-icon">${meta.icon}</div>
-        <div style="flex:1;min-width:0;">
-          <div class="rss-title">${item.title}</div>
-          <div class="rss-meta">${meta.label}${dateStr ? ' · ' + dateStr : ''}</div>
-        </div>
-      </div>`;
-    }).join('');
-    el.querySelectorAll('.rss-card').forEach(card => {
-      card.addEventListener('click', () => openRssArticle(items[parseInt(card.dataset.index)]));
-    });
-  }
-
-  async function openRssArticle(item) {
-    // Show loading in read tab immediately
-    switchTab('read');
-    document.getElementById('article-body').innerHTML = '<div class="translation-loading" style="padding:40px 0;">正在載入文章...</div>';
-    document.getElementById('word-count').textContent = 'VOA Learning English';
-    document.getElementById('translation-section').style.display = 'none';
-
-    try {
-      // Fetch full article via CORS proxy
-      const res = await fetch(CORSPROXY + encodeURIComponent(item.link), { signal: AbortSignal.timeout(6000) });
-      const raw = await res.text();
-      const doc = new DOMParser().parseFromString(raw, 'text/html');
-
-      // Extract article body text from VOA article page
-      let text = '';
-      const selectors = ['.article-content', '.wsw', '.intro', 'article p', '.story-content'];
-      for (const sel of selectors) {
-        const els = doc.querySelectorAll(sel + ' p, ' + sel);
-        if (els.length) {
-          text = Array.from(els).map(e => e.textContent.trim()).filter(t => t.length > 40).join('\n\n');
-          if (text.length > 200) break;
-        }
-      }
-
-      // Fallback to RSS description
-      if (text.length < 100) text = item.desc;
-
-      if (!text || text.length < 50) {
-        document.getElementById('article-body').innerHTML = '<div class="translation-loading">無法取得文章內容，請直接前往 VOA 網站閱讀。</div>';
+    document.getElementById('start-btn').addEventListener('click', () => {
+      const text = document.getElementById('article-input').value.trim();
+      if (!text) {
+        alert('請先貼上文章');
         return;
       }
 
       renderArticle(text);
-      document.getElementById('word-count').textContent = item.title.slice(0,30) + (item.title.length>30?'...':'') + '　B1';
-    } catch(e) {
-      // Fallback to description only
-      if (item.desc && item.desc.length > 50) {
-        renderArticle(item.desc);
-      } else {
-        document.getElementById('article-body').innerHTML = '<div class="translation-loading">載入失敗：' + e.message + '</div>';
+      switchTab('read');
+    });
+
+    async function translateText(text) {
+      const key = text.toLowerCase();
+      if (translationCache[key]) return translationCache[key];
+
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const result = data?.[0]?.map(item => item[0]).join('') || '翻譯失敗';
+        translationCache[key] = result;
+        return result;
+      } catch (error) {
+        return '翻譯失敗，請確認網路連線';
       }
     }
-  }
 
-  // ── PWA Service Worker ──
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
-</script>
+    async function fetchDictionary(word) {
+      const key = word.toLowerCase();
+      if (dictCache[key]) return dictCache[key];
 
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(key)}`);
+        if (!res.ok) return null;
+
+        const data = await res.json();
+        const entry = data[0];
+        const result = {
+          phonetic: entry.phonetic || entry.phonetics?.find(item => item.text)?.text || ''
+        };
+
+        dictCache[key] = result;
+        return result;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    async function showPopup(word, el) {
+      currentWord = word;
+      currentWordEl = el;
+      currentTranslation = '';
+
+      document.getElementById('popup-word').textContent = word;
+      document.getElementById('popup-translation').textContent = '翻譯中...';
+      document.getElementById('popup-phonetic').textContent = '';
+
+      const overlay = document.getElementById('popup-overlay');
+      const popup = document.getElementById('popup');
+      const rect = el.getBoundingClientRect();
+      const margin = 12;
+
+      let left = rect.left;
+      let top = rect.bottom + margin;
+
+      if (left + 330 > window.innerWidth) left = window.innerWidth - 330 - margin;
+      if (left < margin) left = margin;
+      if (top + 220 > window.innerHeight) top = rect.top - 220 - margin;
+
+      popup.style.left = left + 'px';
+      popup.style.top = Math.max(margin, top) + 'px';
+      overlay.classList.add('active');
+
+      const [translation, dict] = await Promise.all([
+        translateText(word),
+        fetchDictionary(word)
+      ]);
+
+      currentTranslation = translation;
+      document.getElementById('popup-translation').textContent = translation;
+      document.getElementById('popup-phonetic').textContent = dict?.phonetic || '';
+
+      const inVocab = vocab.some(item => item.en.toLowerCase() === word.toLowerCase());
+      const inLibrary = library.some(item => item.en.toLowerCase() === word.toLowerCase());
+
+      document.getElementById('popup-save').textContent = inVocab ? '✓ 已在單字本' : '＋ 單字本';
+      document.getElementById('popup-lib-save').textContent = inLibrary ? '✓ 已在單字庫' : '＋ 單字庫';
+    }
+
+    function hidePopup() {
+      document.getElementById('popup-overlay').classList.remove('active');
+    }
+
+    document.getElementById('popup-overlay').addEventListener('click', hidePopup);
+    document.getElementById('popup').addEventListener('click', event => event.stopPropagation());
+    document.getElementById('popup-close').addEventListener('click', hidePopup);
+
+    document.getElementById('popup-speak').addEventListener('click', () => {
+      speakText(currentWord);
+    });
+
+    document.getElementById('popup-save').addEventListener('click', () => {
+      if (!currentWord || !currentTranslation) return;
+
+      const exists = vocab.some(item => item.en.toLowerCase() === currentWord.toLowerCase());
+      if (!exists) {
+        vocab.unshift({ en: currentWord, zh: currentTranslation });
+        localStorage.setItem('wordlens-vocab', JSON.stringify(vocab));
+        currentWordEl?.classList.add('looked-up');
+      }
+
+      document.getElementById('popup-save').textContent = '✓ 已在單字本';
+    });
+
+    document.getElementById('popup-lib-save').addEventListener('click', () => {
+      if (!currentWord || !currentTranslation) return;
+
+      const exists = library.some(item => item.en.toLowerCase() === currentWord.toLowerCase());
+      if (!exists) {
+        library.unshift({ en: currentWord, zh: currentTranslation });
+        localStorage.setItem('wordlens-library', JSON.stringify(library));
+      }
+
+      document.getElementById('popup-lib-save').textContent = '✓ 已在單字庫';
+    });
+
+    function renderVocab() {
+      const list = document.getElementById('vocab-list');
+      const count = document.getElementById('vocab-count');
+
+      if (vocab.length === 0) {
+        count.textContent = '';
+        list.innerHTML = '<div class="empty">單字本是空的<br>閱讀時點單字並儲存</div>';
+        return;
+      }
+
+      count.textContent = `已收錄 ${vocab.length} 個單字`;
+      list.innerHTML = vocab.map((item, index) => `
+        <div class="vocab-card">
+          <div>
+            <div class="vocab-en">${item.en}</div>
+            <div class="vocab-zh">${item.zh}</div>
+          </div>
+          <button class="delete-btn" data-index="${index}">✕</button>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          vocab.splice(Number(btn.dataset.index), 1);
+          localStorage.setItem('wordlens-vocab', JSON.stringify(vocab));
+          renderVocab();
+        });
+      });
+    }
+
+    function renderLibrary() {
+      const list = document.getElementById('library-list');
+      const count = document.getElementById('library-count');
+
+      if (library.length === 0) {
+        count.textContent = '';
+        list.innerHTML = '<div class="empty">單字庫是空的<br>可從閱讀彈窗加入單字庫</div>';
+        return;
+      }
+
+      count.textContent = `單字庫共 ${library.length} 個單字`;
+      list.innerHTML = library.map((item, index) => `
+        <div class="vocab-card">
+          <div>
+            <div class="vocab-en">${item.en}</div>
+            <div class="vocab-zh">${item.zh}</div>
+          </div>
+          <button class="delete-btn" data-index="${index}">✕</button>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          library.splice(Number(btn.dataset.index), 1);
+          localStorage.setItem('wordlens-library', JSON.stringify(library));
+          renderLibrary();
+        });
+      });
+    }
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const data = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        vocab,
+        library
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'wordlens-backup.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('import-input').addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const data = JSON.parse(e.target.result);
+
+          if (Array.isArray(data.vocab)) {
+            vocab = data.vocab;
+            localStorage.setItem('wordlens-vocab', JSON.stringify(vocab));
+          }
+
+          if (Array.isArray(data.library)) {
+            library = data.library;
+            localStorage.setItem('wordlens-library', JSON.stringify(library));
+          }
+
+          renderLibrary();
+          alert('匯入成功');
+        } catch (error) {
+          alert('檔案格式錯誤');
+        }
+      };
+
+      reader.readAsText(file);
+      event.target.value = '';
+    });
+
+    function speakText(text) {
+      if (!window.speechSynthesis) {
+        alert('你的瀏覽器不支援語音功能');
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = Number(document.getElementById('speech-rate').value || 0.9);
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopReadAloud() {
+      window.speechSynthesis?.cancel();
+      isReading = false;
+      currentUtterance = null;
+
+      document.getElementById('read-aloud-btn').textContent = '🔊 朗讀全文';
+      document.querySelectorAll('.word-speaking, .word-read').forEach(el => {
+        el.classList.remove('word-speaking', 'word-read');
+      });
+    }
+
+    function highlightWordAt(charIndex) {
+      const words = Array.from(document.querySelectorAll('#article-body .word[data-start]'));
+      let activeWord = null;
+
+      words.forEach(word => {
+        const start = Number(word.dataset.start);
+        if (start <= charIndex) activeWord = word;
+      });
+
+      words.forEach(word => {
+        word.classList.remove('word-speaking');
+        if (activeWord && Number(word.dataset.start) < Number(activeWord.dataset.start)) {
+          word.classList.add('word-read');
+        }
+      });
+
+      if (activeWord) {
+        activeWord.classList.add('word-speaking');
+        activeWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    document.getElementById('read-aloud-btn').addEventListener('click', () => {
+      if (isReading) {
+        stopReadAloud();
+        return;
+      }
+
+      const text = document.getElementById('article-body').innerText.trim();
+      if (!text) return;
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = Number(document.getElementById('speech-rate').value || 0.9);
+
+      utterance.onboundary = event => {
+        if (event.name === 'word') highlightWordAt(event.charIndex);
+      };
+
+      utterance.onend = stopReadAloud;
+      utterance.onerror = stopReadAloud;
+
+      currentUtterance = utterance;
+      isReading = true;
+      document.getElementById('read-aloud-btn').textContent = '⏹ 停止朗讀';
+      window.speechSynthesis.speak(utterance);
+    });
+
+    document.getElementById('translate-all-btn').addEventListener('click', async () => {
+      const section = document.getElementById('translation-section');
+      const body = document.getElementById('translation-body');
+      const btn = document.getElementById('translate-all-btn');
+
+      if (section.style.display !== 'none') {
+        section.style.display = 'none';
+        btn.textContent = '🌐 顯示全文翻譯';
+        return;
+      }
+
+      section.style.display = 'block';
+      body.textContent = '翻譯中...';
+      btn.textContent = '🌐 隱藏全文翻譯';
+
+      const text = document.getElementById('article-body').innerText.trim();
+      const result = await translateText(text);
+      body.textContent = result;
+    });
+
+    let geminiKey = localStorage.getItem('wordlens-gemini-key') || '';
+
+    function updateApiKeyUI() {
+      const row = document.getElementById('api-key-row');
+      const status = document.getElementById('api-key-status');
+
+      if (geminiKey) {
+        row.style.display = 'none';
+        status.innerHTML = '✓ API Key 已儲存　<span id="clear-key" style="text-decoration:underline;cursor:pointer;">清除</span>';
+        document.getElementById('clear-key').addEventListener('click', () => {
+          geminiKey = '';
+          localStorage.removeItem('wordlens-gemini-key');
+          updateApiKeyUI();
+        });
+      } else {
+        row.style.display = 'flex';
+        status.textContent = '請先到 Google AI Studio 建立 Gemini API Key。';
+      }
+    }
+
+    document.getElementById('api-key-save').addEventListener('click', () => {
+      const value = document.getElementById('api-key-input').value.trim();
+
+      if (!value.startsWith('AIza')) {
+        alert('Gemini API Key 通常是 AIza 開頭');
+        return;
+      }
+
+      geminiKey = value;
+      localStorage.setItem('wordlens-gemini-key', value);
+      updateApiKeyUI();
+    });
+
+    document.getElementById('gen-btn').addEventListener('click', async () => {
+      if (!geminiKey) {
+        alert('請先輸入 Gemini API Key');
+        return;
+      }
+
+      const level = document.getElementById('gen-level').value;
+      const topic = document.getElementById('gen-topic').value;
+      const btn = document.getElementById('gen-btn');
+
+      btn.disabled = true;
+      btn.textContent = '生成中...';
+
+      try {
+        const levelDesc = {
+          A1: 'very simple English, under 120 words',
+          A2: 'simple English, 150 words',
+          B1: 'intermediate English, 220 words',
+          B2: 'upper-intermediate English, 320 words',
+          C1: 'advanced English, 420 words'
+        };
+
+        const prompt = `Write an English graded reading article about "${topic}" at ${levelDesc[level]}. Return only valid JSON: {"title":"English title","titleZh":"中文標題","content":"article content"}.`;
+
+        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': geminiKey
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.8, maxOutputTokens: 1200 }
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+
+        const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(raw);
+
+        const article = {
+          id: 'gen_' + Date.now(),
+          level,
+          topic,
+          icon: '✨',
+          title: parsed.title,
+          titleZh: parsed.titleZh,
+          content: parsed.content
+        };
+
+        storedArticles.unshift(article);
+        allArticles = [...storedArticles, ...SEED_ARTICLES];
+        localStorage.setItem('wordlens-articles', JSON.stringify(storedArticles));
+        renderExplore();
+        loadArticle(article);
+      } catch (error) {
+        alert('生成失敗：' + error.message);
+      }
+
+      btn.disabled = false;
+      btn.textContent = '生成文章';
+    });
+
+    const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+    const CORS_PROXY = 'https://corsproxy.io/?';
+    let activeRssFeed = document.querySelector('#rss-source-filter .filter-btn.active').dataset.feed;
+
+    document.querySelectorAll('#rss-source-filter .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#rss-source-filter .filter-btn').forEach(item => item.classList.remove('active'));
+        btn.classList.add('active');
+        activeRssFeed = btn.dataset.feed;
+        loadRssFeed();
+      });
+    });
+
+    document.getElementById('rss-refresh-btn').addEventListener('click', loadRssFeed);
+
+    async function loadRssFeed() {
+      const container = document.getElementById('rss-articles');
+      const btn = document.getElementById('rss-refresh-btn');
+
+      btn.textContent = '載入中...';
+      container.innerHTML = '<div class="loading">載入 VOA 文章中...</div>';
+
+      try {
+        const res = await fetch(RSS2JSON + encodeURIComponent(activeRssFeed) + '&count=8');
+        const data = await res.json();
+
+        if (data.status !== 'ok') throw new Error(data.message || 'RSS 載入失敗');
+
+        const items = (data.items || []).map(item => ({
+          title: item.title || '',
+          link: item.link || '',
+          date: item.pubDate || '',
+          desc: (item.content || item.description || '').replace(/<[^>]*>/g, '').trim()
+        }));
+
+        renderRssItems(items);
+      } catch (error) {
+        container.innerHTML = '<div class="loading">載入失敗，可能是 RSS 或 CORS 限制。可以使用「貼上自己的文章」功能。</div>';
+      }
+
+      btn.textContent = '↺ 載入';
+    }
+
+    function renderRssItems(items) {
+      const container = document.getElementById('rss-articles');
+
+      if (items.length === 0) {
+        container.innerHTML = '<div class="loading">沒有文章</div>';
+        return;
+      }
+
+      container.innerHTML = items.map((item, index) => `
+        <div class="rss-card" data-index="${index}">
+          <div class="rss-icon">📡</div>
+          <div>
+            <div class="rss-title">${item.title}</div>
+            <div class="rss-meta">${item.date ? new Date(item.date).toLocaleDateString('zh-TW') : 'VOA Learning English'}</div>
+          </div>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('.rss-card').forEach(card => {
+        card.addEventListener('click', () => openRssArticle(items[Number(card.dataset.index)]));
+      });
+    }
+
+    async function openRssArticle(item) {
+      switchTab('read');
+      document.getElementById('article-body').innerHTML = '<div class="loading">正在載入文章...</div>';
+      document.getElementById('word-count').textContent = 'VOA Learning English';
+
+      try {
+        const res = await fetch(CORS_PROXY + encodeURIComponent(item.link), {
+          signal: AbortSignal.timeout(7000)
+        });
+
+        const raw = await res.text();
+        const doc = new DOMParser().parseFromString(raw, 'text/html');
+        const paragraphs = Array.from(doc.querySelectorAll('article p, .wsw p, .article-content p, p'))
+          .map(p => p.textContent.trim())
+          .filter(text => text.length > 45);
+
+        let text = paragraphs.join('\n\n');
+
+        if (text.length < 100) text = item.desc;
+
+        if (!text || text.length < 50) {
+          throw new Error('文章內容不足');
+        }
+
+        renderArticle(text);
+        document.getElementById('word-count').textContent = item.title.slice(0, 28) + (item.title.length > 28 ? '...' : '') + '　B1';
+      } catch (error) {
+        if (item.desc && item.desc.length > 50) {
+          renderArticle(item.desc);
+        } else {
+          document.getElementById('article-body').innerHTML = '<div class="loading">無法取得全文，請改用貼上文章功能。</div>';
+        }
+      }
+    }
+
+    document.getElementById('chat-send-btn').addEventListener('click', sendChatMessage);
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      const messages = document.getElementById('chat-messages');
+
+      if (!text) return;
+
+      messages.innerHTML += `<div class="card" style="align-self:flex-end;background:#f5e6dc;">${escapeHtml(text)}</div>`;
+      input.value = '';
+
+      if (!geminiKey) {
+        messages.innerHTML += `<div class="card">請先在探索頁設定 Gemini API Key。</div>`;
+        return;
+      }
+
+      messages.innerHTML += `<div class="card" id="chat-loading">回覆中...</div>`;
+
+      try {
+        const prompt = `You are an English practice partner. Reply in simple English and correct the user's sentence gently if needed. User says: ${text}`;
+
+        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': geminiKey
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.8, maxOutputTokens: 300 }
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+
+        const reply = data.candidates[0].content.parts[0].text.trim();
+        document.getElementById('chat-loading').remove();
+        messages.innerHTML += `<div class="card">${escapeHtml(reply)}</div>`;
+      } catch (error) {
+        document.getElementById('chat-loading')?.remove();
+        messages.innerHTML += `<div class="card">連線失敗：${escapeHtml(error.message)}</div>`;
+      }
+
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    renderExplore();
+    renderVocab();
+    renderLibrary();
+    updateApiKeyUI();
+    loadRssFeed();
+  </script>
 </body>
 </html>
