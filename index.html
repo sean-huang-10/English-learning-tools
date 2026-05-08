@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
@@ -900,6 +901,7 @@
       animation: savePulse 0.3s ease;
     }
   </style>
+
 </head>
 <body>
 
@@ -928,6 +930,7 @@
   </div>
 
   <!-- Read View -->
+
   <div id="read-view">
     <div class="article-header">
       <button class="back-btn" id="back-btn">← 返回</button>
@@ -962,12 +965,14 @@
   </div>
 
   <!-- Vocab View -->
+
   <div id="vocab-view">
     <div class="vocab-count" id="vocab-count"></div>
     <div id="vocab-list"></div>
   </div>
 
   <!-- Library View -->
+
   <div id="library-view">
     <div class="library-header">
       <div class="vocab-count" id="library-count"></div>
@@ -982,36 +987,40 @@
     </div>
     <div id="library-list"></div>
 
-    <!-- Flashcard overlay -->
-    <div id="flashcard-overlay" style="display:none;">
-      <div class="flashcard-wrap">
-        <div class="flashcard-progress">
-          <div class="flashcard-progress-bar" id="fc-progress-bar"></div>
-        </div>
-        <div id="flashcard" class="flashcard">
-          <div class="fc-front">
-            <div class="fc-word" id="fc-word"></div>
-            <div class="fc-phonetic" id="fc-phonetic"></div>
-            <div class="fc-tap-hint">點擊翻面</div>
-          </div>
-          <div class="fc-back" id="fc-back" style="display:none;">
-            <div class="fc-word" id="fc-word-back"></div>
-            <div class="fc-pos" id="fc-pos"></div>
-            <div class="fc-translation" id="fc-translation"></div>
-            <div class="fc-example" id="fc-example"></div>
-          </div>
-        </div>
-        <div class="fc-btn-row" id="fc-btn-row" style="display:none;">
-          <button class="fc-btn fc-wrong" id="fc-wrong">✗ 不熟</button>
-          <button class="fc-btn fc-right" id="fc-right">✓ 認識</button>
-        </div>
-        <button class="fc-close" id="fc-close">✕ 結束複習</button>
+```
+<!-- Flashcard overlay -->
+<div id="flashcard-overlay" style="display:none;">
+  <div class="flashcard-wrap">
+    <div class="flashcard-progress">
+      <div class="flashcard-progress-bar" id="fc-progress-bar"></div>
+    </div>
+    <div id="flashcard" class="flashcard">
+      <div class="fc-front">
+        <div class="fc-word" id="fc-word"></div>
+        <div class="fc-phonetic" id="fc-phonetic"></div>
+        <div class="fc-tap-hint">點擊翻面</div>
+      </div>
+      <div class="fc-back" id="fc-back" style="display:none;">
+        <div class="fc-word" id="fc-word-back"></div>
+        <div class="fc-pos" id="fc-pos"></div>
+        <div class="fc-translation" id="fc-translation"></div>
+        <div class="fc-example" id="fc-example"></div>
       </div>
     </div>
+    <div class="fc-btn-row" id="fc-btn-row" style="display:none;">
+      <button class="fc-btn fc-wrong" id="fc-wrong">✗ 不熟</button>
+      <button class="fc-btn fc-right" id="fc-right">✓ 認識</button>
+    </div>
+    <button class="fc-close" id="fc-close">✕ 結束複習</button>
+  </div>
+</div>
+```
+
   </div>
 </main>
 
 <!-- Popup -->
+
 <div id="popup-overlay">
   <div id="popup">
     <div class="popup-header">
@@ -1462,10 +1471,11 @@ Scientists have discovered that trees communicate through these underground netw
 
   function pauseReadAloud() {
     if (!isReadingAloud || isPaused) return;
+    isRestarting = true;
     window.speechSynthesis.cancel();
+    setTimeout(() => { isRestarting = false; }, 100);
     isPaused = true;
     isReadingAloud = false;
-    // keep currentCharIndex at last word boundary
     setReadAloudUI('paused');
   }
 
@@ -1805,5 +1815,6 @@ Scientists have discovered that trees communicate through these underground netw
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 </script>
+
 </body>
 </html>
