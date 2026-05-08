@@ -170,6 +170,69 @@
     }
     .back-btn:active { background: var(--border); }
  
+    .speed-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+    .speed-label {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      white-space: nowrap;
+    }
+    .speed-slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .speed-value {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 36px;
+      text-align: right;
+    }
+    .custom-slider {
+      flex: 1;
+      padding: 10px 0;
+      cursor: pointer;
+      touch-action: none;
+    }
+    .custom-track {
+      position: relative;
+      height: 4px;
+      background: #e8e2d8;
+      border-radius: 2px;
+    }
+    .custom-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      background: #c0622f;
+      border-radius: 2px;
+      width: 56%;
+      pointer-events: none;
+    }
+    .custom-thumb {
+      position: absolute;
+      top: 50%;
+      left: 56%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #c0622f;
+      box-shadow: 0 2px 8px rgba(192,98,47,0.4);
+      pointer-events: none;
+    }
+    .custom-thumb.dragging { transform: translate(-50%, -50%) scale(1.2); }
+ 
     .read-aloud-btn {
       width: 100%;
       background: var(--surface);
@@ -288,13 +351,13 @@
     #popup-overlay {
       position: fixed;
       inset: 0;
-      z-index: 100;
+      z-index: 300;
       pointer-events: none;
     }
     #popup-overlay.active { pointer-events: all; }
  
     #popup {
-      position: fixed;
+      position: absolute;
       background: var(--popup-bg);
       color: var(--popup-text);
       border-radius: 16px;
@@ -305,7 +368,6 @@
       opacity: 0;
       transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
-      z-index: 200;
       overflow: hidden;
     }
     #popup.show {
@@ -408,14 +470,7 @@
       background: #4a7c59;
     }
  
-    /* ── Backdrop ── */
-    #backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 150;
-      display: none;
-    }
-    #backdrop.active { display: block; }
+ 
   </style>
 </head>
 <body>
@@ -450,6 +505,18 @@
       <span>👆</span>
       <span>點任何單字查看翻譯</span>
     </div>
+    <div class="speed-bar">
+      <span class="speed-label">語速</span>
+      <div class="speed-slider-wrap">
+        <div class="custom-slider" id="speed-slider">
+          <div class="custom-track">
+            <div class="custom-fill" id="speed-fill"></div>
+            <div class="custom-thumb" id="speed-thumb"></div>
+          </div>
+        </div>
+        <span class="speed-value" id="speed-value">0.9x</span>
+      </div>
+    </div>
     <button class="read-aloud-btn" id="read-aloud-btn">
       <span id="read-aloud-icon">🔊</span>
       <span id="read-aloud-label">朗讀全文</span>
@@ -463,9 +530,6 @@
     <div id="vocab-list"></div>
   </div>
 </main>
- 
-<!-- Backdrop -->
-<div id="backdrop"></div>
  
 <!-- Popup -->
 <div id="popup-overlay">
@@ -592,7 +656,7 @@ Scientists have discovered that trees communicate through these underground netw
  
   // ── Popup ──
   const popup = document.getElementById('popup');
-  const backdrop = document.getElementById('backdrop');
+  const overlay = document.getElementById('popup-overlay');
  
   function showPopup(word, el) {
     currentWord = word;
@@ -627,7 +691,7 @@ Scientists have discovered that trees communicate through these underground netw
     popupEl.style.width = popupW + 'px';
  
     popup.classList.add('show');
-    backdrop.classList.add('active');
+    overlay.classList.add('active');
  
     translate(word).then(result => {
       currentTranslation = result;
@@ -638,18 +702,99 @@ Scientists have discovered that trees communicate through these underground netw
  
   function hidePopup() {
     popup.classList.remove('show');
-    backdrop.classList.remove('active');
+    overlay.classList.remove('active');
   }
  
-  backdrop.addEventListener('click', hidePopup);
-  document.getElementById('popup-close').addEventListener('click', hidePopup);
+  overlay.addEventListener('click', hidePopup);
+  document.getElementById('popup-close').addEventListener('click', (e) => { e.stopPropagation(); hidePopup(); });
+  document.getElementById('popup').addEventListener('click', (e) => e.stopPropagation());
+ 
+  // ── Speech Rate ──
+  var speechRate = 0.9;
+  var isReadingAloud = false;
+  var articleText = '';
+  var currentCharIndex = 0;
+  const sliderEl   = document.getElementById('speed-slider');
+  const fillEl     = document.getElementById('speed-fill');
+  const thumbEl    = document.getElementById('speed-thumb');
+  const speedLabel = document.getElementById('speed-value');
+  const MIN = 0.1, MAX = 1.5, STEP = 0.1;
+ 
+  function setRate(pct) {
+    pct = Math.max(0, Math.min(1, pct));
+    const raw = MIN + pct * (MAX - MIN);
+    speechRate = Math.round(raw / STEP) * STEP;
+    speechRate = Math.round(speechRate * 10) / 10;
+    const dp = (speechRate - MIN) / (MAX - MIN) * 100;
+    fillEl.style.width = dp + '%';
+    thumbEl.style.left = dp + '%';
+    speedLabel.textContent = speechRate.toFixed(1) + 'x';
+    // 朗讀中：取消後從目前位置以新語速重新開始
+    if (isReadingAloud) {
+      startSpeakingFrom(currentCharIndex);
+    }
+  }
+ 
+  function pctFromEvent(e) {
+    const rect = sliderEl.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return (clientX - rect.left) / rect.width;
+  }
+ 
+  sliderEl.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    thumbEl.classList.add('dragging');
+    setRate(pctFromEvent(e));
+  }, { passive: false });
+ 
+  sliderEl.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    setRate(pctFromEvent(e));
+  }, { passive: false });
+ 
+  sliderEl.addEventListener('touchend', () => thumbEl.classList.remove('dragging'));
+ 
+  sliderEl.addEventListener('mousedown', (e) => {
+    thumbEl.classList.add('dragging');
+    setRate(pctFromEvent(e));
+    const onMove = (e) => setRate(pctFromEvent(e));
+    const onUp = () => {
+      thumbEl.classList.remove('dragging');
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+ 
+  setRate((0.9 - MIN) / (MAX - MIN));
  
   // ── Read Aloud ──
-  let isReadingAloud = false;
+ 
+  function startSpeakingFrom(charIndex) {
+    window.speechSynthesis.cancel();
+    const textToSpeak = articleText.slice(charIndex);
+    if (!textToSpeak.trim()) { stopReadAloud(); return; }
+    const utter = new SpeechSynthesisUtterance(textToSpeak);
+    utter.lang = 'en-US';
+    utter.rate = speechRate;
+    utter.onboundary = (e) => {
+      if (e.name === 'word') currentCharIndex = charIndex + e.charIndex;
+    };
+    utter.onend = (e) => {
+      // only stop if it finished naturally (not cancelled for rate change)
+      if (isReadingAloud) stopReadAloud();
+    };
+    utter.onerror = (e) => {
+      if (e.error !== 'interrupted' && isReadingAloud) stopReadAloud();
+    };
+    setTimeout(() => window.speechSynthesis.speak(utter), 50);
+  }
  
   function stopReadAloud() {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
     isReadingAloud = false;
+    currentCharIndex = 0;
     const btn = document.getElementById('read-aloud-btn');
     btn.classList.remove('playing');
     document.getElementById('read-aloud-icon').textContent = '🔊';
@@ -658,23 +803,16 @@ Scientists have discovered that trees communicate through these underground netw
  
   document.getElementById('read-aloud-btn').addEventListener('click', () => {
     if (!window.speechSynthesis) { alert('你的瀏覽器不支援語音功能'); return; }
-    if (isReadingAloud) {
-      stopReadAloud();
-      return;
-    }
-    const text = document.getElementById('article-body').innerText;
-    if (!text.trim()) return;
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'en-US';
-    utter.rate = 0.88;
+    if (isReadingAloud) { stopReadAloud(); return; }
+    articleText = document.getElementById('article-body').innerText;
+    if (!articleText.trim()) return;
     isReadingAloud = true;
+    currentCharIndex = 0;
     const btn = document.getElementById('read-aloud-btn');
     btn.classList.add('playing');
     document.getElementById('read-aloud-icon').textContent = '⏹';
     document.getElementById('read-aloud-label').textContent = '停止朗讀';
-    utter.onend = stopReadAloud;
-    utter.onerror = stopReadAloud;
-    window.speechSynthesis.speak(utter);
+    startSpeakingFrom(0);
   });
  
   // ── Speak single word ──
@@ -683,15 +821,19 @@ Scientists have discovered that trees communicate through these underground netw
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(word);
     utter.lang = 'en-US';
-    utter.rate = 0.85;
+    utter.rate = speechRate;
     const speakBtn = document.getElementById('popup-speak');
     speakBtn.classList.add('speaking');
     utter.onend = () => speakBtn.classList.remove('speaking');
     utter.onerror = () => speakBtn.classList.remove('speaking');
-    window.speechSynthesis.speak(utter);
+    // iOS Safari needs a tiny delay after cancel()
+    setTimeout(() => window.speechSynthesis.speak(utter), 50);
   }
  
-  document.getElementById('popup-speak').addEventListener('click', () => speak(currentWord));
+  document.getElementById('popup-speak').addEventListener('click', (e) => {
+    e.stopPropagation(); // 防止冒泡觸發 backdrop 關閉
+    speak(currentWord);
+  });
  
   // ── Save to vocab ──
   document.getElementById('popup-save').addEventListener('click', () => {
