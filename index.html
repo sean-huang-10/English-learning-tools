@@ -170,6 +170,37 @@
     }
     .back-btn:active { background: var(--border); }
  
+    .read-aloud-btn {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 18px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.95rem;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .read-aloud-btn:active { opacity: 0.8; }
+    .read-aloud-btn.playing {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .read-aloud-btn.playing #read-aloud-icon {
+      animation: pulse-speak 0.55s ease-in-out infinite alternate;
+      display: inline-block;
+    }
+    @keyframes icon-pulse {
+      from { transform: scale(1); }
+      to   { transform: scale(1.2); }
+    }
+ 
     .hint-bar {
       background: var(--accent-light);
       border: 1px solid #e8c4a8;
@@ -419,6 +450,10 @@
       <span>👆</span>
       <span>點任何單字查看翻譯</span>
     </div>
+    <button class="read-aloud-btn" id="read-aloud-btn">
+      <span id="read-aloud-icon">🔊</span>
+      <span id="read-aloud-label">朗讀全文</span>
+    </button>
     <div id="article-body"></div>
   </div>
  
@@ -488,7 +523,10 @@ Scientists have discovered that trees communicate through these underground netw
     switchTab('read');
   });
  
-  document.getElementById('back-btn').addEventListener('click', () => switchTab('input'));
+  document.getElementById('back-btn').addEventListener('click', () => {
+    stopReadAloud();
+    switchTab('input');
+  });
  
   // ── Render article with clickable words ──
   function renderArticle(text) {
@@ -591,9 +629,6 @@ Scientists have discovered that trees communicate through these underground netw
     popup.classList.add('show');
     backdrop.classList.add('active');
  
-    // Auto-speak the word
-    speak(word);
- 
     translate(word).then(result => {
       currentTranslation = result;
       transEl.classList.remove('loading-text');
@@ -609,7 +644,40 @@ Scientists have discovered that trees communicate through these underground netw
   backdrop.addEventListener('click', hidePopup);
   document.getElementById('popup-close').addEventListener('click', hidePopup);
  
-  // ── Speak ──
+  // ── Read Aloud ──
+  let isReadingAloud = false;
+ 
+  function stopReadAloud() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    isReadingAloud = false;
+    const btn = document.getElementById('read-aloud-btn');
+    btn.classList.remove('playing');
+    document.getElementById('read-aloud-icon').textContent = '🔊';
+    document.getElementById('read-aloud-label').textContent = '朗讀全文';
+  }
+ 
+  document.getElementById('read-aloud-btn').addEventListener('click', () => {
+    if (!window.speechSynthesis) { alert('你的瀏覽器不支援語音功能'); return; }
+    if (isReadingAloud) {
+      stopReadAloud();
+      return;
+    }
+    const text = document.getElementById('article-body').innerText;
+    if (!text.trim()) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.88;
+    isReadingAloud = true;
+    const btn = document.getElementById('read-aloud-btn');
+    btn.classList.add('playing');
+    document.getElementById('read-aloud-icon').textContent = '⏹';
+    document.getElementById('read-aloud-label').textContent = '停止朗讀';
+    utter.onend = stopReadAloud;
+    utter.onerror = stopReadAloud;
+    window.speechSynthesis.speak(utter);
+  });
+ 
+  // ── Speak single word ──
   function speak(word) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
