@@ -2181,7 +2181,7 @@ Scientists have discovered that trees communicate through these underground netw
     try {
       if (!anthropicKey) { alert('請先輸入 Gemini API Key'); document.getElementById('gen-btn').disabled = false; document.getElementById('gen-icon').textContent = '✨'; document.getElementById('gen-label').textContent = '生成文章'; return; }
       const prompt = `Write an English graded reading article about "${topic}" at ${levelDesc[level]}. Return ONLY valid JSON with these exact fields: {"title": "English title", "titleZh": "中文標題", "content": "article text here"}. No markdown, no backticks, just raw JSON.`;
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + anthropicKey, {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' + anthropicKey, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
