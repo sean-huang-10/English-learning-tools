@@ -9,9 +9,9 @@
   <meta name="theme-color" content="#2c2825" />
   <link rel="manifest" href="manifest.json" />
   <title>WordLens</title>
- 
+
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet" />
- 
+
   <style>
     :root {
       --bg: #faf8f4;
@@ -27,9 +27,9 @@
       --radius: 14px;
       --shadow: 0 8px 32px rgba(44,40,37,0.18);
     }
- 
+
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
- 
+
     body {
       font-family: 'Lora', Georgia, serif;
       background: var(--bg);
@@ -38,7 +38,7 @@
       display: flex;
       flex-direction: column;
     }
- 
+
     /* ── Header ── */
     header {
       background: var(--ink);
@@ -79,13 +79,13 @@
       background: var(--accent);
       color: white;
     }
- 
+
     /* ── Main ── */
     main { flex: 1; padding: 20px; max-width: 700px; margin: 0 auto; width: 100%; }
- 
+
     /* ── Input View ── */
     #input-view { display: flex; flex-direction: column; gap: 16px; }
- 
+
     .input-label {
       font-family: 'Noto Sans TC', sans-serif;
       font-size: 0.8rem;
@@ -93,7 +93,7 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
- 
+
     textarea {
       width: 100%;
       min-height: 220px;
@@ -111,7 +111,7 @@
     }
     textarea:focus { border-color: var(--accent); }
     textarea::placeholder { color: var(--ink-muted); font-style: italic; }
- 
+
     .btn-primary {
       background: var(--accent);
       color: white;
@@ -130,7 +130,7 @@
       -webkit-tap-highlight-color: transparent;
     }
     .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
- 
+
     .sample-btn {
       background: transparent;
       border: 1.5px solid var(--border);
@@ -144,10 +144,10 @@
       transition: all 0.2s;
     }
     .sample-btn:active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
- 
+
     /* ── Read View ── */
     #read-view { display: none; flex-direction: column; gap: 16px; }
- 
+
     .article-header {
       display: flex;
       align-items: center;
@@ -169,7 +169,7 @@
       cursor: pointer;
     }
     .back-btn:active { background: var(--border); }
- 
+
     .speed-bar {
       display: flex;
       align-items: center;
@@ -232,7 +232,7 @@
       pointer-events: none;
     }
     .custom-thumb.dragging { transform: translate(-50%, -50%) scale(1.2); }
- 
+
     .read-aloud-btn {
       width: 100%;
       background: var(--surface);
@@ -263,7 +263,7 @@
       from { transform: scale(1); }
       to   { transform: scale(1.2); }
     }
- 
+
     .hint-bar {
       background: var(--accent-light);
       border: 1px solid #e8c4a8;
@@ -276,7 +276,7 @@
       align-items: center;
       gap: 8px;
     }
- 
+
     #article-body {
       background: var(--surface);
       border: 1.5px solid var(--border);
@@ -287,7 +287,7 @@
       color: var(--ink);
       min-height: 300px;
     }
- 
+
     .word {
       display: inline;
       cursor: pointer;
@@ -299,10 +299,10 @@
     .word:active { background: var(--word-hover); }
     .word.loading { background: var(--accent-light); }
     .word.looked-up { border-bottom: 1.5px solid var(--accent); }
- 
+
     /* ── Vocab List ── */
     #vocab-view { display: none; flex-direction: column; gap: 12px; }
- 
+
     .vocab-empty {
       text-align: center;
       padding: 60px 20px;
@@ -346,7 +346,7 @@
       flex-shrink: 0;
     }
     .vocab-del:active { background: #fde8e8; color: #c0392b; }
- 
+
     /* ── Popup ── */
     #popup-overlay {
       position: fixed;
@@ -355,7 +355,7 @@
       pointer-events: none;
     }
     #popup-overlay.active { pointer-events: all; }
- 
+
     #popup {
       position: absolute;
       background: var(--popup-bg);
@@ -375,7 +375,7 @@
       opacity: 1;
       pointer-events: all;
     }
- 
+
     .popup-header {
       background: rgba(255,255,255,0.08);
       padding: 14px 18px 12px;
@@ -402,7 +402,7 @@
       align-items: center;
       justify-content: center;
     }
- 
+
     .popup-speak-btn {
       background: rgba(255,255,255,0.12);
       border: none;
@@ -422,9 +422,9 @@
       from { background: rgba(192,98,47,0.35); }
       to   { background: rgba(192,98,47,0.75); }
     }
- 
+
     .popup-body { padding: 14px 18px; }
- 
+
     .popup-translation {
       font-family: 'Noto Sans TC', sans-serif;
       font-size: 1.05rem;
@@ -443,12 +443,12 @@
       border-radius: 4px;
       vertical-align: middle;
     }
- 
+
     @keyframes shimmer {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
- 
+
     .popup-actions {
       display: flex;
       gap: 8px;
@@ -466,6 +466,46 @@
       transition: opacity 0.2s;
     }
     .popup-save-btn:active { opacity: 0.8; }
+    .popup-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+      min-height: 0;
+    }
+    .pos-badge {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .pos-noun     { background: rgba(96,165,250,0.2);  color: #93c5fd; }
+    .pos-verb     { background: rgba(167,243,208,0.2); color: #6ee7b7; }
+    .pos-adj      { background: rgba(253,230,138,0.2); color: #fcd34d; }
+    .pos-adv      { background: rgba(216,180,254,0.2); color: #c4b5fd; }
+    .pos-prep     { background: rgba(253,186,116,0.2); color: #fdba74; }
+    .pos-conj     { background: rgba(249,168,212,0.2); color: #f9a8d4; }
+    .pos-pron     { background: rgba(134,239,172,0.2); color: #86efac; }
+    .pos-other    { background: rgba(148,163,184,0.2); color: #94a3b8; }
+    .popup-phonetic {
+      font-family: 'Lora', serif;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+    .popup-example {
+      font-family: 'Lora', serif;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      border-left: 2px solid rgba(192,98,47,0.5);
+      padding-left: 8px;
+    }
     .popup-speed-row {
       display: flex;
       align-items: center;
@@ -502,12 +542,12 @@
     .popup-save-btn.saved {
       background: #4a7c59;
     }
- 
- 
+
+
   </style>
 </head>
 <body>
- 
+
 <header>
   <div class="logo">Word<span>Lens</span></div>
   <div class="tab-bar">
@@ -516,7 +556,7 @@
     <button class="tab-btn" data-tab="vocab">單字本</button>
   </div>
 </header>
- 
+
 <main>
   <!-- Input View -->
   <div id="input-view">
@@ -527,7 +567,7 @@
     </button>
     <button class="sample-btn" id="sample-btn">使用範例文章試試看</button>
   </div>
- 
+
   <!-- Read View -->
   <div id="read-view">
     <div class="article-header">
@@ -556,14 +596,14 @@
     </button>
     <div id="article-body"></div>
   </div>
- 
+
   <!-- Vocab View -->
   <div id="vocab-view">
     <div class="vocab-count" id="vocab-count"></div>
     <div id="vocab-list"></div>
   </div>
 </main>
- 
+
 <!-- Popup -->
 <div id="popup-overlay">
   <div id="popup">
@@ -575,7 +615,10 @@
       </div>
     </div>
     <div class="popup-body">
+      <div class="popup-meta" id="popup-meta"></div>
       <div class="popup-translation" id="popup-translation"></div>
+      <div class="popup-phonetic" id="popup-phonetic"></div>
+      <div class="popup-example" id="popup-example"></div>
       <div class="popup-speed-row">
         <button class="popup-speed-adj" id="popup-speed-down">－</button>
         <span class="popup-speed-display" id="popup-speed-display">0.9x</span>
@@ -587,7 +630,7 @@
     </div>
   </div>
 </div>
- 
+
 <script>
   // ── State ──
   let vocab = JSON.parse(localStorage.getItem('wordlens-vocab') || '[]');
@@ -595,28 +638,28 @@
   let currentTranslation = '';
   let currentWordEl = null;
   let translationCache = {};
- 
+
   const SAMPLE = `The ancient forests of the Pacific Northwest are among the most biodiverse ecosystems on Earth. Towering Douglas firs and Sitka spruces create a dense canopy that filters sunlight, casting the forest floor in a perpetual, emerald twilight. Beneath this canopy, an intricate web of life thrives — from delicate mosses clinging to every surface, to the complex fungal networks that connect the roots of trees across vast distances.
- 
+
 Scientists have discovered that trees communicate through these underground networks, sharing nutrients and even warning signals when pests or disease threaten. This remarkable phenomenon has transformed how we understand forests: not as collections of individual trees competing for resources, but as collaborative communities with a sophisticated, silent language of their own.`;
- 
+
   // ── Tabs ──
   const tabs = document.querySelectorAll('.tab-btn');
   const views = { input: document.getElementById('input-view'), read: document.getElementById('read-view'), vocab: document.getElementById('vocab-view') };
- 
+
   function switchTab(tab) {
     tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     Object.entries(views).forEach(([k, v]) => v.style.display = k === tab ? 'flex' : 'none');
     if (tab === 'vocab') renderVocab();
   }
- 
+
   tabs.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
- 
+
   // ── Sample ──
   document.getElementById('sample-btn').addEventListener('click', () => {
     document.getElementById('article-input').value = SAMPLE;
   });
- 
+
   // ── Start reading ──
   document.getElementById('start-btn').addEventListener('click', () => {
     const text = document.getElementById('article-input').value.trim();
@@ -624,19 +667,19 @@ Scientists have discovered that trees communicate through these underground netw
     renderArticle(text);
     switchTab('read');
   });
- 
+
   document.getElementById('back-btn').addEventListener('click', () => {
     stopReadAloud();
     switchTab('input');
   });
- 
+
   // ── Render article with clickable words ──
   function renderArticle(text) {
     const body = document.getElementById('article-body');
     const words = text.split(/(\s+|[\n\r]+)/);
     let wordCount = 0;
     let html = '';
- 
+
     words.forEach(part => {
       if (/\n/.test(part)) {
         html += '<br><br>';
@@ -655,10 +698,10 @@ Scientists have discovered that trees communicate through these underground netw
         }
       }
     });
- 
+
     body.innerHTML = html;
     document.getElementById('word-count').textContent = `${wordCount} 個單字`;
- 
+
     body.querySelectorAll('.word').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -666,7 +709,7 @@ Scientists have discovered that trees communicate through these underground netw
       });
     });
   }
- 
+
   // ── Translation ──
   async function translate(word) {
     const key = word.toLowerCase();
@@ -691,63 +734,139 @@ Scientists have discovered that trees communicate through these underground netw
       }
     }
   }
- 
+
+  // ── Dictionary ──
+  let dictCache = {};
+  const POS_MAP = {
+    'noun': ['noun','名詞','pos-noun'],
+    'verb': ['verb','動詞','pos-verb'],
+    'adjective': ['adj','形容詞','pos-adj'],
+    'adverb': ['adv','副詞','pos-adv'],
+    'preposition': ['prep','介係詞','pos-prep'],
+    'conjunction': ['conj','連接詞','pos-conj'],
+    'pronoun': ['pron','代名詞','pos-pron'],
+    'article': ['art','冠詞','pos-other'],
+    'exclamation': ['excl','感嘆詞','pos-other'],
+  };
+
+  async function fetchDictionary(word) {
+    const key = word.toLowerCase();
+    if (dictCache[key]) return dictCache[key];
+    try {
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(key)}`);
+      if (!res.ok) { dictCache[key] = null; return null; }
+      const data = await res.json();
+      const entry = data[0];
+      const phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
+      const meanings = entry.meanings || [];
+      const result = { phonetic, meanings: [] };
+      meanings.forEach(m => {
+        const posKey = Object.keys(POS_MAP).find(k => m.partOfSpeech?.toLowerCase().includes(k));
+        const [short, zh, cls] = posKey ? POS_MAP[posKey] : ['?','?','pos-other'];
+        const def = m.definitions?.[0];
+        const example = def?.example || '';
+        result.meanings.push({ pos: m.partOfSpeech, short, zh, cls, example });
+      });
+      dictCache[key] = result;
+      return result;
+    } catch {
+      dictCache[key] = null;
+      return null;
+    }
+  }
+
   // ── Popup ──
   const popup = document.getElementById('popup');
   const overlay = document.getElementById('popup-overlay');
- 
+
   function showPopup(word, el) {
     currentWord = word;
     currentWordEl = el;
     currentTranslation = '';
- 
+
     document.getElementById('popup-word').textContent = word;
     const transEl = document.getElementById('popup-translation');
     transEl.textContent = '';
     transEl.classList.add('loading-text');
- 
+    document.getElementById('popup-meta').innerHTML = '';
+    document.getElementById('popup-phonetic').textContent = '';
+    document.getElementById('popup-example').textContent = '';
+
     const saveBtn = document.getElementById('popup-save');
     const alreadySaved = vocab.some(v => v.en.toLowerCase() === word.toLowerCase());
     saveBtn.textContent = alreadySaved ? '✓ 已在單字本' : '＋ 加入單字本';
     saveBtn.classList.toggle('saved', alreadySaved);
- 
+
     // Position popup
     const rect = el.getBoundingClientRect();
     const popupEl = popup;
     const margin = 12;
     const popupW = Math.min(320, window.innerWidth * 0.88);
     const popupH = 160;
- 
+
     let top = rect.bottom + margin;
     let left = rect.left;
     if (left + popupW > window.innerWidth - margin) left = window.innerWidth - popupW - margin;
     if (left < margin) left = margin;
     if (top + popupH > window.innerHeight - margin) top = rect.top - popupH - margin;
- 
+
     popupEl.style.top = top + 'px';
     popupEl.style.left = left + 'px';
     popupEl.style.width = popupW + 'px';
- 
+
     popup.classList.add('show');
     syncPopupSpeed();
     overlay.classList.add('active');
- 
-    translate(word).then(result => {
-      currentTranslation = result;
+
+    Promise.all([translate(word), fetchDictionary(word)]).then(([translation, dict]) => {
+      currentTranslation = translation;
       transEl.classList.remove('loading-text');
-      transEl.textContent = result;
+      transEl.textContent = translation;
+
+      if (dict) {
+        // Phonetic
+        if (dict.phonetic) {
+          document.getElementById('popup-phonetic').textContent = dict.phonetic;
+        }
+        // Part of speech badges
+        const metaEl = document.getElementById('popup-meta');
+        const seen = new Set();
+        dict.meanings.forEach(m => {
+          if (!seen.has(m.short)) {
+            seen.add(m.short);
+            const badge = document.createElement('span');
+            badge.className = 'pos-badge ' + m.cls;
+            badge.textContent = m.short + ' ' + m.zh;
+            metaEl.appendChild(badge);
+          }
+        });
+        // Example - prefer preposition/verb, else first available
+        const priority = ['preposition','verb','noun','adjective'];
+        let bestExample = '';
+        for (const p of priority) {
+          const m = dict.meanings.find(m => m.pos?.includes(p) && m.example);
+          if (m) { bestExample = m.example; break; }
+        }
+        if (!bestExample) {
+          const m = dict.meanings.find(m => m.example);
+          if (m) bestExample = m.example;
+        }
+        if (bestExample) {
+          document.getElementById('popup-example').textContent = '"' + bestExample + '"';
+        }
+      }
     });
   }
- 
+
   function hidePopup() {
     popup.classList.remove('show');
     overlay.classList.remove('active');
   }
- 
+
   overlay.addEventListener('click', hidePopup);
   document.getElementById('popup-close').addEventListener('click', (e) => { e.stopPropagation(); hidePopup(); });
   document.getElementById('popup').addEventListener('click', (e) => e.stopPropagation());
- 
+
   // ── Speech Rate ──
   var speechRate = 0.9;
   var isReadingAloud = false;
@@ -759,7 +878,7 @@ Scientists have discovered that trees communicate through these underground netw
   const thumbEl    = document.getElementById('speed-thumb');
   const speedLabel = document.getElementById('speed-value');
   const MIN = 0.1, MAX = 1.5, STEP = 0.1;
- 
+
   function setRate(pct) {
     pct = Math.max(0, Math.min(1, pct));
     const raw = MIN + pct * (MAX - MIN);
@@ -774,26 +893,26 @@ Scientists have discovered that trees communicate through these underground netw
       startSpeakingFrom(currentCharIndex);
     }
   }
- 
+
   function pctFromEvent(e) {
     const rect = sliderEl.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     return (clientX - rect.left) / rect.width;
   }
- 
+
   sliderEl.addEventListener('touchstart', (e) => {
     e.preventDefault();
     thumbEl.classList.add('dragging');
     setRate(pctFromEvent(e));
   }, { passive: false });
- 
+
   sliderEl.addEventListener('touchmove', (e) => {
     e.preventDefault();
     setRate(pctFromEvent(e));
   }, { passive: false });
- 
+
   sliderEl.addEventListener('touchend', () => thumbEl.classList.remove('dragging'));
- 
+
   sliderEl.addEventListener('mousedown', (e) => {
     thumbEl.classList.add('dragging');
     setRate(pctFromEvent(e));
@@ -806,11 +925,11 @@ Scientists have discovered that trees communicate through these underground netw
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
   });
- 
+
   setRate((0.9 - MIN) / (MAX - MIN));
- 
+
   // ── Read Aloud ──
- 
+
   function startSpeakingFrom(charIndex) {
     isRestarting = true;
     window.speechSynthesis.cancel();
@@ -830,7 +949,7 @@ Scientists have discovered that trees communicate through these underground netw
     };
     setTimeout(() => { isRestarting = false; window.speechSynthesis.speak(utter); }, 80);
   }
- 
+
   function stopReadAloud() {
     window.speechSynthesis.cancel();
     isReadingAloud = false;
@@ -840,7 +959,7 @@ Scientists have discovered that trees communicate through these underground netw
     document.getElementById('read-aloud-icon').textContent = '🔊';
     document.getElementById('read-aloud-label').textContent = '朗讀全文';
   }
- 
+
   document.getElementById('read-aloud-btn').addEventListener('click', () => {
     if (!window.speechSynthesis) { alert('你的瀏覽器不支援語音功能'); return; }
     if (isReadingAloud) { stopReadAloud(); return; }
@@ -854,7 +973,7 @@ Scientists have discovered that trees communicate through these underground netw
     document.getElementById('read-aloud-label').textContent = '停止朗讀';
     startSpeakingFrom(0);
   });
- 
+
   // ── Speak single word ──
   function speak(word) {
     if (!window.speechSynthesis) return;
@@ -869,7 +988,7 @@ Scientists have discovered that trees communicate through these underground netw
     // iOS Safari needs a tiny delay after cancel()
     setTimeout(() => window.speechSynthesis.speak(utter), 50);
   }
- 
+
   // ── Popup speed controls ──
   function syncPopupSpeed() {
     const el = document.getElementById('popup-speed-display');
@@ -881,26 +1000,26 @@ Scientists have discovered that trees communicate through these underground netw
     if (thumbEl) thumbEl.style.left = dp + '%';
     if (speedLabel) speedLabel.textContent = speechRate.toFixed(1) + 'x';
   }
- 
+
   document.getElementById('popup-speed-down').addEventListener('click', (e) => {
     e.stopPropagation();
     speechRate = Math.max(0.1, Math.round((speechRate - 0.1) * 10) / 10);
     syncPopupSpeed();
     if (isReadingAloud) startSpeakingFrom(currentCharIndex);
   });
- 
+
   document.getElementById('popup-speed-up').addEventListener('click', (e) => {
     e.stopPropagation();
     speechRate = Math.min(1.5, Math.round((speechRate + 0.1) * 10) / 10);
     syncPopupSpeed();
     if (isReadingAloud) startSpeakingFrom(currentCharIndex);
   });
- 
+
   document.getElementById('popup-speak').addEventListener('click', (e) => {
     e.stopPropagation(); // 防止冒泡觸發 backdrop 關閉
     speak(currentWord);
   });
- 
+
   // ── Save to vocab ──
   document.getElementById('popup-save').addEventListener('click', () => {
     if (!currentTranslation) return;
@@ -916,7 +1035,7 @@ Scientists have discovered that trees communicate through these underground netw
     saveBtn.textContent = '✓ 已在單字本';
     saveBtn.classList.add('saved');
   });
- 
+
   // ── Vocab ──
   function renderVocab() {
     const list = document.getElementById('vocab-list');
@@ -944,7 +1063,7 @@ Scientists have discovered that trees communicate through these underground netw
       });
     });
   }
- 
+
   // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
