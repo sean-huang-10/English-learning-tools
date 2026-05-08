@@ -70,8 +70,8 @@
       background: transparent;
       color: rgba(255,255,255,0.6);
       font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.8rem;
-      padding: 5px 12px;
+      font-size: 0.72rem;
+      padding: 5px 8px;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s;
@@ -1040,6 +1040,228 @@
       font-size: 0.88rem;
     }
 
+    /* ── Chat View ── */
+    #chat-view { display:none; flex-direction:column; gap:0; flex:1; min-height:0; }
+
+    .mode-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .mode-card:active { transform: scale(0.98); border-color: var(--accent); }
+    .mode-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .mode-title { font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .mode-desc { font-family:'Noto Sans TC',sans-serif; font-size:0.82rem; color:var(--ink-muted); line-height:1.5; }
+
+    .scenario-grid { display:flex; flex-direction:column; gap:10px; }
+    .scenario-pill {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-family:'Noto Sans TC',sans-serif;
+      font-size:0.9rem;
+      color:var(--ink);
+      transition: all 0.15s;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .scenario-pill:active { background:var(--accent-light); border-color:var(--accent); }
+
+    .chat-topbar {
+      background: var(--ink);
+      padding: 10px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .chat-scenario-label {
+      font-family:'Noto Sans TC',sans-serif;
+      font-size:0.82rem;
+      color:rgba(255,255,255,0.7);
+    }
+    .chat-top-btn {
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color:white;
+      border-radius:8px;
+      padding:6px 12px;
+      font-family:'Noto Sans TC',sans-serif;
+      font-size:0.78rem;
+      cursor:pointer;
+      transition:background 0.15s;
+    }
+    .chat-top-btn:active { background:rgba(255,255,255,0.25); }
+    .chat-top-btn.danger { background:rgba(192,98,47,0.4); }
+    .chat-top-btn.active { background:var(--accent); }
+
+    #chat-messages {
+      flex:1;
+      overflow-y:auto;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      background:var(--bg);
+      min-height:200px;
+      max-height: calc(100dvh - 280px);
+    }
+
+    .msg-wrap { display:flex; flex-direction:column; gap:4px; }
+    .msg-wrap.user { align-items:flex-end; }
+    .msg-wrap.ai   { align-items:flex-start; }
+
+    .msg-bubble {
+      max-width:80%;
+      padding:10px 14px;
+      border-radius:18px;
+      font-size:0.95rem;
+      line-height:1.55;
+    }
+    .msg-wrap.user .msg-bubble {
+      background:var(--accent);
+      color:white;
+      border-bottom-right-radius:4px;
+    }
+    .msg-wrap.ai .msg-bubble {
+      background:var(--surface);
+      border:1.5px solid var(--border);
+      color:var(--ink);
+      border-bottom-left-radius:4px;
+    }
+    .msg-translation {
+      font-family:'Noto Sans TC',sans-serif;
+      font-size:0.8rem;
+      color:var(--ink-muted);
+      max-width:80%;
+      padding:4px 8px;
+      background:rgba(0,0,0,0.04);
+      border-radius:8px;
+      display:none;
+      line-height:1.5;
+    }
+    .msg-translation.visible { display:block; }
+
+    .chat-input-bar {
+      display:flex;
+      gap:8px;
+      padding:12px 14px;
+      background:var(--surface);
+      border-top:1.5px solid var(--border);
+      align-items:flex-end;
+    }
+    .chat-input {
+      flex:1;
+      border:1.5px solid var(--border);
+      border-radius:12px;
+      padding:10px 14px;
+      font-family:'Lora',serif;
+      font-size:0.95rem;
+      color:var(--ink);
+      background:var(--bg);
+      outline:none;
+      resize:none;
+      max-height:100px;
+      line-height:1.4;
+    }
+    .chat-input:focus { border-color:var(--accent); }
+    .chat-send-btn {
+      background:var(--accent);
+      color:white;
+      border:none;
+      border-radius:50%;
+      width:40px;
+      height:40px;
+      font-size:1rem;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      transition:opacity 0.15s;
+    }
+    .chat-send-btn:active { opacity:0.8; }
+    .chat-send-btn:disabled { opacity:0.4; }
+
+    .typing-bubble {
+      background:var(--surface);
+      border:1.5px solid var(--border);
+      border-radius:18px;
+      border-bottom-left-radius:4px;
+      padding:12px 16px;
+      display:inline-flex;
+      gap:4px;
+      align-items:center;
+    }
+    .typing-dot {
+      width:6px; height:6px;
+      border-radius:50%;
+      background:var(--ink-muted);
+      animation: typingBounce 1s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay:0.15s; }
+    .typing-dot:nth-child(3) { animation-delay:0.3s; }
+    @keyframes typingBounce {
+      0%,60%,100% { transform:translateY(0); }
+      30% { transform:translateY(-5px); }
+    }
+
+    /* Feedback */
+    .feedback-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .feedback-title {
+      font-size:1.1rem;
+      font-weight:600;
+      color:var(--ink);
+    }
+    .feedback-score {
+      background:var(--accent);
+      color:white;
+      border-radius:var(--radius);
+      padding:16px;
+      text-align:center;
+      font-family:'Noto Sans TC',sans-serif;
+    }
+    .feedback-score-num { font-size:2.5rem; font-weight:700; }
+    .feedback-score-label { font-size:0.85rem; opacity:0.85; }
+    .feedback-section {
+      background:var(--surface);
+      border:1.5px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px;
+    }
+    .feedback-section-title {
+      font-family:'Noto Sans TC',sans-serif;
+      font-size:0.8rem;
+      color:var(--ink-muted);
+      margin-bottom:10px;
+      text-transform:uppercase;
+      letter-spacing:0.06em;
+    }
+    .feedback-item {
+      font-family:'Noto Sans TC',sans-serif;
+      font-size:0.88rem;
+      color:var(--ink);
+      line-height:1.6;
+      padding:8px 0;
+      border-bottom:1px solid var(--border);
+    }
+    .feedback-item:last-child { border-bottom:none; }
+    .feedback-item .wrong { color:#c0392b; font-family:'Lora',serif; }
+    .feedback-item .right { color:#2d7a4f; font-family:'Lora',serif; }
+
     /* ── Reading Progress Bar ── */
     #reading-progress-bar {
       position: sticky;
@@ -1146,6 +1368,7 @@
     <button class="tab-btn" data-tab="read">閱讀</button>
     <button class="tab-btn" data-tab="vocab">單字本</button>
     <button class="tab-btn" data-tab="library">單字庫</button>
+    <button class="tab-btn" data-tab="chat">對話</button>
   </div>
 </header>
 <div id="reading-progress-bar" style="display:none;">
@@ -1330,6 +1553,34 @@
 ```
 
   </div>
+
+  <!-- Chat View -->
+
+  <div id="chat-view">
+    <div id="chat-home"></div>
+    <div id="chat-screen" style="display:none;flex-direction:column;flex:1;">
+      <div class="chat-topbar">
+        <div class="chat-scenario-label" id="chat-scenario-label"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="chat-top-btn" id="translate-toggle-btn">🌐 查翻譯</button>
+          <button class="chat-top-btn danger" id="end-chat-btn">結束</button>
+        </div>
+      </div>
+      <div id="chat-messages"></div>
+      <div class="chat-input-bar">
+        <textarea id="chat-input" class="chat-input" placeholder="Type your message in English..." rows="1"></textarea>
+        <button class="chat-send-btn" id="chat-send-btn">➤</button>
+      </div>
+    </div>
+    <div id="chat-feedback" style="display:none;flex-direction:column;gap:14px;">
+      <div class="feedback-header">
+        <div class="feedback-title">📊 對話分析</div>
+        <button class="chat-top-btn" id="new-chat-btn">重新開始</button>
+      </div>
+      <div id="feedback-body"></div>
+    </div>
+  </div>
+
 </main>
 
 <!-- Popup -->
@@ -1375,7 +1626,7 @@ Scientists have discovered that trees communicate through these underground netw
 
   // ── Tabs ──
   const tabs = document.querySelectorAll('.tab-btn');
-  const views = { explore: document.getElementById('explore-view'), read: document.getElementById('read-view'), vocab: document.getElementById('vocab-view'), library: document.getElementById('library-view') };
+  const views = { explore: document.getElementById('explore-view'), read: document.getElementById('read-view'), vocab: document.getElementById('vocab-view'), library: document.getElementById('library-view'), chat: document.getElementById('chat-view') };
 
   function switchTab(tab) {
     tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -1392,6 +1643,7 @@ Scientists have discovered that trees communicate through these underground netw
     if (tab === 'vocab') renderVocab();
     if (tab === 'explore') renderExplore();
     if (tab === 'library') renderLibrary();
+    if (tab === 'chat' && chatPhase === 'select') renderChatHome();
     if (tab === 'read') { updateProgress(); }
   }
 
@@ -2378,6 +2630,318 @@ ${text}`;
   }
 
   document.getElementById('translate-all-btn').addEventListener('click', translateFullArticle);
+
+
+  // ══════════════════════════════════════════
+  // ── CHAT MODULE ──
+  // ══════════════════════════════════════════
+  var chatPhase = 'select'; // 'select' | 'chat' | 'feedback'
+  var chatMode = '';
+  var chatScenario = {};
+  var chatHistory = [];
+  var showTranslations = false;
+  var chatTranslationCache = {};
+
+  const SCENARIOS = {
+    roleplay: [
+      { id:'cafe',      emoji:'☕', title:'咖啡廳點餐',     en:'Ordering at a Café',        role:'barista' },
+      { id:'hotel',     emoji:'🏨', title:'飯店 Check-in',  en:'Hotel Check-in',            role:'hotel receptionist' },
+      { id:'airport',   emoji:'✈️', title:'機場報到',       en:'Airport Check-in',          role:'airline staff' },
+      { id:'interview', emoji:'💼', title:'求職面試',       en:'Job Interview',             role:'interviewer' },
+      { id:'doctor',    emoji:'🏥', title:'看診',           en:'Doctor Appointment',     role:'doctor' },
+      { id:'shopping',  emoji:'🛍️', title:'購物',           en:'Shopping',                  role:'shop assistant' },
+    ],
+    free: [
+      { id:'travel',    emoji:'🌏', title:'旅遊',           en:'Travel & Destinations' },
+      { id:'food',      emoji:'🍽️', title:'飲食文化',       en:'Food & Culture' },
+      { id:'movie',     emoji:'🎬', title:'電影與音樂',     en:'Movies & Music' },
+      { id:'life',      emoji:'🌱', title:'日常生活',       en:'Daily Life' },
+      { id:'tech',      emoji:'💡', title:'科技趨勢',       en:'Technology' },
+    ],
+    task: [
+      { id:'book_hotel',  emoji:'🏨', title:'訂一間飯店',      en:'Book a Hotel Room',       goal:'successfully book a hotel room with specific dates, room type, and breakfast included' },
+      { id:'report_lost', emoji:'🔍', title:'報告遺失物品',    en:'Report a Lost Item',      goal:'report a lost wallet to airport lost and found with full details' },
+      { id:'complain',    emoji:'😤', title:'客訴處理',        en:'Handle a Complaint',      goal:'get a refund or replacement for a defective product from customer service' },
+      { id:'directions',  emoji:'🗺️', title:'問路到達目的地',  en:'Ask for Directions',      goal:'get clear directions to a museum and confirm arrival time' },
+    ]
+  };
+
+  const LEVEL_PROMPTS = {
+    A1: 'Use very simple English, short sentences, basic vocabulary only. Speak slowly and clearly.',
+    A2: 'Use simple English with common words. Keep sentences short.',
+    B1: 'Use intermediate English. Some complexity is fine.',
+    B2: 'Use natural English at upper-intermediate level.',
+    C1: 'Use advanced, natural English with varied vocabulary and complex structures.'
+  };
+
+  function renderChatHome() {
+    const home = document.getElementById('chat-home');
+    home.style.display = 'flex';
+    home.style.flexDirection = 'column';
+    home.style.gap = '12px';
+    document.getElementById('chat-screen').style.display = 'none';
+    document.getElementById('chat-feedback').style.display = 'none';
+    chatPhase = 'select';
+
+    home.innerHTML = '<div style="font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);letter-spacing:0.05em;text-transform:uppercase;">選擇練習模式</div>' +
+      [
+        { mode:'roleplay', icon:'🎭', title:'角色情境對話',   desc:'AI扮演咖啡師、面試官等角色，在真實情境中練習對話' },
+        { mode:'free',     icon:'💬', title:'自由對話練習',   desc:'選擇主題自由聊天，AI會配合你的程度調整，自然練習' },
+        { mode:'task',     icon:'🎯', title:'任務達成挑戰',   desc:'有明確目標要完成（如訂飯店），對話結束評估是否成功' },
+      ].map(m => `
+        <div class="mode-card" data-mode="${m.mode}">
+          <div class="mode-icon">${m.icon}</div>
+          <div>
+            <div class="mode-title">${m.title}</div>
+            <div class="mode-desc">${m.desc}</div>
+          </div>
+        </div>
+      `).join('');
+
+    home.querySelectorAll('.mode-card').forEach(card => {
+      card.addEventListener('click', () => showScenarioSelect(card.dataset.mode));
+    });
+  }
+
+  function showScenarioSelect(mode) {
+    chatMode = mode;
+    const home = document.getElementById('chat-home');
+    const list = SCENARIOS[mode];
+    const modeLabels = { roleplay:'角色情境對話', free:'自由對話練習', task:'任務達成挑戰' };
+
+    home.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px;">
+        <button id="back-to-modes" style="background:transparent;border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);cursor:pointer;">← 返回</button>
+        <div style="font-family:Noto Sans TC,sans-serif;font-size:0.88rem;color:var(--ink);">${modeLabels[mode]}</div>
+      </div>
+      <div style="font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);">選擇難度</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${['A1','A2','B1','B2','C1'].map(l => `<button class="filter-btn level-select-btn${l==='B1'?' active':''}" data-level="${l}">${l}</button>`).join('')}
+      </div>
+      <div style="font-family:Noto Sans TC,sans-serif;font-size:0.8rem;color:var(--ink-muted);">選擇${mode==='task'?'任務':'情境'}</div>
+      <div class="scenario-grid">
+        ${list.map(s => `
+          <div class="scenario-pill" data-scenario='${JSON.stringify(s)}'>
+            <span style="font-size:1.4rem;">${s.emoji}</span>
+            <div>
+              <div style="font-weight:600;">${s.title}</div>
+              <div style="font-size:0.78rem;color:var(--ink-muted);">${s.en}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+
+    document.getElementById('back-to-modes').addEventListener('click', renderChatHome);
+    home.querySelectorAll('.level-select-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        home.querySelectorAll('.level-select-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+      });
+    });
+    home.querySelectorAll('.scenario-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const level = home.querySelector('.level-select-btn.active')?.dataset.level || 'B1';
+        const scenario = JSON.parse(pill.dataset.scenario);
+        startChat(mode, scenario, level);
+      });
+    });
+  }
+
+  async function startChat(mode, scenario, level) {
+    chatScenario = { mode, scenario, level };
+    chatHistory = [];
+    showTranslations = false;
+    chatTranslationCache = {};
+
+    document.getElementById('chat-home').style.display = 'none';
+    document.getElementById('chat-feedback').style.display = 'none';
+    const screen = document.getElementById('chat-screen');
+    screen.style.display = 'flex';
+    document.getElementById('chat-messages').innerHTML = '';
+    document.getElementById('chat-scenario-label').textContent = scenario.emoji + ' ' + scenario.title + '　' + level;
+    document.getElementById('translate-toggle-btn').classList.remove('active');
+
+    const systemPrompt = buildSystemPrompt(mode, scenario, level);
+    chatHistory.push({ role:'user', parts:[{ text: '__START__' }] });
+
+    await sendToAI(systemPrompt, true);
+  }
+
+  function buildSystemPrompt(mode, scenario, level) {
+    const lvl = LEVEL_PROMPTS[level];
+    if (mode === 'roleplay') {
+      return `You are a ${scenario.role} in a ${scenario.en} scenario. ${lvl} Keep responses to 2-3 sentences. Stay in character. If the user makes grammar mistakes, naturally model the correct form in your response without explicitly pointing it out. Start by setting the scene and greeting the user.`;
+    } else if (mode === 'free') {
+      return `You are a friendly English conversation partner discussing ${scenario.en}. ${lvl} Keep responses conversational and engaging, 2-4 sentences. Ask follow-up questions to keep the conversation going. If the user makes notable grammar mistakes, gently correct by modeling the correct form. Start with a warm greeting and an interesting opening question about the topic.`;
+    } else {
+      return `You are playing a role where the user must: "${scenario.goal}". ${lvl} Respond naturally but require the user to provide all necessary information to complete the task. Don't make it too easy — ask for details. Keep responses to 2-3 sentences. Start by setting the scene.`;
+    }
+  }
+
+  async function sendToAI(systemPrompt, isFirst) {
+    if (!anthropicKey) { addMessage('ai', '⚠️ 請先在探索頁面設定 Gemini API Key 才能使用對話功能。'); return; }
+    const typingId = showTyping();
+    try {
+      const messages = isFirst
+        ? [{ role:'user', parts:[{ text: systemPrompt + '\n\nStart the conversation now.' }] }]
+        : [{ role:'user', parts:[{ text: systemPrompt }] }, ...chatHistory];
+
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'x-goog-api-key': anthropicKey },
+        body: JSON.stringify({ contents: messages, generationConfig:{ temperature:0.85, maxOutputTokens:200 } })
+      });
+      const data = await res.json();
+      removeTyping(typingId);
+      if (data.error) throw new Error(data.error.message);
+      const reply = data.candidates[0].content.parts[0].text.trim();
+      chatHistory.push({ role:'model', parts:[{ text: reply }] });
+      addMessage('ai', reply);
+    } catch(e) {
+      removeTyping(typingId);
+      addMessage('ai', '⚠️ 連線錯誤：' + e.message);
+    }
+  }
+
+  function addMessage(role, text) {
+    const msgs = document.getElementById('chat-messages');
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap ' + role;
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+    if (role === 'ai') {
+      const tranEl = document.createElement('div');
+      tranEl.className = 'msg-translation' + (showTranslations ? ' visible' : '');
+      tranEl.dataset.text = text;
+      if (showTranslations && !chatTranslationCache[text]) {
+        tranEl.textContent = '翻譯中...';
+        translate(text).then(t => { chatTranslationCache[text] = t; tranEl.textContent = t; });
+      } else if (chatTranslationCache[text]) {
+        tranEl.textContent = chatTranslationCache[text];
+      }
+      wrap.appendChild(tranEl);
+    }
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('chat-messages');
+    const id = 'typing_' + Date.now();
+    const div = document.createElement('div');
+    div.id = id; div.className = 'msg-wrap ai';
+    div.innerHTML = '<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return id;
+  }
+  function removeTyping(id) { document.getElementById(id)?.remove(); }
+
+  // Send message
+  document.getElementById('chat-send-btn').addEventListener('click', sendUserMessage);
+  document.getElementById('chat-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendUserMessage(); }
+  });
+
+  function sendUserMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    addMessage('user', text);
+    chatHistory.push({ role:'user', parts:[{ text }] });
+    const sys = buildSystemPrompt(chatScenario.mode, chatScenario.scenario, chatScenario.level);
+    sendToAI(sys, false);
+  }
+
+  // Auto resize textarea
+  document.getElementById('chat-input').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  });
+
+  // Toggle translation
+  document.getElementById('translate-toggle-btn').addEventListener('click', async () => {
+    showTranslations = !showTranslations;
+    document.getElementById('translate-toggle-btn').classList.toggle('active', showTranslations);
+    document.querySelectorAll('.msg-translation').forEach(async el => {
+      el.classList.toggle('visible', showTranslations);
+      if (showTranslations && !el.textContent) {
+        const t = el.dataset.text;
+        if (!chatTranslationCache[t]) {
+          el.textContent = '翻譯中...';
+          const result = await translate(t);
+          chatTranslationCache[t] = result;
+          el.textContent = result;
+        } else {
+          el.textContent = chatTranslationCache[t];
+        }
+      }
+    });
+  });
+
+  // End chat → get feedback
+  document.getElementById('end-chat-btn').addEventListener('click', async () => {
+    if (chatHistory.length < 3) { alert('對話太短，請多聊幾句再結束'); return; }
+    document.getElementById('chat-screen').style.display = 'none';
+    const feedback = document.getElementById('chat-feedback');
+    feedback.style.display = 'flex';
+    document.getElementById('feedback-body').innerHTML = '<div class="translation-loading">正在分析對話，請稍候...</div>';
+
+    try {
+      const convo = chatHistory.filter(m => m.parts[0].text !== '__START__')
+        .map(m => (m.role === 'user' ? 'User: ' : 'AI: ') + m.parts[0].text).join('\n');
+
+      const prompt = `Analyse this English conversation and respond ONLY in valid JSON with this structure:
+{"score": 75, "scoreLabel": "不錯", "corrections": [{"wrong": "I am go", "right": "I am going", "tip": "使用現在進行式"}], "vocab": ["suggestion 1", "suggestion 2"], "summary": "整體評語（繁體中文）"}
+Conversation:
+${convo}`;
+
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
+        body: JSON.stringify({ contents:[{ role:'user', parts:[{ text:prompt }] }], generationConfig:{temperature:0.3,maxOutputTokens:600} })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+      const fb = JSON.parse(raw);
+      renderFeedback(fb);
+    } catch(e) {
+      document.getElementById('feedback-body').innerHTML = '<div class="translation-loading">分析失敗：' + e.message + '</div>';
+    }
+  });
+
+  function renderFeedback(fb) {
+    const corrections = (fb.corrections || []).map(c => `
+      <div class="feedback-item">
+        <span class="wrong">✗ ${c.wrong}</span> → <span class="right">✓ ${c.right}</span>
+        <div style="font-size:0.8rem;color:var(--ink-muted);margin-top:2px;">${c.tip}</div>
+      </div>`).join('') || '<div class="feedback-item">沒有發現明顯錯誤 🎉</div>';
+
+    const vocab = (fb.vocab || []).map(v => `<div class="feedback-item">💡 ${v}</div>`).join('');
+
+    document.getElementById('feedback-body').innerHTML = `
+      <div class="feedback-score">
+        <div class="feedback-score-num">${fb.score || '--'}</div>
+        <div class="feedback-score-label">${fb.scoreLabel || '分'}</div>
+      </div>
+      <div class="feedback-section">
+        <div class="feedback-section-title">整體評語</div>
+        <div style="font-family:Noto Sans TC,sans-serif;font-size:0.9rem;line-height:1.7;color:var(--ink);">${fb.summary || ''}</div>
+      </div>
+      ${fb.corrections?.length ? `<div class="feedback-section"><div class="feedback-section-title">語法修正</div>${corrections}</div>` : ''}
+      ${fb.vocab?.length ? `<div class="feedback-section"><div class="feedback-section-title">單字建議</div>${vocab}</div>` : ''}`;
+  }
+
+  document.getElementById('new-chat-btn').addEventListener('click', () => {
+    document.getElementById('chat-feedback').style.display = 'none';
+    document.getElementById('chat-home').style.display = 'flex';
+    renderChatHome();
+  });
 
   // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
