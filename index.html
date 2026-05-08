@@ -1418,6 +1418,7 @@ Scientists have discovered that trees communicate through these underground netw
 
   // ── Render article with clickable words ──
   function renderArticle(text) {
+    currentArticleText = text;
     const body = document.getElementById('article-body');
     const words = text.split(/(\s+|[\n\r]+)/);
     let wordCount = 0;
@@ -1633,6 +1634,7 @@ Scientists have discovered that trees communicate through these underground netw
 
   // ── Speech Rate ──
   var speechRate = 0.9;
+  var currentArticleText = '';
   var isReadingAloud = false;
   var isRestarting = false;
   var articleText = '';
