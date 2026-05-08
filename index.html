@@ -838,6 +838,42 @@
     }
     .gen-select option { background: #2c2825; color: white; }
 
+    .api-key-row {
+      display: flex;
+      gap: 6px;
+    }
+    .api-key-input {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: white;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      outline: none;
+      min-width: 0;
+    }
+    .api-key-input::placeholder { color: rgba(255,255,255,0.4); }
+    .api-key-save {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      color: white;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.82rem;
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .api-key-save:active { background: rgba(255,255,255,0.3); }
+    #api-key-status {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.78rem;
+      min-height: 0;
+    }
+
     .paste-section {
       background: var(--surface);
       border: 1.5px solid var(--border);
@@ -1084,6 +1120,11 @@
           <option value="Sports">⚽ 運動</option>
         </select>
       </div>
+      <div class="api-key-row" id="api-key-row">
+        <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
+        <button class="api-key-save" id="api-key-save">儲存</button>
+      </div>
+      <div id="api-key-status"></div>
       <button class="btn-primary" id="gen-btn" style="margin-top:0;">
         <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
       </button>
@@ -2091,6 +2132,42 @@ Scientists have discovered that trees communicate through these underground netw
     });
   });
 
+  // ── API Key ──
+  var anthropicKey = localStorage.getItem('wordlens-gemini-key') || '';
+
+  function updateKeyUI() {
+    const input = document.getElementById('api-key-input');
+    const status = document.getElementById('api-key-status');
+    const row = document.getElementById('api-key-row');
+    if (anthropicKey) {
+      row.style.display = 'none';
+      status.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">✓ API Key 已儲存 <span id="clear-key" style="cursor:pointer;text-decoration:underline;">清除</span></span>';
+      document.getElementById('clear-key')?.addEventListener('click', () => {
+        anthropicKey = '';
+        localStorage.removeItem('wordlens-gemini-key');
+        row.style.display = 'flex';
+        status.innerHTML = '';
+      });
+    } else {
+      row.style.display = 'flex';
+      status.innerHTML = '<span style="color:rgba(255,255,255,0.45);font-size:0.75rem;">👉 在 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#fbb36a;">aistudio.google.com</a> 申請免費 Key</span>';
+    }
+  }
+
+  document.getElementById('api-key-save').addEventListener('click', () => {
+    const val = document.getElementById('api-key-input').value.trim();
+    if (!val.startsWith('AIza')) { alert('請輸入正確的 Gemini API Key（以 AIza 開頭）'); return; }
+    anthropicKey = val;
+    localStorage.setItem('wordlens-gemini-key', val);
+    updateKeyUI();
+  });
+
+  document.getElementById('api-key-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('api-key-save').click();
+  });
+
+  updateKeyUI();
+
   // AI Generate
   document.getElementById('gen-btn').addEventListener('click', async () => {
     const level = document.getElementById('gen-level').value;
@@ -2102,17 +2179,19 @@ Scientists have discovered that trees communicate through these underground netw
 
     const levelDesc = {A1:'very simple sentences, A1 CEFR level, under 150 words', A2:'simple sentences, A2 CEFR, 150-200 words', B1:'intermediate level, B1 CEFR, 200-280 words', B2:'upper-intermediate, B2 CEFR, 300-380 words', C1:'advanced, C1 CEFR, complex sentences, 380-450 words'};
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      if (!anthropicKey) { alert('請先輸入 Gemini API Key'); document.getElementById('gen-btn').disabled = false; document.getElementById('gen-icon').textContent = '✨'; document.getElementById('gen-label').textContent = '生成文章'; return; }
+      const prompt = `Write an English graded reading article about "${topic}" at ${levelDesc[level]}. Return ONLY valid JSON with these exact fields: {"title": "English title", "titleZh": "中文標題", "content": "article text here"}. No markdown, no backticks, just raw JSON.`;
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + anthropicKey, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: `Write an English graded reading article about "${topic}" at ${levelDesc[level]}. Return ONLY valid JSON with these fields: {"title": "English title", "titleZh": "中文標題", "content": "article text"}. No markdown, no backticks, just raw JSON.` }]
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.8, maxOutputTokens: 1000 }
         })
       });
       const data = await res.json();
-      const text = data.content[0].text.replace(/```json|```/g,'').trim();
+      if (data.error) throw new Error(data.error.message);
+      const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
       const parsed = JSON.parse(text);
       const newArt = {
         id: 'gen_' + Date.now(),
