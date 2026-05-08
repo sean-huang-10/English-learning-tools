@@ -291,14 +291,32 @@
     .word {
       display: inline;
       cursor: pointer;
-      border-radius: 3px;
-      padding: 0 1px;
-      transition: background 0.15s;
+      border-radius: 4px;
+      padding: 1px 2px;
+      transition: background 0.12s, color 0.12s;
       position: relative;
     }
-    .word:active { background: var(--word-hover); }
+    .word:hover { background: var(--word-hover); }
+    .word:active { background: #f8d5b8; transform: scale(0.97); }
     .word.loading { background: var(--accent-light); }
-    .word.looked-up { border-bottom: 1.5px solid var(--accent); }
+    .word.looked-up {
+      background: #fef0e6;
+      border-bottom: 2px solid var(--accent);
+      border-radius: 4px 4px 2px 2px;
+    }
+    .word.looked-up:hover { background: #fde3cc; }
+    .word.word-read {
+      color: #b8a898;
+      transition: color 0.2s;
+    }
+    .word.word-speaking {
+      background: #c0622f;
+      color: white !important;
+      border-radius: 4px;
+      padding: 1px 3px;
+      box-shadow: 0 2px 8px rgba(192,98,47,0.4);
+      transition: background 0.1s, color 0.1s;
+    }
 
     /* ── Vocab List ── */
     #vocab-view { display: none; flex-direction: column; gap: 12px; }
@@ -773,6 +791,100 @@
       font-size: 0.9rem;
       color: var(--ink-muted);
     }
+    /* ── Reading Progress Bar ── */
+    #reading-progress-bar {
+      position: sticky;
+      top: 53px;
+      z-index: 49;
+      height: 3px;
+      background: var(--border);
+    }
+    #reading-progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--accent), #e8854a);
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    /* ── View transition animations ── */
+    .view-enter {
+      animation: viewIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Card hover effects ── */
+    .vocab-card {
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+    .vocab-card:hover {
+      border-color: #d4c8bc;
+      box-shadow: 0 4px 16px rgba(44,40,37,0.07);
+      transform: translateY(-1px);
+    }
+    .lib-card {
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+    .lib-card:hover {
+      border-color: #d4c8bc;
+      box-shadow: 0 4px 16px rgba(44,40,37,0.07);
+      transform: translateY(-1px);
+    }
+
+    /* ── Popup spring upgrade ── */
+    #popup.show {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ── Tab active indicator ── */
+    .tab-btn {
+      position: relative;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    /* ── Article word appear animation ── */
+    @keyframes wordFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #article-body {
+      animation: wordFadeIn 0.3s ease both;
+    }
+
+    /* ── Flashcard flip animation ── */
+    .flashcard {
+      transition: box-shadow 0.2s;
+    }
+    .flashcard:hover {
+      box-shadow: 0 8px 32px rgba(44,40,37,0.13);
+    }
+    .flashcard:active {
+      transform: scale(0.985);
+    }
+
+    /* ── Save btn pulse ── */
+    @keyframes savePulse {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    .popup-save-btn.pulse {
+      animation: savePulse 0.3s ease;
+    }
   </style>
 </head>
 <body>
@@ -786,6 +898,9 @@
     <button class="tab-btn" data-tab="library">單字庫</button>
   </div>
 </header>
+<div id="reading-progress-bar" style="display:none;">
+  <div id="reading-progress-fill"></div>
+</div>
 
 <main>
   <!-- Input View -->
@@ -923,9 +1038,19 @@ Scientists have discovered that trees communicate through these underground netw
 
   function switchTab(tab) {
     tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    Object.entries(views).forEach(([k, v]) => v.style.display = k === tab ? 'flex' : 'none');
+    Object.entries(views).forEach(([k, v]) => {
+      const showing = k === tab;
+      v.style.display = showing ? 'flex' : 'none';
+      if (showing) {
+        v.classList.remove('view-enter');
+        void v.offsetWidth; // reflow
+        v.classList.add('view-enter');
+      }
+    });
+    progressBar.style.display = tab === 'read' ? 'block' : 'none';
     if (tab === 'vocab') renderVocab();
     if (tab === 'library') renderLibrary();
+    if (tab === 'read') { updateProgress(); }
   }
 
   tabs.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
@@ -954,23 +1079,28 @@ Scientists have discovered that trees communicate through these underground netw
     const words = text.split(/(\s+|[\n\r]+)/);
     let wordCount = 0;
     let html = '';
+    let charPos = 0;
 
     words.forEach(part => {
       if (/\n/.test(part)) {
         html += '<br><br>';
+        charPos += part.length;
       } else if (/\s+/.test(part)) {
         html += ' ';
+        charPos += part.length;
       } else if (part) {
         const clean = part.replace(/[^a-zA-Z'-]/g, '');
         const prefix = part.match(/^[^a-zA-Z'-]*/)?.[0] || '';
         const suffix = part.match(/[^a-zA-Z'-]*$/)?.[0] || '';
         if (clean) {
           wordCount++;
+          const wordStart = charPos + prefix.length;
           const isLooked = vocab.some(v => v.en.toLowerCase() === clean.toLowerCase());
-          html += `${prefix}<span class="word${isLooked ? ' looked-up' : ''}" data-word="${clean}">${clean}</span>${suffix}`;
+          html += `${prefix}<span class="word${isLooked ? ' looked-up' : ''}" data-word="${clean}" data-start="${wordStart}">${clean}</span>${suffix}`;
         } else {
           html += part;
         }
+        charPos += part.length;
       }
     });
 
@@ -1209,6 +1339,42 @@ Scientists have discovered that trees communicate through these underground netw
 
   // ── Read Aloud ──
 
+  // ── Word Highlight Helpers ──
+  function clearHighlights() {
+    document.querySelectorAll('.word-speaking, .word-read').forEach(el => {
+      el.classList.remove('word-speaking', 'word-read');
+    });
+  }
+
+  function highlightAt(absCharIndex) {
+    const allWords = Array.from(document.querySelectorAll('#article-body .word[data-start]'));
+    if (!allWords.length) return;
+
+    let speakingEl = null;
+    let minDiff = Infinity;
+    allWords.forEach(el => {
+      const start = parseInt(el.dataset.start);
+      const diff = Math.abs(start - absCharIndex);
+      if (diff < minDiff) { minDiff = diff; speakingEl = el; }
+    });
+
+    allWords.forEach(el => {
+      el.classList.remove('word-speaking');
+      const start = parseInt(el.dataset.start);
+      if (speakingEl && start < parseInt(speakingEl.dataset.start)) {
+        el.classList.add('word-read');
+      } else {
+        el.classList.remove('word-read');
+      }
+    });
+    if (speakingEl) {
+      speakingEl.classList.add('word-speaking');
+      speakingEl.classList.remove('word-read');
+      // Auto-scroll into view smoothly
+      speakingEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }
+  }
+
   function startSpeakingFrom(charIndex) {
     isRestarting = true;
     window.speechSynthesis.cancel();
@@ -1218,7 +1384,10 @@ Scientists have discovered that trees communicate through these underground netw
     utter.lang = 'en-US';
     utter.rate = speechRate;
     utter.onboundary = (e) => {
-      if (e.name === 'word') currentCharIndex = charIndex + e.charIndex;
+      if (e.name === 'word') {
+        currentCharIndex = charIndex + e.charIndex;
+        highlightAt(currentCharIndex);
+      }
     };
     utter.onend = () => {
       if (!isRestarting && isReadingAloud) stopReadAloud();
@@ -1233,6 +1402,7 @@ Scientists have discovered that trees communicate through these underground netw
     window.speechSynthesis.cancel();
     isReadingAloud = false;
     currentCharIndex = 0;
+    clearHighlights();
     const btn = document.getElementById('read-aloud-btn');
     btn.classList.remove('playing');
     document.getElementById('read-aloud-icon').textContent = '🔊';
@@ -1323,7 +1493,8 @@ Scientists have discovered that trees communicate through these underground netw
     }
     const saveBtn = document.getElementById('popup-save');
     saveBtn.textContent = '✓ 已在單字本';
-    saveBtn.classList.add('saved');
+    saveBtn.classList.add('saved', 'pulse');
+    setTimeout(() => saveBtn.classList.remove('pulse'), 400);
   });
 
   // ── Vocab ──
@@ -1536,6 +1707,25 @@ Scientists have discovered that trees communicate through these underground netw
     reader.readAsText(file);
     e.target.value = '';
   });
+
+  // ── Reading Progress Bar ──
+  const progressBar = document.getElementById('reading-progress-bar');
+  const progressFill = document.getElementById('reading-progress-fill');
+
+  function updateProgress() {
+    const body = document.getElementById('article-body');
+    if (!body || views.read.style.display === 'none') return;
+    const rect = body.getBoundingClientRect();
+    const total = body.offsetHeight;
+    const scrolled = Math.max(0, -rect.top + window.innerHeight * 0.3);
+    const pct = Math.min(100, (scrolled / total) * 100);
+    progressFill.style.width = pct.toFixed(1) + '%';
+  }
+
+  window.addEventListener('scroll', updateProgress, { passive: true });
+
+  // Show/hide progress bar with tab
+  const origSwitch = switchTab;
 
   // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
