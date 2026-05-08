@@ -466,6 +466,39 @@
       transition: opacity 0.2s;
     }
     .popup-save-btn:active { opacity: 0.8; }
+    .popup-speed-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+    .popup-speed-adj {
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .popup-speed-adj:active { background: rgba(255,255,255,0.28); }
+    .popup-speed-display {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.9rem;
+      color: #c0622f;
+      font-weight: 600;
+      min-width: 40px;
+      text-align: center;
+    }
     .popup-save-btn.saved {
       background: #4a7c59;
     }
@@ -543,6 +576,11 @@
     </div>
     <div class="popup-body">
       <div class="popup-translation" id="popup-translation"></div>
+      <div class="popup-speed-row">
+        <button class="popup-speed-adj" id="popup-speed-down">－</button>
+        <span class="popup-speed-display" id="popup-speed-display">0.9x</span>
+        <button class="popup-speed-adj" id="popup-speed-up">＋</button>
+      </div>
       <div class="popup-actions">
         <button class="popup-save-btn" id="popup-save">＋ 加入單字本</button>
       </div>
@@ -691,6 +729,7 @@ Scientists have discovered that trees communicate through these underground netw
     popupEl.style.width = popupW + 'px';
  
     popup.classList.add('show');
+    syncPopupSpeed();
     overlay.classList.add('active');
  
     translate(word).then(result => {
@@ -712,6 +751,7 @@ Scientists have discovered that trees communicate through these underground netw
   // ── Speech Rate ──
   var speechRate = 0.9;
   var isReadingAloud = false;
+  var isRestarting = false;
   var articleText = '';
   var currentCharIndex = 0;
   const sliderEl   = document.getElementById('speed-slider');
@@ -772,23 +812,23 @@ Scientists have discovered that trees communicate through these underground netw
   // ── Read Aloud ──
  
   function startSpeakingFrom(charIndex) {
+    isRestarting = true;
     window.speechSynthesis.cancel();
     const textToSpeak = articleText.slice(charIndex);
-    if (!textToSpeak.trim()) { stopReadAloud(); return; }
+    if (!textToSpeak.trim()) { isRestarting = false; stopReadAloud(); return; }
     const utter = new SpeechSynthesisUtterance(textToSpeak);
     utter.lang = 'en-US';
     utter.rate = speechRate;
     utter.onboundary = (e) => {
       if (e.name === 'word') currentCharIndex = charIndex + e.charIndex;
     };
-    utter.onend = (e) => {
-      // only stop if it finished naturally (not cancelled for rate change)
-      if (isReadingAloud) stopReadAloud();
+    utter.onend = () => {
+      if (!isRestarting && isReadingAloud) stopReadAloud();
     };
     utter.onerror = (e) => {
-      if (e.error !== 'interrupted' && isReadingAloud) stopReadAloud();
+      if (!isRestarting && e.error !== 'interrupted' && isReadingAloud) stopReadAloud();
     };
-    setTimeout(() => window.speechSynthesis.speak(utter), 50);
+    setTimeout(() => { isRestarting = false; window.speechSynthesis.speak(utter); }, 80);
   }
  
   function stopReadAloud() {
@@ -829,6 +869,32 @@ Scientists have discovered that trees communicate through these underground netw
     // iOS Safari needs a tiny delay after cancel()
     setTimeout(() => window.speechSynthesis.speak(utter), 50);
   }
+ 
+  // ── Popup speed controls ──
+  function syncPopupSpeed() {
+    const el = document.getElementById('popup-speed-display');
+    if (el) el.textContent = speechRate.toFixed(1) + 'x';
+    // Also sync main slider
+    const pct = (speechRate - MIN) / (MAX - MIN);
+    const dp = pct * 100;
+    if (fillEl) fillEl.style.width = dp + '%';
+    if (thumbEl) thumbEl.style.left = dp + '%';
+    if (speedLabel) speedLabel.textContent = speechRate.toFixed(1) + 'x';
+  }
+ 
+  document.getElementById('popup-speed-down').addEventListener('click', (e) => {
+    e.stopPropagation();
+    speechRate = Math.max(0.1, Math.round((speechRate - 0.1) * 10) / 10);
+    syncPopupSpeed();
+    if (isReadingAloud) startSpeakingFrom(currentCharIndex);
+  });
+ 
+  document.getElementById('popup-speed-up').addEventListener('click', (e) => {
+    e.stopPropagation();
+    speechRate = Math.min(1.5, Math.round((speechRate + 0.1) * 10) / 10);
+    syncPopupSpeed();
+    if (isReadingAloud) startSpeakingFrom(currentCharIndex);
+  });
  
   document.getElementById('popup-speak').addEventListener('click', (e) => {
     e.stopPropagation(); // 防止冒泡觸發 backdrop 關閉
