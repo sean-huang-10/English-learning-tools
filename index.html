@@ -2181,7 +2181,7 @@ Scientists have discovered that trees communicate through these underground netw
     try {
       if (!anthropicKey) { alert('請先輸入 Gemini API Key'); document.getElementById('gen-btn').disabled = false; document.getElementById('gen-icon').textContent = '✨'; document.getElementById('gen-label').textContent = '生成文章'; return; }
       const prompt = `Write an English graded reading article about "${topic}" at ${levelDesc[level]}. Return ONLY valid JSON with these exact fields: {"title": "English title", "titleZh": "中文標題", "content": "article text here"}. No markdown, no backticks, just raw JSON.`;
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + anthropicKey, {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + anthropicKey, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2190,7 +2190,7 @@ Scientists have discovered that trees communicate through these underground netw
         })
       });
       const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
+      if (data.error) throw new Error(data.error.message + ' (code: ' + data.error.code + ')');
       const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
       const parsed = JSON.parse(text);
       const newArt = {
@@ -2208,7 +2208,7 @@ Scientists have discovered that trees communicate through these underground netw
       document.querySelectorAll('#level-filter .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.level === level || (level !== 'all' && b.dataset.level === 'all')));
       renderExplore();
     } catch(e) {
-      alert('生成失敗，請確認網路連線後再試');
+      alert('生成失敗：' + e.message);
     }
     icon.textContent = '✨'; label.textContent = '生成文章';
     document.getElementById('gen-btn').disabled = false;
