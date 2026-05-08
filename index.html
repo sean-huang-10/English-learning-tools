@@ -233,8 +233,11 @@
     }
     .custom-thumb.dragging { transform: translate(-50%, -50%) scale(1.2); }
 
+    .read-aloud-row {
+      display: flex;
+      gap: 8px;
+    }
     .read-aloud-btn {
-      width: 100%;
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
@@ -249,11 +252,22 @@
       gap: 8px;
       transition: all 0.2s;
     }
+    .read-aloud-main { flex: 1; }
+    .read-aloud-pause {
+      width: 52px;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
     .read-aloud-btn:active { opacity: 0.8; }
     .read-aloud-btn.playing {
       background: var(--accent-light);
       border-color: var(--accent);
       color: var(--accent);
+    }
+    .read-aloud-btn.paused {
+      background: #eef3ff;
+      border-color: #7b9cde;
+      color: #3a5fa8;
     }
     .read-aloud-btn.playing #read-aloud-icon {
       animation: pulse-speak 0.55s ease-in-out infinite alternate;
@@ -935,10 +949,15 @@
         <span class="speed-value" id="speed-value">0.9x</span>
       </div>
     </div>
-    <button class="read-aloud-btn" id="read-aloud-btn">
-      <span id="read-aloud-icon">🔊</span>
-      <span id="read-aloud-label">朗讀全文</span>
-    </button>
+    <div class="read-aloud-row" id="read-aloud-row">
+      <button class="read-aloud-btn read-aloud-main" id="read-aloud-btn">
+        <span id="read-aloud-icon">🔊</span>
+        <span id="read-aloud-label">朗讀全文</span>
+      </button>
+      <button class="read-aloud-btn read-aloud-pause" id="pause-btn" style="display:none;">
+        <span id="pause-icon">⏸</span>
+      </button>
+    </div>
     <div id="article-body"></div>
   </div>
 
@@ -1070,6 +1089,7 @@ Scientists have discovered that trees communicate through these underground netw
 
   document.getElementById('back-btn').addEventListener('click', () => {
     stopReadAloud();
+    isPaused = false;
     switchTab('input');
   });
 
@@ -1298,7 +1318,7 @@ Scientists have discovered that trees communicate through these underground netw
     thumbEl.style.left = dp + '%';
     speedLabel.textContent = speechRate.toFixed(1) + 'x';
     // 朗讀中：取消後從目前位置以新語速重新開始
-    if (isReadingAloud) {
+    if (isReadingAloud && !isPaused) {
       startSpeakingFrom(currentCharIndex);
     }
   }
@@ -1398,29 +1418,82 @@ Scientists have discovered that trees communicate through these underground netw
     setTimeout(() => { isRestarting = false; window.speechSynthesis.speak(utter); }, 80);
   }
 
+  var isPaused = false;
+
+  function setReadAloudUI(state) {
+    // state: 'stopped' | 'playing' | 'paused'
+    const mainBtn  = document.getElementById('read-aloud-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const icon     = document.getElementById('read-aloud-icon');
+    const label    = document.getElementById('read-aloud-label');
+    const pauseIcon = document.getElementById('pause-icon');
+    mainBtn.classList.remove('playing', 'paused');
+    pauseBtn.style.display = 'none';
+    if (state === 'playing') {
+      mainBtn.classList.add('playing');
+      icon.textContent = '⏹';
+      label.textContent = '停止朗讀';
+      pauseBtn.style.display = 'flex';
+      pauseBtn.classList.remove('paused');
+      pauseBtn.classList.add('playing');
+      pauseIcon.textContent = '⏸';
+    } else if (state === 'paused') {
+      mainBtn.classList.add('paused');
+      icon.textContent = '▶';
+      label.textContent = '繼續朗讀';
+      pauseBtn.style.display = 'flex';
+      pauseBtn.classList.remove('playing');
+      pauseBtn.classList.add('paused');
+      pauseIcon.textContent = '⏹';
+    } else {
+      icon.textContent = '🔊';
+      label.textContent = '朗讀全文';
+    }
+  }
+
   function stopReadAloud() {
     window.speechSynthesis.cancel();
     isReadingAloud = false;
+    isPaused = false;
     currentCharIndex = 0;
     clearHighlights();
-    const btn = document.getElementById('read-aloud-btn');
-    btn.classList.remove('playing');
-    document.getElementById('read-aloud-icon').textContent = '🔊';
-    document.getElementById('read-aloud-label').textContent = '朗讀全文';
+    setReadAloudUI('stopped');
+  }
+
+  function pauseReadAloud() {
+    if (!isReadingAloud || isPaused) return;
+    window.speechSynthesis.cancel();
+    isPaused = true;
+    isReadingAloud = false;
+    // keep currentCharIndex at last word boundary
+    setReadAloudUI('paused');
+  }
+
+  function resumeReadAloud() {
+    if (!isPaused) return;
+    isPaused = false;
+    isReadingAloud = true;
+    setReadAloudUI('playing');
+    startSpeakingFrom(currentCharIndex);
   }
 
   document.getElementById('read-aloud-btn').addEventListener('click', () => {
     if (!window.speechSynthesis) { alert('你的瀏覽器不支援語音功能'); return; }
+    if (isPaused) { resumeReadAloud(); return; }
     if (isReadingAloud) { stopReadAloud(); return; }
     articleText = document.getElementById('article-body').innerText;
     if (!articleText.trim()) return;
     isReadingAloud = true;
+    isPaused = false;
     currentCharIndex = 0;
-    const btn = document.getElementById('read-aloud-btn');
-    btn.classList.add('playing');
-    document.getElementById('read-aloud-icon').textContent = '⏹';
-    document.getElementById('read-aloud-label').textContent = '停止朗讀';
+    setReadAloudUI('playing');
     startSpeakingFrom(0);
+  });
+
+  // pause btn: when playing → pause; when paused → stop
+  document.getElementById('pause-btn').addEventListener('click', () => {
+    if (isReadingAloud) { pauseReadAloud(); }
+    else if (isPaused) { stopReadAloud(); }
   });
 
   // ── Speak single word ──
