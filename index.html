@@ -3177,7 +3177,8 @@ ${convo}`;
 
 
   // ── RSS Feed Reader ──
-  const PROXY = 'https://api.allorigins.win/get?url=';
+  const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+  const CORSPROXY = 'https://corsproxy.io/?';
   var activeRssFeed = document.querySelector('#rss-source-filter .filter-btn.active')?.dataset.feed || '';
   var rssCache = {};
 
@@ -3211,14 +3212,15 @@ ${convo}`;
     btn.classList.add('spinning'); btn.textContent = '載入中...';
     el.innerHTML = '<div class="rss-loading">載入 VOA 文章中...</div>';
     try {
-      const res = await fetch(PROXY + encodeURIComponent(feedUrl));
+      const res = await fetch(RSS2JSON + encodeURIComponent(feedUrl) + '&count=8');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
-      const xml = new DOMParser().parseFromString(data.contents, 'text/xml');
-      const items = Array.from(xml.querySelectorAll('item')).slice(0, 8).map(item => ({
-        title: item.querySelector('title')?.textContent?.trim() || '',
-        link:  item.querySelector('link')?.textContent?.trim() || '',
-        desc:  item.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim() || '',
-        date:  item.querySelector('pubDate')?.textContent?.trim() || '',
+      if (data.status !== 'ok') throw new Error(data.message || 'RSS error');
+      const items = (data.items || []).map(item => ({
+        title: item.title || '',
+        link:  item.link || '',
+        desc:  (item.content || item.description || '').replace(/<[^>]+>/g,'').trim(),
+        date:  item.pubDate || '',
         feed:  feedUrl,
       }));
       rssCache[feedUrl] = items;
@@ -3258,9 +3260,9 @@ ${convo}`;
 
     try {
       // Fetch full article via CORS proxy
-      const res = await fetch(PROXY + encodeURIComponent(item.link));
-      const data = await res.json();
-      const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+      const res = await fetch(CORSPROXY + encodeURIComponent(item.link), { signal: AbortSignal.timeout(6000) });
+      const raw = await res.text();
+      const doc = new DOMParser().parseFromString(raw, 'text/html');
 
       // Extract article body text from VOA article page
       let text = '';
