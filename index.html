@@ -347,15 +347,40 @@
       font-size: 0.8rem;
       color: var(--ink-muted);
     }
+    .vocab-speed-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+    .vocab-speak {
+      background: rgba(192,98,47,0.08);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .vocab-speak:active { background: var(--accent-light); }
+
     .vocab-card {
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
       padding: 16px 18px;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
     .vocab-en {
       font-size: 1.1rem;
@@ -1351,6 +1376,44 @@
       30% { transform:translateY(-5px); }
     }
 
+    /* Voice Mode */
+    .mic-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .mic-btn.recording {
+      background: #fee2e2;
+      border-color: #ef4444;
+      animation: mic-pulse 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes mic-pulse {
+      from { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      to   { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+    }
+    .chat-top-btn.voice-on {
+      background: #ef4444;
+    }
+    .voice-status {
+      text-align: center;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      padding: 4px 0;
+      min-height: 20px;
+    }
+    .voice-status.active { color: #ef4444; }
+
     /* Feedback */
     .feedback-header {
       display:flex;
@@ -1685,6 +1748,18 @@
 
   <div id="vocab-view">
     <div class="vocab-count" id="vocab-count"></div>
+    <div class="vocab-speed-bar">
+      <span class="speed-label" style="color:var(--ink-muted);">語速</span>
+      <div class="speed-slider-wrap">
+        <div class="custom-slider" id="vocab-speed-slider">
+          <div class="custom-track">
+            <div class="custom-fill" id="vocab-speed-fill"></div>
+            <div class="custom-thumb" id="vocab-speed-thumb"></div>
+          </div>
+        </div>
+        <span class="speed-value" id="vocab-speed-value">0.9x</span>
+      </div>
+    </div>
     <div id="vocab-list"></div>
   </div>
 
@@ -1742,13 +1817,15 @@
     <div id="chat-screen" style="display:none;flex-direction:column;flex:1;">
       <div class="chat-topbar">
         <div class="chat-scenario-label" id="chat-scenario-label"></div>
-        <div style="display:flex;gap:8px;">
-          <button class="chat-top-btn" id="translate-toggle-btn">🌐 查翻譯</button>
+        <div style="display:flex;gap:6px;">
+          <button class="chat-top-btn" id="voice-mode-btn">🎤 語音</button>
+          <button class="chat-top-btn" id="translate-toggle-btn">🌐 翻譯</button>
           <button class="chat-top-btn danger" id="end-chat-btn">結束</button>
         </div>
       </div>
       <div id="chat-messages"></div>
       <div class="chat-input-bar">
+        <button class="mic-btn" id="mic-btn" style="display:none;">🎤</button>
         <textarea id="chat-input" class="chat-input" placeholder="Type your message in English..." rows="1"></textarea>
         <button class="chat-send-btn" id="chat-send-btn">➤</button>
       </div>
@@ -2353,10 +2430,11 @@ Scientists have discovered that trees communicate through these underground netw
     count.textContent = `已收錄 ${vocab.length} 個單字`;
     list.innerHTML = vocab.map((v, i) => `
       <div class="vocab-card">
-        <div>
+        <div style="flex:1;">
           <div class="vocab-en">${v.en}</div>
           <div class="vocab-zh">${v.zh}</div>
         </div>
+        <button class="vocab-speak" data-word="${v.en}">🔊</button>
         <button class="vocab-del" data-index="${i}">✕</button>
       </div>
     `).join('');
@@ -2367,6 +2445,15 @@ Scientists have discovered that trees communicate through these underground netw
         renderVocab();
       });
     });
+    list.querySelectorAll('.vocab-speak').forEach(btn => {
+      btn.addEventListener('click', () => {
+        speak(btn.dataset.word);
+        btn.textContent = '🔊';
+        btn.style.transform = 'scale(1.2)';
+        setTimeout(() => btn.style.transform = '', 200);
+      });
+    });
+    initVocabSpeedSlider();
   }
 
   // ── Library (永久單字庫) ──
@@ -3440,7 +3527,170 @@ ${convo}`;
   document.getElementById('rss-articles').innerHTML =
     '<div class="rss-loading">點「↺ 載入」取得 The Guardian 最新新聞</div>';
 
-    // ── PWA Service Worker ──
+    // ── Vocab Speed Slider ──
+  function initVocabSpeedSlider() {
+    const sEl = document.getElementById('vocab-speed-slider');
+    const fEl = document.getElementById('vocab-speed-fill');
+    const tEl = document.getElementById('vocab-speed-thumb');
+    const lEl = document.getElementById('vocab-speed-value');
+    if (!sEl || sEl._inited) return;
+    sEl._inited = true;
+
+    function setVocabRate(pct) {
+      pct = Math.max(0, Math.min(1, pct));
+      const raw = 0.1 + pct * (1.5 - 0.1);
+      speechRate = Math.round(raw / 0.1) * 0.1;
+      speechRate = Math.round(speechRate * 10) / 10;
+      const dp = (speechRate - 0.1) / (1.5 - 0.1) * 100;
+      fEl.style.width = dp + '%';
+      tEl.style.left = dp + '%';
+      lEl.textContent = speechRate.toFixed(1) + 'x';
+      // Sync main slider
+      const mainFill = document.getElementById('speed-fill');
+      const mainThumb = document.getElementById('speed-thumb');
+      const mainLabel = document.getElementById('speed-value');
+      if (mainFill) mainFill.style.width = dp + '%';
+      if (mainThumb) mainThumb.style.left = dp + '%';
+      if (mainLabel) mainLabel.textContent = speechRate.toFixed(1) + 'x';
+    }
+
+    function pctFromE(e) {
+      const rect = sEl.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      return (cx - rect.left) / rect.width;
+    }
+
+    sEl.addEventListener('touchstart', e => { e.preventDefault(); tEl.classList.add('dragging'); setVocabRate(pctFromE(e)); }, { passive:false });
+    sEl.addEventListener('touchmove',  e => { e.preventDefault(); setVocabRate(pctFromE(e)); }, { passive:false });
+    sEl.addEventListener('touchend',   () => tEl.classList.remove('dragging'));
+    sEl.addEventListener('mousedown', e => {
+      tEl.classList.add('dragging'); setVocabRate(pctFromE(e));
+      const mv = e2 => setVocabRate(pctFromE(e2));
+      const up = () => { tEl.classList.remove('dragging'); window.removeEventListener('mousemove',mv); window.removeEventListener('mouseup',up); };
+      window.addEventListener('mousemove', mv);
+      window.addEventListener('mouseup', up);
+    });
+    // Init to current speechRate
+    setVocabRate((speechRate - 0.1) / (1.5 - 0.1));
+  }
+
+  // ── Voice Chat ──
+  var voiceModeOn = false;
+  var isRecording = false;
+  var isSpeakingAI = false;
+  var recognition = null;
+
+  function initSpeechRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const r = new SR();
+    r.lang = 'en-US';
+    r.continuous = false;
+    r.interimResults = true;
+    return r;
+  }
+
+  function toggleVoiceMode() {
+    voiceModeOn = !voiceModeOn;
+    const btn = document.getElementById('voice-mode-btn');
+    const mic = document.getElementById('mic-btn');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+
+    if (voiceModeOn) {
+      btn.classList.add('voice-on');
+      btn.textContent = '🎤 ON';
+      mic.style.display = 'flex';
+      input.placeholder = '點麥克風說話，或打字...';
+    } else {
+      btn.classList.remove('voice-on');
+      btn.textContent = '🎤 語音';
+      mic.style.display = 'none';
+      input.placeholder = 'Type your message in English...';
+      stopRecording();
+      window.speechSynthesis?.cancel();
+    }
+  }
+
+  function startRecording() {
+    if (isRecording) { stopRecording(); return; }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('你的瀏覽器不支援語音輸入，請使用 Safari'); return; }
+    window.speechSynthesis?.cancel();
+    recognition = new SR();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    const mic = document.getElementById('mic-btn');
+    const input = document.getElementById('chat-input');
+    isRecording = true;
+    mic.classList.add('recording');
+    mic.textContent = '⏹';
+    input.placeholder = '說話中...';
+    input.value = '';
+
+    recognition.onresult = (e) => {
+      const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+      input.value = transcript;
+      if (e.results[e.results.length-1].isFinal) {
+        stopRecording();
+        if (transcript.trim()) sendUserMessage();
+      }
+    };
+    recognition.onerror = () => stopRecording();
+    recognition.onend = () => stopRecording();
+    recognition.start();
+  }
+
+  function stopRecording() {
+    if (!isRecording) return;
+    isRecording = false;
+    recognition?.stop();
+    const mic = document.getElementById('mic-btn');
+    if (mic) { mic.classList.remove('recording'); mic.textContent = '🎤'; }
+    const input = document.getElementById('chat-input');
+    if (input) input.placeholder = '點麥克風說話，或打字...';
+  }
+
+  function speakAIMessage(text) {
+    if (!voiceModeOn || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = speechRate;
+    isSpeakingAI = true;
+    utter.onend = () => {
+      isSpeakingAI = false;
+      if (voiceModeOn) {
+        setTimeout(() => { if (voiceModeOn && !isRecording) startRecording(); }, 600);
+      }
+    };
+    utter.onerror = () => { isSpeakingAI = false; };
+    setTimeout(() => window.speechSynthesis.speak(utter), 100);
+  }
+
+  document.getElementById('voice-mode-btn').addEventListener('click', toggleVoiceMode);
+  document.getElementById('mic-btn').addEventListener('click', startRecording);
+
+  // Patch addMessage to auto-speak AI messages in voice mode
+  const _origAddMessage = addMessage;
+  addMessage = function(role, text) {
+    _origAddMessage(role, text);
+    if (role === 'ai' && voiceModeOn) speakAIMessage(text);
+  };
+
+  // Stop voice when ending chat
+  const _origStopChat = typeof stopReadAloud !== 'undefined' ? stopReadAloud : null;
+  document.getElementById('end-chat-btn').addEventListener('click', () => {
+    stopRecording();
+    window.speechSynthesis?.cancel();
+    voiceModeOn = false;
+    const btn = document.getElementById('voice-mode-btn');
+    if (btn) { btn.classList.remove('voice-on'); btn.textContent = '🎤 語音'; }
+  }, true);
+
+  // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
