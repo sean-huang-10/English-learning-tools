@@ -3394,47 +3394,62 @@ ${convo}`;
 
   // ── Guardian API ──
   async function loadGuardianNews() {
-    const key = guardianKey || 'test';
+    if (!guardianKey) {
+      document.getElementById('rss-articles').innerHTML =
+        '<div class="rss-loading">請先在上方輸入並儲存 Guardian API Key<br><span style="font-size:0.75rem;"><a href="https://open-platform.theguardian.com/access/" target="_blank" style="color:var(--accent);">免費申請 →</a></span></div>';
+      document.getElementById('rss-refresh-btn').classList.remove('spinning');
+      document.getElementById('rss-refresh-btn').textContent = '↺ 載入';
+      return;
+    }
     const btn = document.getElementById('rss-refresh-btn');
     const el = document.getElementById('rss-articles');
     btn.classList.add('spinning'); btn.textContent = '載入中...';
     el.innerHTML = '<div class="rss-loading">從 The Guardian 載入新聞...</div>';
 
-    const url = 'https://content.guardianapis.com/search?api-key=' + key +
-      '&section=' + activeNewsTopic +
-      '&show-fields=trailText,bodyText,thumbnail' +
-      '&page-size=6&order-by=newest&format=json';
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('HTTP ' + res.status + (res.status===401?' (請輸入正確的 Guardian Key)':' (請確認網路)'));
-      const data = await res.json();
-      const results = data.response?.results || [];
-      if (!results.length) throw new Error('沒有找到文章');
+    // Try multiple field combos for compatibility
+    const urls = [
+      'https://content.guardianapis.com/search?api-key=' + guardianKey + '&section=' + activeNewsTopic + '&show-fields=trailText,body&page-size=6&order-by=newest&format=json',
+      'https://content.guardianapis.com/search?api-key=' + guardianKey + '&section=' + activeNewsTopic + '&show-fields=trailText&page-size=6&order-by=newest&format=json',
+    ];
 
-      const items = results.map(r => ({
-        id: 'guardian_' + r.id?.replace(/\//g,'_'),
-        title: r.webTitle,
-        titleZh: '',
-        trailText: (r.fields?.trailText || '').replace(/<[^>]+>/g,''),
-        bodyText: r.fields?.bodyText || '',
-        url: r.webUrl,
-        date: r.webPublicationDate?.slice(0,10) || '',
-        topic: activeNewsTopic,
-        icon: NEWS_ICONS[activeNewsTopic] || '📰',
-        source: 'The Guardian',
-        isReal: true,
-      }));
+    let lastError = '';
+    for (const url of urls) {
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) {
+          const msg = data.message || ('HTTP ' + res.status);
+          if (res.status === 401 || res.status === 403) {
+            el.innerHTML = '<div class="rss-loading">❌ API Key 無效<br><span style="font-size:0.75rem;">請確認 Key 正確，並已收到 Guardian 的確認信</span></div>';
+            btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
+            return;
+          }
+          lastError = msg; continue;
+        }
+        const results = data.response?.results || [];
+        if (!results.length) { lastError = '沒有文章'; continue; }
 
-      const cacheKey = 'guardian_' + activeNewsTopic;
-      newsCache[cacheKey] = items;
-      renderNewsItems(items);
-    } catch(e) {
-      if (!guardianKey) {
-        el.innerHTML = '<div class="rss-loading">需要 Guardian API Key<br><span style="font-size:0.75rem;">請在上方「探索」頁面輸入免費的 Guardian Key</span></div>';
-      } else {
-        el.innerHTML = '<div class="rss-loading">載入失敗：' + e.message + '</div>';
-      }
+        const items = results.map(r => ({
+          id: 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+          title: r.webTitle || '',
+          titleZh: '',
+          trailText: (r.fields?.trailText || '').replace(/<[^>]+>/g,'').trim(),
+          bodyText: (r.fields?.body || '').replace(/<[^>]+>/g,'').trim(),
+          url: r.webUrl || '',
+          date: (r.webPublicationDate || '').slice(0,10),
+          topic: activeNewsTopic,
+          icon: NEWS_ICONS[activeNewsTopic] || '📰',
+          source: 'The Guardian',
+          isReal: true,
+        }));
+
+        newsCache['guardian_' + activeNewsTopic] = items;
+        renderNewsItems(items);
+        btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
+        return;
+      } catch(e) { lastError = e.message; }
     }
+    el.innerHTML = '<div class="rss-loading">載入失敗：' + lastError + '</div>';
     btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
   }
 
@@ -3497,31 +3512,44 @@ ${convo}`;
   }
 
   async function openNewsArticle(item) {
-    const text = item.bodyText || item.trailText || '';
-    if (text && text.length > 100) {
-      renderArticle(text);
+    // Use bodyText if long enough, otherwise expand with Gemini
+    const rawText = (item.bodyText || item.trailText || '').trim();
+    if (rawText.length > 200) {
+      renderArticle(rawText);
       switchTab('read');
-      document.getElementById('word-count').textContent = (item.source||'Guardian') + '　' + item.date;
+      document.getElementById('word-count').textContent = (item.source||'News') + '　' + item.date;
       return;
     }
-    // Short text — use Gemini to expand
-    if (!anthropicKey) { renderArticle(item.trailText || item.title); switchTab('read'); return; }
     switchTab('read');
-    document.getElementById('article-body').innerHTML = '<div class="translation-loading" style="padding:40px 0;">正在擴寫文章...</div>';
+    document.getElementById('article-body').innerHTML = '<div class="translation-loading" style="padding:40px 0;">正在根據新聞標題生成完整文章...</div>';
+
+    if (!anthropicKey) {
+      renderArticle(rawText || item.title);
+      document.getElementById('word-count').textContent = (item.source||'News') + '　' + item.date;
+      return;
+    }
     try {
-      const prompt = 'Rewrite this news headline into a B1 CEFR English learning article (250-300 words): ' + item.title + '. Context: ' + (item.trailText||'');
+      const parts = [
+        'You are an English learning article writer.',
+        'Based on this real news headline, write a complete B1 CEFR English learning article (250-300 words).',
+        'Make it factual, clear, and educational.',
+        'Headline: ' + item.title,
+        item.trailText ? 'Context: ' + item.trailText : '',
+      ].filter(Boolean).join(' ');
+
       const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
         method:'POST',
         headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
-        body: JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.5,maxOutputTokens:500}})
+        body: JSON.stringify({contents:[{parts:[{text:parts}]}],generationConfig:{temperature:0.5,maxOutputTokens:600}})
       });
       const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
       const expanded = data.candidates[0].content.parts[0].text.trim();
       renderArticle(expanded);
     } catch(e) {
-      renderArticle(item.trailText || item.title);
+      renderArticle(rawText || item.title);
     }
-    document.getElementById('word-count').textContent = (item.source||'Guardian') + '　' + item.date;
+    document.getElementById('word-count').textContent = (item.source||'News') + '　' + item.date;
   }
 
   document.getElementById('rss-articles').innerHTML =
