@@ -831,6 +831,44 @@
     .daily-refresh:active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
     .daily-refresh.spinning { opacity: 0.5; pointer-events: none; }
 
+    .news-source-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .nsrc-btn {
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .nsrc-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .art-read-btn {
+      margin-top: 8px;
+      background: var(--accent-light);
+      border: 1px solid #e8c4a8;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.78rem;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .art-read-btn:active { opacity: 0.75; }
+
     .rss-header {
       display: flex;
       align-items: center;
@@ -1488,15 +1526,21 @@
 <!-- AI 新聞生成 -->
 <div class="rss-header">
   <div class="daily-title">📡 今日英文新聞</div>
-  <button class="daily-refresh" id="rss-refresh-btn">↺ 搜尋新聞</button>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <div class="news-source-toggle">
+      <button class="nsrc-btn active" data-src="guardian">🇬🇧 Guardian</button>
+      <button class="nsrc-btn" data-src="gemini">✨ AI</button>
+    </div>
+    <button class="daily-refresh" id="rss-refresh-btn">↺ 載入</button>
+  </div>
 </div>
 <div class="filter-row" id="rss-source-filter" style="padding-bottom:2px;">
-  <button class="filter-btn active" data-topic="World News">🌍 國際</button>
-  <button class="filter-btn" data-topic="Health">🏥 健康</button>
-  <button class="filter-btn" data-topic="Science">🔬 科學</button>
-  <button class="filter-btn" data-topic="Technology">💻 科技</button>
-  <button class="filter-btn" data-topic="Business">💹 財經</button>
-  <button class="filter-btn" data-topic="Culture">🎭 文化</button>
+  <button class="filter-btn active" data-topic="world" data-gemini-topic="World News">🌍 國際</button>
+  <button class="filter-btn" data-topic="lifeandstyle" data-gemini-topic="Health">🏥 健康</button>
+  <button class="filter-btn" data-topic="science" data-gemini-topic="Science">🔬 科學</button>
+  <button class="filter-btn" data-topic="technology" data-gemini-topic="Technology">💻 科技</button>
+  <button class="filter-btn" data-topic="business" data-gemini-topic="Business">💹 財經</button>
+  <button class="filter-btn" data-topic="culture" data-gemini-topic="Culture">🎭 文化</button>
 </div>
 <div id="rss-articles"></div>
 
@@ -1534,6 +1578,11 @@
     <button class="api-key-save" id="api-key-save">儲存</button>
   </div>
   <div id="api-key-status"></div>
+  <div class="api-key-row" id="guardian-key-row">
+    <input type="password" id="guardian-key-input" class="api-key-input" placeholder="The Guardian API Key（選填）" autocomplete="off" />
+    <button class="api-key-save" id="guardian-key-save">儲存</button>
+  </div>
+  <div id="guardian-key-status"></div>
   <button class="btn-primary" id="gen-btn" style="margin-top:0;">
     <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
   </button>
@@ -3178,137 +3227,218 @@ ${convo}`;
 
 
   // ── RSS Feed Reader ──
-  // ── AI News Generation ──
-  var activeNewsTopic = 'World News';
+  // ── News (Guardian + AI fallback) ──
+  var activeNewsTopic = 'world';
+  var activeGeminiTopic = 'World News';
+  var activeNewsSource = 'guardian';
   var newsCache = {};
+  var guardianKey = localStorage.getItem('wordlens-guardian-key') || '';
 
   const NEWS_ICONS = {
-    'World News':'🌍','Health':'🏥','Science':'🔬',
-    'Technology':'💻','Business':'💹','Culture':'🎭'
+    'world':'🌍','lifeandstyle':'🏥','science':'🔬',
+    'technology':'💻','business':'💹','culture':'🎭'
+  };
+  const GUARDIAN_SECTION_NAMES = {
+    'world':'World','lifeandstyle':'Health & Life','science':'Science',
+    'technology':'Technology','business':'Business','culture':'Culture'
   };
 
+  // Guardian Key UI
+  function updateGuardianKeyUI() {
+    const row = document.getElementById('guardian-key-row');
+    const status = document.getElementById('guardian-key-status');
+    if (!row || !status) return;
+    if (guardianKey) {
+      row.style.display = 'none';
+      status.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">✓ Guardian Key 已儲存 <span id="clear-guardian-key" style="cursor:pointer;text-decoration:underline;">清除</span></span>';
+      document.getElementById('clear-guardian-key')?.addEventListener('click', () => {
+        guardianKey = '';
+        localStorage.removeItem('wordlens-guardian-key');
+        row.style.display = 'flex';
+        status.innerHTML = '<span style="color:rgba(255,255,255,0.45);font-size:0.75rem;">👉 免費申請 <a href="https://open-platform.theguardian.com/access/" target="_blank" style="color:#fbb36a;">Guardian API Key</a></span>';
+      });
+    } else {
+      row.style.display = 'flex';
+      status.innerHTML = '<span style="color:rgba(255,255,255,0.45);font-size:0.75rem;">👉 免費申請 <a href="https://open-platform.theguardian.com/access/" target="_blank" style="color:#fbb36a;">Guardian API Key</a>（可選）</span>';
+    }
+  }
+
+  document.getElementById('guardian-key-save')?.addEventListener('click', () => {
+    const val = document.getElementById('guardian-key-input')?.value.trim();
+    if (!val) return;
+    guardianKey = val;
+    localStorage.setItem('wordlens-guardian-key', val);
+    updateGuardianKeyUI();
+  });
+  updateGuardianKeyUI();
+
+  // Source toggle
+  document.querySelectorAll('.nsrc-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.nsrc-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeNewsSource = btn.dataset.src;
+    });
+  });
+
+  // Topic filter
   document.querySelectorAll('#rss-source-filter .filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#rss-source-filter .filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeNewsTopic = btn.dataset.topic;
-      renderNewsItems(newsCache[activeNewsTopic] || []);
+      activeGeminiTopic = btn.dataset.geminiTopic || btn.dataset.topic;
+      const cacheKey = activeNewsSource + '_' + activeNewsTopic;
+      if (newsCache[cacheKey]) renderNewsItems(newsCache[cacheKey]);
     });
   });
 
-  document.getElementById('rss-refresh-btn').addEventListener('click', generateNews);
+  document.getElementById('rss-refresh-btn').addEventListener('click', loadNews);
 
-  async function generateNews() {
+  async function loadNews() {
+    const cacheKey = activeNewsSource + '_' + activeNewsTopic;
+    delete newsCache[cacheKey];
+    if (activeNewsSource === 'guardian') {
+      await loadGuardianNews();
+    } else {
+      await generateAINews();
+    }
+  }
+
+  // ── Guardian API ──
+  async function loadGuardianNews() {
+    const key = guardianKey || 'test';
+    const btn = document.getElementById('rss-refresh-btn');
+    const el = document.getElementById('rss-articles');
+    btn.classList.add('spinning'); btn.textContent = '載入中...';
+    el.innerHTML = '<div class="rss-loading">從 The Guardian 載入新聞...</div>';
+
+    const url = 'https://content.guardianapis.com/search?api-key=' + key +
+      '&section=' + activeNewsTopic +
+      '&show-fields=trailText,bodyText,thumbnail' +
+      '&page-size=6&order-by=newest&format=json';
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status + (res.status===401?' (請輸入正確的 Guardian Key)':' (請確認網路)'));
+      const data = await res.json();
+      const results = data.response?.results || [];
+      if (!results.length) throw new Error('沒有找到文章');
+
+      const items = results.map(r => ({
+        id: 'guardian_' + r.id?.replace(/\//g,'_'),
+        title: r.webTitle,
+        titleZh: '',
+        trailText: (r.fields?.trailText || '').replace(/<[^>]+>/g,''),
+        bodyText: r.fields?.bodyText || '',
+        url: r.webUrl,
+        date: r.webPublicationDate?.slice(0,10) || '',
+        topic: activeNewsTopic,
+        icon: NEWS_ICONS[activeNewsTopic] || '📰',
+        source: 'The Guardian',
+        isReal: true,
+      }));
+
+      const cacheKey = 'guardian_' + activeNewsTopic;
+      newsCache[cacheKey] = items;
+      renderNewsItems(items);
+    } catch(e) {
+      if (!guardianKey) {
+        el.innerHTML = '<div class="rss-loading">需要 Guardian API Key<br><span style="font-size:0.75rem;">請在上方「探索」頁面輸入免費的 Guardian Key</span></div>';
+      } else {
+        el.innerHTML = '<div class="rss-loading">載入失敗：' + e.message + '</div>';
+      }
+    }
+    btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
+  }
+
+  // ── Gemini AI News ──
+  async function generateAINews() {
     if (!anthropicKey) {
       document.getElementById('rss-articles').innerHTML =
-        '<div class="rss-loading">請先在「用AI生成文章」區設定 Gemini Key</div>';
+        '<div class="rss-loading">請先設定 Gemini API Key</div>';
       return;
     }
     const btn = document.getElementById('rss-refresh-btn');
     const el = document.getElementById('rss-articles');
-    btn.classList.add('spinning'); btn.textContent = '搜尋新聞中...';
-    el.innerHTML = '<div class="rss-loading">正在搜尋今日真實新聞並改寫...</div>';
-
+    btn.classList.add('spinning'); btn.textContent = '生成中...';
+    el.innerHTML = '<div class="rss-loading">AI 正在搜尋並撰寫今日新聞...</div>';
     const today = new Date().toLocaleDateString('zh-TW');
-    const topicQuery = {
-      'World News':'international world news today',
-      'Health':'health medical news today',
-      'Science':'science discovery news today',
-      'Technology':'technology news today',
-      'Business':'business economy news today',
-      'Culture':'culture arts lifestyle news today'
-    }[activeNewsTopic] || activeNewsTopic + ' news today';
-
-    const prompt = 'Search for 4 recent real news stories about ' + topicQuery + '. For each story you find, rewrite it as a B1 CEFR English learning article (200-250 words) suitable for intermediate learners. Use clear simple sentences. Return ONLY a valid JSON array with no markdown: [{"title":"Original-style English headline","titleZh":"中文標題","source":"News source name","content":"full rewritten article 200-250 words"}]';
-
+    const prompt = 'Search for 4 recent real news stories about ' + activeGeminiTopic + ' today. For each story, rewrite as a B1 CEFR English learning article (200-250 words). Return ONLY JSON array: [{"title":"headline","titleZh":"中文標題","source":"source name","trailText":"1 sentence summary","bodyText":"full article 200-250 words"}]';
     try {
-      // Use Gemini with Google Search grounding for real news
       const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
         method:'POST',
         headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
-        body: JSON.stringify({
-          contents:[{parts:[{text:prompt}]}],
-          tools:[{'google_search':{}}],
-          generationConfig:{temperature:0.4,maxOutputTokens:2000}
-        })
+        body: JSON.stringify({contents:[{parts:[{text:prompt}]}],tools:[{'google_search':{}}],generationConfig:{temperature:0.4,maxOutputTokens:2000}})
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error.message);
-
-      const rawText = data.candidates[0].content.parts
-        .filter(p => p.text).map(p => p.text).join('');
+      const rawText = data.candidates[0].content.parts.filter(p=>p.text).map(p=>p.text).join('');
       const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) throw new Error('無法解析回應格式');
-      const articles = JSON.parse(jsonMatch[0]);
-
-      const items = articles.map((a,i) => ({
-        ...a,
-        id: 'news_' + Date.now() + '_' + i,
-        topic: activeNewsTopic,
-        icon: NEWS_ICONS[activeNewsTopic] || '📰',
-        date: today,
-        isReal: true,
-      }));
-      newsCache[activeNewsTopic] = items;
+      if (!jsonMatch) throw new Error('格式錯誤');
+      const arts = JSON.parse(jsonMatch[0]);
+      const items = arts.map((a,i) => ({...a, id:'ai_'+Date.now()+'_'+i, topic:activeNewsTopic, icon:NEWS_ICONS[activeNewsTopic]||'📰', date:today, isReal:true}));
+      newsCache['gemini_'+activeNewsTopic] = items;
       renderNewsItems(items);
     } catch(e) {
-      // Fallback to gemini-3.1-flash-lite without search
-      try {
-        const fallbackPrompt = 'Generate 4 realistic current English news articles about ' + activeNewsTopic + ' at B1 CEFR level (200-250 words each). Return ONLY JSON array: [{"title":"headline","titleZh":"中文標題","source":"VOA Learning English","content":"article text"}]';
-        const res2 = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
-          method:'POST',
-          headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
-          body: JSON.stringify({contents:[{parts:[{text:fallbackPrompt}]}],generationConfig:{temperature:0.8,maxOutputTokens:2000}})
-        });
-        const d2 = await res2.json();
-        if (d2.error) throw new Error(d2.error.message);
-        const raw2 = d2.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
-        const arts2 = JSON.parse(raw2);
-        const items2 = arts2.map((a,i) => ({...a, id:'news_'+Date.now()+'_'+i, topic:activeNewsTopic, icon:NEWS_ICONS[activeNewsTopic]||'📰', date:today}));
-        newsCache[activeNewsTopic] = items2;
-        renderNewsItems(items2);
-      } catch(e2) {
-        el.innerHTML = '<div class="rss-loading">搜尋失敗：' + e.message + '</div>';
-      }
+      el.innerHTML = '<div class="rss-loading">生成失敗：' + e.message + '</div>';
     }
-    btn.classList.remove('spinning'); btn.textContent = '↺ 搜尋新聞';
+    btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
   }
 
   function renderNewsItems(items) {
     const el = document.getElementById('rss-articles');
-    if (!items.length) {
-      el.innerHTML = '<div class="rss-loading">點「↺ 生成新聞」取得今日英文新聞</div>';
-      return;
-    }
+    if (!items.length) { el.innerHTML = '<div class="rss-loading">沒有文章</div>'; return; }
     el.innerHTML = items.map((item,i) =>
-      '<div class="rss-card" data-index="' + i + '" data-topic="' + item.topic + '">' +
-        '<div class="rss-icon" style="background:linear-gradient(135deg,#c0622f,#e8854a);">' + item.icon + '</div>' +
+      '<div class="rss-card" data-index="' + i + '" data-cache="' + (activeNewsSource+'_'+activeNewsTopic) + '">' +
+        '<div class="rss-icon" style="background:linear-gradient(135deg,#1a237e,#1565c0);">' + item.icon + '</div>' +
         '<div style="flex:1;min-width:0;">' +
-          '<span class="art-style-badge badge-news">新聞</span>' +
-          '<div class="rss-title">' + item.titleZh + '</div>' +
-          '<div class="art-preview">' + item.title + '</div>' +
-          '<div class="rss-meta">' + (item.source||'新聞') + (item.isReal?' · 🌐 真實新聞':'') + ' · ' + item.date + '</div>' +
+          '<span class="art-style-badge badge-news">' + (item.source||'News') + '</span>' +
+          '<div class="rss-title">' + item.title + '</div>' +
+          (item.trailText ? '<div class="art-preview">' + item.trailText.slice(0,100) + '...</div>' : '') +
+          '<div class="rss-meta">' + item.date + (item.isReal?' · 🌐 真實新聞':'') + '</div>' +
         '</div>' +
       '</div>'
     ).join('');
     el.querySelectorAll('.rss-card').forEach(card => {
       card.addEventListener('click', () => {
-        const topic = card.dataset.topic;
-        const item = newsCache[topic]?.[parseInt(card.dataset.index)];
+        const cacheKey = card.dataset.cache;
+        const allItems = newsCache[cacheKey] || newsCache['guardian_'+activeNewsTopic] || newsCache['gemini_'+activeNewsTopic] || [];
+        const item = allItems[parseInt(card.dataset.index)];
         if (item) openNewsArticle(item);
       });
     });
   }
 
-  function openNewsArticle(item) {
-    renderArticle(item.content);
+  async function openNewsArticle(item) {
+    const text = item.bodyText || item.trailText || '';
+    if (text && text.length > 100) {
+      renderArticle(text);
+      switchTab('read');
+      document.getElementById('word-count').textContent = (item.source||'Guardian') + '　' + item.date;
+      return;
+    }
+    // Short text — use Gemini to expand
+    if (!anthropicKey) { renderArticle(item.trailText || item.title); switchTab('read'); return; }
     switchTab('read');
-    document.getElementById('word-count').textContent = item.titleZh + '　B1';
+    document.getElementById('article-body').innerHTML = '<div class="translation-loading" style="padding:40px 0;">正在擴寫文章...</div>';
+    try {
+      const prompt = 'Rewrite this news headline into a B1 CEFR English learning article (250-300 words): ' + item.title + '. Context: ' + (item.trailText||'');
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
+        body: JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.5,maxOutputTokens:500}})
+      });
+      const data = await res.json();
+      const expanded = data.candidates[0].content.parts[0].text.trim();
+      renderArticle(expanded);
+    } catch(e) {
+      renderArticle(item.trailText || item.title);
+    }
+    document.getElementById('word-count').textContent = (item.source||'Guardian') + '　' + item.date;
   }
 
-  // init
   document.getElementById('rss-articles').innerHTML =
-    '<div class="rss-loading">點「↺ 搜尋新聞」取得今日英文新聞（需要 Gemini Key）</div>';
+    '<div class="rss-loading">點「↺ 載入」取得 The Guardian 最新新聞</div>';
 
     // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
