@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
@@ -554,6 +553,33 @@
       margin-bottom: 8px;
       font-style: italic;
     }
+    .popup-phrase-box {
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-left: 2px solid var(--accent);
+    }
+    .popup-phrase-label {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .popup-phrase-en {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #fbbf7a;
+      margin-bottom: 2px;
+    }
+    .popup-phrase-zh {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.75);
+    }
+
     .popup-example {
       font-family: 'Lora', serif;
       font-size: 0.82rem;
@@ -1461,6 +1487,165 @@
     .feedback-item .wrong { color:#c0392b; font-family:'Lora',serif; }
     .feedback-item .right { color:#2d7a4f; font-family:'Lora',serif; }
 
+    /* ── Mode Toggle ── */
+    .mode-toggle-bar {
+      display: flex;
+      gap: 6px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+    }
+    .mode-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      padding: 8px 12px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mode-btn.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    /* ── Sentence Highlight ── */
+    .sentence {
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s;
+      padding: 1px 0;
+    }
+    .sentence:hover { background: rgba(192,98,47,0.07); }
+    .sentence.selected { background: rgba(192,98,47,0.15); }
+
+    /* ── Sentence Panel ── */
+    .sent-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -8px 32px rgba(44,40,37,0.18);
+      z-index: 300;
+      max-height: 70dvh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    .sent-panel-handle {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 10px auto 0;
+      flex-shrink: 0;
+    }
+    .sent-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px 8px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .sent-panel-title {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+    .sent-panel-close {
+      background: var(--border);
+      border: none;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      color: var(--ink-muted);
+    }
+    .sent-panel-body {
+      overflow-y: auto;
+      padding: 14px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .sent-section { display: flex; flex-direction: column; gap: 6px; }
+    .sent-section-label {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+    .sent-orig {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--ink);
+      font-style: italic;
+    }
+    .sent-zh {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 1rem;
+      color: var(--ink);
+      line-height: 1.65;
+    }
+    .grammar-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 8px 10px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-bottom: 4px;
+    }
+    .grammar-part {
+      font-size: 0.88rem;
+      color: var(--ink);
+      font-weight: 600;
+      min-width: 0;
+      flex: 1;
+    }
+    .grammar-role {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.78rem;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .grammar-note {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      width: 100%;
+      margin-top: 2px;
+    }
+    .sent-phrases-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .phrase-chip {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .phrase-en { font-size: 0.88rem; font-weight: 600; color: var(--ink); }
+    .phrase-zh { font-family: 'Noto Sans TC', sans-serif; font-size: 0.75rem; color: var(--ink-muted); }
+
     /* ── Reading Progress Bar ── */
     #reading-progress-bar {
       position: sticky;
@@ -1556,7 +1741,6 @@
       animation: savePulse 0.3s ease;
     }
   </style>
-
 </head>
 <body>
 
@@ -1585,124 +1769,124 @@
     </div>
     <div id="daily-articles"></div>
 
-```
-<!-- AI 新聞生成 -->
-<div class="rss-header">
-  <div class="daily-title">📡 今日英文新聞</div>
-  <div style="display:flex;gap:6px;align-items:center;">
-    <div class="news-source-toggle">
-      <button class="nsrc-btn active" data-src="guardian">🇬🇧 Guardian</button>
-      <button class="nsrc-btn" data-src="gemini">✨ AI</button>
+    <!-- AI 新聞生成 -->
+    <div class="rss-header">
+      <div class="daily-title">📡 今日英文新聞</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div class="news-source-toggle">
+          <button class="nsrc-btn active" data-src="guardian">🇬🇧 Guardian</button>
+          <button class="nsrc-btn" data-src="gemini">✨ AI</button>
+        </div>
+        <button class="daily-refresh" id="rss-refresh-btn">↺ 載入</button>
+      </div>
     </div>
-    <button class="daily-refresh" id="rss-refresh-btn">↺ 載入</button>
-  </div>
-</div>
-<div class="filter-row" id="rss-source-filter" style="padding-bottom:2px;">
-  <button class="filter-btn active" data-topic="world" data-gemini-topic="World News">🌍 國際</button>
-  <button class="filter-btn" data-topic="lifeandstyle" data-gemini-topic="Health">🏥 健康</button>
-  <button class="filter-btn" data-topic="science" data-gemini-topic="Science">🔬 科學</button>
-  <button class="filter-btn" data-topic="technology" data-gemini-topic="Technology">💻 科技</button>
-  <button class="filter-btn" data-topic="business" data-gemini-topic="Business">💹 財經</button>
-  <button class="filter-btn" data-topic="culture" data-gemini-topic="Culture">🎭 文化</button>
-</div>
-<div id="rss-articles"></div>
+    <div class="filter-row" id="rss-source-filter" style="padding-bottom:2px;">
+      <button class="filter-btn active" data-topic="world" data-gemini-topic="World News">🌍 國際</button>
+      <button class="filter-btn" data-topic="lifeandstyle" data-gemini-topic="Health">🏥 健康</button>
+      <button class="filter-btn" data-topic="science" data-gemini-topic="Science">🔬 科學</button>
+      <button class="filter-btn" data-topic="technology" data-gemini-topic="Technology">💻 科技</button>
+      <button class="filter-btn" data-topic="business" data-gemini-topic="Business">💹 財經</button>
+      <button class="filter-btn" data-topic="culture" data-gemini-topic="Culture">🎭 文化</button>
+    </div>
+    <div id="rss-articles"></div>
 
-<div class="gen-card" id="gen-section">
-  <div class="gen-title">✨ 用AI幫我生成文章</div>
-  <div class="gen-filters">
-    <select class="gen-select" id="gen-level">
-      <option value="A1">A1 入門</option>
-      <option value="A2">A2 基礎</option>
-      <option value="B1" selected>B1 中級</option>
-      <option value="B2">B2 中高級</option>
-      <option value="C1">C1 高級</option>
-    </select>
-    <select class="gen-select" id="gen-topic">
-      <optgroup label="── 新聞 / 雜誌 ──">
-      <option value="World News">🌍 世界新聞</option>
-      <option value="Business">💹 商業財經</option>
-      <option value="Health">🏥 健康醫療</option>
-      <option value="Lifestyle">✨ 生活風格</option>
-      <option value="Tech News">📱 科技新知</option>
-      </optgroup>
-      <optgroup label="── 一般主題 ──">
-      <option value="Science">🔬 科學</option>
-      <option value="Culture">🎭 文化</option>
-      <option value="Travel">✈️ 旅遊</option>
-      <option value="Food">🍜 飲食</option>
-      <option value="Nature">🌿 自然</option>
-      <option value="History">🏛️ 歷史</option>
-      <option value="Sports">⚽ 運動</option>
-      </optgroup>
-    </select>
-  </div>
-  <div class="api-key-row" id="api-key-row">
-    <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
-    <button class="api-key-save" id="api-key-save">儲存</button>
-  </div>
-  <div id="api-key-status"></div>
-  <div class="api-key-row" id="guardian-key-row">
-    <input type="password" id="guardian-key-input" class="api-key-input" placeholder="The Guardian API Key（選填）" autocomplete="off" />
-    <button class="api-key-save" id="guardian-key-save">儲存</button>
-  </div>
-  <div id="guardian-key-status"></div>
-  <button class="btn-primary" id="gen-btn" style="margin-top:0;">
-    <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
-  </button>
-</div>
+    <div class="gen-card" id="gen-section">
+      <div class="gen-title">✨ 用AI幫我生成文章</div>
+      <div class="gen-filters">
+        <select class="gen-select" id="gen-level">
+          <option value="A1">A1 入門</option>
+          <option value="A2">A2 基礎</option>
+          <option value="B1" selected>B1 中級</option>
+          <option value="B2">B2 中高級</option>
+          <option value="C1">C1 高級</option>
+        </select>
+        <select class="gen-select" id="gen-topic">
+          <optgroup label="── 新聞 / 雜誌 ──">
+          <option value="World News">🌍 世界新聞</option>
+          <option value="Business">💹 商業財經</option>
+          <option value="Health">🏥 健康醫療</option>
+          <option value="Lifestyle">✨ 生活風格</option>
+          <option value="Tech News">📱 科技新知</option>
+          </optgroup>
+          <optgroup label="── 一般主題 ──">
+          <option value="Science">🔬 科學</option>
+          <option value="Culture">🎭 文化</option>
+          <option value="Travel">✈️ 旅遊</option>
+          <option value="Food">🍜 飲食</option>
+          <option value="Nature">🌿 自然</option>
+          <option value="History">🏛️ 歷史</option>
+          <option value="Sports">⚽ 運動</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="api-key-row" id="api-key-row">
+        <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
+        <button class="api-key-save" id="api-key-save">儲存</button>
+      </div>
+      <div id="api-key-status"></div>
+      <div class="api-key-row" id="guardian-key-row">
+        <input type="password" id="guardian-key-input" class="api-key-input" placeholder="The Guardian API Key（選填）" autocomplete="off" />
+        <button class="api-key-save" id="guardian-key-save">儲存</button>
+      </div>
+      <div id="guardian-key-status"></div>
+      <button class="btn-primary" id="gen-btn" style="margin-top:0;">
+        <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
+      </button>
+    </div>
 
-<!-- Paste custom -->
-<details class="paste-section">
-  <summary>📋 貼上自己的文章</summary>
-  <div class="paste-inner">
-    <textarea id="article-input" placeholder="Paste your English article here..."></textarea>
-    <button class="btn-primary" id="start-btn"><span>📖</span> 開始閱讀</button>
-  </div>
-</details>
+    <!-- Paste custom -->
+    <details class="paste-section">
+      <summary>📋 貼上自己的文章</summary>
+      <div class="paste-inner">
+        <textarea id="article-input" placeholder="Paste your English article here..."></textarea>
+        <button class="btn-primary" id="start-btn"><span>📖</span> 開始閱讀</button>
+      </div>
+    </details>
 
-<!-- Level filter -->
-<div class="filter-row" id="level-filter">
-  <button class="filter-btn active" data-level="all">全部</button>
-  <button class="filter-btn" data-level="A1">A1</button>
-  <button class="filter-btn" data-level="A2">A2</button>
-  <button class="filter-btn" data-level="B1">B1</button>
-  <button class="filter-btn" data-level="B2">B2</button>
-  <button class="filter-btn" data-level="C1">C1</button>
-</div>
+    <!-- Level filter -->
+    <div class="filter-row" id="level-filter">
+      <button class="filter-btn active" data-level="all">全部</button>
+      <button class="filter-btn" data-level="A1">A1</button>
+      <button class="filter-btn" data-level="A2">A2</button>
+      <button class="filter-btn" data-level="B1">B1</button>
+      <button class="filter-btn" data-level="B2">B2</button>
+      <button class="filter-btn" data-level="C1">C1</button>
+    </div>
 
-<!-- Topic filter -->
-<div class="filter-row topic-filter" id="topic-filter">
-  <button class="filter-btn active" data-topic="all">全部</button>
-  <button class="filter-btn" data-topic="World News">🌍 新聞</button>
-  <button class="filter-btn" data-topic="Business">💹 財經</button>
-  <button class="filter-btn" data-topic="Health">🏥 健康</button>
-  <button class="filter-btn" data-topic="Lifestyle">✨ 生活</button>
-  <button class="filter-btn" data-topic="Tech News">📱 科技</button>
-  <button class="filter-btn" data-topic="Science">🔬 科學</button>
-  <button class="filter-btn" data-topic="Culture">🎭 文化</button>
-  <button class="filter-btn" data-topic="Travel">✈️ 旅遊</button>
-  <button class="filter-btn" data-topic="Food">🍜 飲食</button>
-  <button class="filter-btn" data-topic="Nature">🌿 自然</button>
-  <button class="filter-btn" data-topic="History">🏛️ 歷史</button>
-  <button class="filter-btn" data-topic="Sports">⚽ 運動</button>
-</div>
+    <!-- Topic filter -->
+    <div class="filter-row topic-filter" id="topic-filter">
+      <button class="filter-btn active" data-topic="all">全部</button>
+      <button class="filter-btn" data-topic="World News">🌍 新聞</button>
+      <button class="filter-btn" data-topic="Business">💹 財經</button>
+      <button class="filter-btn" data-topic="Health">🏥 健康</button>
+      <button class="filter-btn" data-topic="Lifestyle">✨ 生活</button>
+      <button class="filter-btn" data-topic="Tech News">📱 科技</button>
+      <button class="filter-btn" data-topic="Science">🔬 科學</button>
+      <button class="filter-btn" data-topic="Culture">🎭 文化</button>
+      <button class="filter-btn" data-topic="Travel">✈️ 旅遊</button>
+      <button class="filter-btn" data-topic="Food">🍜 飲食</button>
+      <button class="filter-btn" data-topic="Nature">🌿 自然</button>
+      <button class="filter-btn" data-topic="History">🏛️ 歷史</button>
+      <button class="filter-btn" data-topic="Sports">⚽ 運動</button>
+    </div>
 
-<!-- Article list -->
-<div id="article-list"></div>
-```
-
+    <!-- Article list -->
+    <div id="article-list"></div>
   </div>
 
   <!-- Read View -->
-
   <div id="read-view">
     <div class="article-header">
       <button class="back-btn" id="back-btn">← 返回</button>
       <div class="word-count" id="word-count"></div>
     </div>
-    <div class="hint-bar">
+    <div class="mode-toggle-bar">
+      <button class="mode-btn active" id="mode-word-btn">👆 單字</button>
+      <button class="mode-btn" id="mode-sent-btn">📝 句子</button>
+    </div>
+    <div class="hint-bar" id="hint-bar">
       <span>👆</span>
-      <span>點任何單字查看翻譯</span>
+      <span id="hint-text">點任何單字查看翻譯</span>
     </div>
     <div class="speed-bar">
       <span class="speed-label">語速</span>
@@ -1727,25 +1911,21 @@
     </div>
     <div id="article-body"></div>
 
-```
-<!-- Full Translation -->
-<div id="translation-section" style="display:none;">
-  <div class="translation-divider">
-    <span>中文翻譯</span>
-  </div>
-  <div id="translation-body" class="translation-body"></div>
-</div>
+    <!-- Full Translation -->
+    <div id="translation-section" style="display:none;">
+      <div class="translation-divider">
+        <span>中文翻譯</span>
+      </div>
+      <div id="translation-body" class="translation-body"></div>
+    </div>
 
-<button class="translate-all-btn" id="translate-all-btn">
-  <span id="translate-all-icon">🌐</span>
-  <span id="translate-all-label">顯示全文翻譯</span>
-</button>
-```
-
+    <button class="translate-all-btn" id="translate-all-btn">
+      <span id="translate-all-icon">🌐</span>
+      <span id="translate-all-label">顯示全文翻譯</span>
+    </button>
   </div>
 
   <!-- Vocab View -->
-
   <div id="vocab-view">
     <div class="vocab-count" id="vocab-count"></div>
     <div class="vocab-speed-bar">
@@ -1764,7 +1944,6 @@
   </div>
 
   <!-- Library View -->
-
   <div id="library-view">
     <div class="library-header">
       <div class="vocab-count" id="library-count"></div>
@@ -1779,39 +1958,35 @@
     </div>
     <div id="library-list"></div>
 
-```
-<!-- Flashcard overlay -->
-<div id="flashcard-overlay" style="display:none;">
-  <div class="flashcard-wrap">
-    <div class="flashcard-progress">
-      <div class="flashcard-progress-bar" id="fc-progress-bar"></div>
-    </div>
-    <div id="flashcard" class="flashcard">
-      <div class="fc-front">
-        <div class="fc-word" id="fc-word"></div>
-        <div class="fc-phonetic" id="fc-phonetic"></div>
-        <div class="fc-tap-hint">點擊翻面</div>
+    <!-- Flashcard overlay -->
+    <div id="flashcard-overlay" style="display:none;">
+      <div class="flashcard-wrap">
+        <div class="flashcard-progress">
+          <div class="flashcard-progress-bar" id="fc-progress-bar"></div>
+        </div>
+        <div id="flashcard" class="flashcard">
+          <div class="fc-front">
+            <div class="fc-word" id="fc-word"></div>
+            <div class="fc-phonetic" id="fc-phonetic"></div>
+            <div class="fc-tap-hint">點擊翻面</div>
+          </div>
+          <div class="fc-back" id="fc-back" style="display:none;">
+            <div class="fc-word" id="fc-word-back"></div>
+            <div class="fc-pos" id="fc-pos"></div>
+            <div class="fc-translation" id="fc-translation"></div>
+            <div class="fc-example" id="fc-example"></div>
+          </div>
+        </div>
+        <div class="fc-btn-row" id="fc-btn-row" style="display:none;">
+          <button class="fc-btn fc-wrong" id="fc-wrong">✗ 不熟</button>
+          <button class="fc-btn fc-right" id="fc-right">✓ 認識</button>
+        </div>
+        <button class="fc-close" id="fc-close">✕ 結束複習</button>
       </div>
-      <div class="fc-back" id="fc-back" style="display:none;">
-        <div class="fc-word" id="fc-word-back"></div>
-        <div class="fc-pos" id="fc-pos"></div>
-        <div class="fc-translation" id="fc-translation"></div>
-        <div class="fc-example" id="fc-example"></div>
-      </div>
     </div>
-    <div class="fc-btn-row" id="fc-btn-row" style="display:none;">
-      <button class="fc-btn fc-wrong" id="fc-wrong">✗ 不熟</button>
-      <button class="fc-btn fc-right" id="fc-right">✓ 認識</button>
-    </div>
-    <button class="fc-close" id="fc-close">✕ 結束複習</button>
-  </div>
-</div>
-```
-
   </div>
 
   <!-- Chat View -->
-
   <div id="chat-view">
     <div id="chat-home"></div>
     <div id="chat-screen" style="display:none;flex-direction:column;flex:1;">
@@ -1841,8 +2016,35 @@
 
 </main>
 
-<!-- Popup -->
+<!-- Sentence Analysis Panel -->
+<div id="sent-panel" class="sent-panel" style="display:none;">
+  <div class="sent-panel-handle"></div>
+  <div class="sent-panel-header">
+    <div class="sent-panel-title" id="sent-panel-title">句子分析</div>
+    <button class="sent-panel-close" id="sent-panel-close">✕</button>
+  </div>
+  <div id="sent-panel-body" class="sent-panel-body">
+    <div class="sent-section">
+      <div class="sent-section-label">📖 原句</div>
+      <div class="sent-orig" id="sent-orig"></div>
+    </div>
+    <div class="sent-section">
+      <div class="sent-section-label">🇹🇼 中文翻譯</div>
+      <div class="sent-zh" id="sent-zh">翻譯中...</div>
+    </div>
+    <div class="sent-section" id="sent-grammar-section" style="display:none;">
+      <div class="sent-section-label">🔍 文法結構</div>
+      <div id="sent-grammar"></div>
+    </div>
+    <div class="sent-section" id="sent-phrases-section" style="display:none;">
+      <div class="sent-section-label">💡 關鍵片語</div>
+      <div id="sent-phrases" class="sent-phrases-wrap"></div>
+    </div>
+  </div>
+</div>
+<div id="sent-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:290;"></div>
 
+<!-- Popup -->
 <div id="popup-overlay">
   <div id="popup">
     <div class="popup-header">
@@ -1856,6 +2058,11 @@
       <div class="popup-meta" id="popup-meta"></div>
       <div class="popup-translation" id="popup-translation"></div>
       <div class="popup-phonetic" id="popup-phonetic"></div>
+      <div id="popup-phrase-box" class="popup-phrase-box" style="display:none;">
+        <div class="popup-phrase-label">🔗 片語</div>
+        <div class="popup-phrase-en" id="popup-phrase-en"></div>
+        <div class="popup-phrase-zh" id="popup-phrase-zh"></div>
+      </div>
       <div class="popup-example" id="popup-example"></div>
       <div class="popup-speed-row">
         <button class="popup-speed-adj" id="popup-speed-down">－</button>
@@ -1927,6 +2134,8 @@ Scientists have discovered that trees communicate through these underground netw
   });
 
   // ── Render article with clickable words ──
+  var sentenceMode = false;
+
   function renderArticle(text) {
     currentArticleText = text;
     const body = document.getElementById('article-body');
@@ -2062,6 +2271,9 @@ Scientists have discovered that trees communicate through these underground netw
     document.getElementById('popup-meta').innerHTML = '';
     document.getElementById('popup-phonetic').textContent = '';
     document.getElementById('popup-example').textContent = '';
+    document.getElementById('popup-phrase-box').style.display = 'none';
+    document.getElementById('popup-phrase-en').textContent = '';
+    document.getElementById('popup-phrase-zh').textContent = '';
 
     const saveBtn = document.getElementById('popup-save');
     const alreadySaved = vocab.some(v => v.en.toLowerCase() === word.toLowerCase());
@@ -2092,6 +2304,11 @@ Scientists have discovered that trees communicate through these underground netw
     popup.classList.add('show');
     syncPopupSpeed();
     overlay.classList.add('active');
+
+    // Get sentence context for phrase detection
+    const sentParent = document.querySelector('.sentence.selected') ||
+      Array.from(document.querySelectorAll('.sentence')).find(s => s.contains(document.querySelector('[data-word="' + word + '"]')));
+    const sentContext = sentParent?.dataset?.text || currentArticleText.slice(0, 300);
 
     Promise.all([translate(word), fetchDictionary(word)]).then(([translation, dict]) => {
       currentTranslation = translation;
@@ -2130,6 +2347,9 @@ Scientists have discovered that trees communicate through these underground netw
           document.getElementById('popup-example').textContent = '"' + bestExample + '"';
         }
       }
+
+      // Phrase detection with Gemini
+      if (anthropicKey && sentContext) detectPhrase(word, sentContext);
     });
   }
 
@@ -3396,7 +3616,7 @@ ${convo}`;
   async function loadGuardianNews() {
     if (!guardianKey) {
       document.getElementById('rss-articles').innerHTML =
-        '<div class="rss-loading">請先在上方輸入並儲存 Guardian API Key<br><span style="font-size:0.75rem;"><a href="https://open-platform.theguardian.com/access/" target="_blank" style="color:var(--accent);">免費申請 →</a></span></div>';
+        '<div class="rss-loading">請先輸入並儲存 Guardian API Key</div>';
       document.getElementById('rss-refresh-btn').classList.remove('spinning');
       document.getElementById('rss-refresh-btn').textContent = '↺ 載入';
       return;
@@ -3406,50 +3626,37 @@ ${convo}`;
     btn.classList.add('spinning'); btn.textContent = '載入中...';
     el.innerHTML = '<div class="rss-loading">從 The Guardian 載入新聞...</div>';
 
-    // Try multiple field combos for compatibility
-    const urls = [
-      'https://content.guardianapis.com/search?api-key=' + guardianKey + '&section=' + activeNewsTopic + '&show-fields=trailText,body&page-size=6&order-by=newest&format=json',
-      'https://content.guardianapis.com/search?api-key=' + guardianKey + '&section=' + activeNewsTopic + '&show-fields=trailText&page-size=6&order-by=newest&format=json',
-    ];
+    try {
+      // Fetch with fields; also try without if fields missing
+      const base = 'https://content.guardianapis.com/search?format=json&order-by=newest&page-size=8';
+      const params = '&api-key=' + encodeURIComponent(guardianKey) + '&section=' + activeNewsTopic + '&show-fields=trailText%2Cbody';
+      const res = await fetch(base + params);
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error('HTTP ' + res.status + (res.status === 401 || res.status === 403 ? ' - Key 無效或未啟用' : ''));
+      }
+      const data = await res.json();
+      const results = data.response?.results;
+      if (!results?.length) throw new Error('沒有文章，請換個主題');
 
-    let lastError = '';
-    for (const url of urls) {
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (!res.ok) {
-          const msg = data.message || ('HTTP ' + res.status);
-          if (res.status === 401 || res.status === 403) {
-            el.innerHTML = '<div class="rss-loading">❌ API Key 無效<br><span style="font-size:0.75rem;">請確認 Key 正確，並已收到 Guardian 的確認信</span></div>';
-            btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
-            return;
-          }
-          lastError = msg; continue;
-        }
-        const results = data.response?.results || [];
-        if (!results.length) { lastError = '沒有文章'; continue; }
+      const items = results.map((r, i) => ({
+        id: 'g' + i + '_' + Date.now(),
+        title: r.webTitle || '(無標題)',
+        titleZh: '',
+        trailText: r.fields ? (r.fields.trailText || '').replace(/<[^>]+>/g, '').trim() : '',
+        bodyText:  r.fields ? (r.fields.body     || '').replace(/<[^>]+>/g, '').trim() : '',
+        date:   (r.webPublicationDate || '').slice(0, 10),
+        topic:  activeNewsTopic,
+        icon:   NEWS_ICONS[activeNewsTopic] || '📰',
+        source: 'The Guardian',
+        isReal: true,
+      }));
 
-        const items = results.map(r => ({
-          id: 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-          title: r.webTitle || '',
-          titleZh: '',
-          trailText: (r.fields?.trailText || '').replace(/<[^>]+>/g,'').trim(),
-          bodyText: (r.fields?.body || '').replace(/<[^>]+>/g,'').trim(),
-          url: r.webUrl || '',
-          date: (r.webPublicationDate || '').slice(0,10),
-          topic: activeNewsTopic,
-          icon: NEWS_ICONS[activeNewsTopic] || '📰',
-          source: 'The Guardian',
-          isReal: true,
-        }));
-
-        newsCache['guardian_' + activeNewsTopic] = items;
-        renderNewsItems(items);
-        btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
-        return;
-      } catch(e) { lastError = e.message; }
+      newsCache['guardian_' + activeNewsTopic] = items;
+      renderNewsItems(items);
+    } catch(e) {
+      el.innerHTML = '<div class="rss-loading">❌ ' + e.message + '</div>';
     }
-    el.innerHTML = '<div class="rss-loading">載入失敗：' + lastError + '</div>';
     btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
   }
 
@@ -3718,11 +3925,152 @@ ${convo}`;
     if (btn) { btn.classList.remove('voice-on'); btn.textContent = '🎤 語音'; }
   }, true);
 
+  // ── Sentence Mode ──
+  function wrapSentences(html) {
+    // Split HTML by sentence boundaries (.!?) keeping punctuation
+    // Works on text nodes between span tags
+    return html.replace(/([^<>]+?)([.!?]+)(\s|<br|$)/g, (match, before, punct, after) => {
+      const full = (before + punct).trim();
+      if (full.length < 10) return match;
+      return '<span class="sentence" data-text="' + full.replace(/"/g, '&quot;') + '">' + before + punct + '</span>' + after;
+    });
+  }
+
+  document.getElementById('mode-word-btn').addEventListener('click', () => {
+    sentenceMode = false;
+    document.getElementById('mode-word-btn').classList.add('active');
+    document.getElementById('mode-sent-btn').classList.remove('active');
+    document.getElementById('hint-text').textContent = '點任何單字查看翻譯';
+    closeSentPanel();
+  });
+
+  document.getElementById('mode-sent-btn').addEventListener('click', () => {
+    sentenceMode = true;
+    document.getElementById('mode-sent-btn').classList.add('active');
+    document.getElementById('mode-word-btn').classList.remove('active');
+    document.getElementById('hint-text').textContent = '點任何句子查看翻譯與文法';
+  });
+
+  function closeSentPanel() {
+    document.getElementById('sent-panel').style.display = 'none';
+    document.getElementById('sent-backdrop').style.display = 'none';
+    document.querySelectorAll('.sentence').forEach(s => s.classList.remove('selected'));
+  }
+
+  document.getElementById('sent-panel-close').addEventListener('click', closeSentPanel);
+  document.getElementById('sent-backdrop').addEventListener('click', closeSentPanel);
+
+  var sentAnalysisCache = {};
+
+  async function showSentencePanel(sentence) {
+    const panel = document.getElementById('sent-panel');
+    const backdrop = document.getElementById('sent-backdrop');
+    panel.style.display = 'flex';
+    backdrop.style.display = 'block';
+
+    document.getElementById('sent-orig').textContent = sentence;
+    document.getElementById('sent-zh').textContent = '翻譯中...';
+    document.getElementById('sent-grammar-section').style.display = 'none';
+    document.getElementById('sent-phrases-section').style.display = 'none';
+
+    // Check cache
+    if (sentAnalysisCache[sentence]) {
+      renderSentAnalysis(sentAnalysisCache[sentence]);
+      return;
+    }
+
+    // Quick translation first
+    try {
+      const t = await translate(sentence.split(' ').slice(0,15).join(' '));
+      document.getElementById('sent-zh').textContent = t;
+    } catch(e) {}
+
+    // Full analysis with Gemini if available
+    if (!anthropicKey) return;
+
+    try {
+      const prompt = 'Analyse this English sentence for a B1 language learner. Return ONLY valid JSON: {"translation":"繁體中文翻譯","grammar":[{"part":"text fragment","role":"角色（繁體中文）","note":"說明（繁體中文）"}],"keyPhrases":[{"phrase":"phrase","meaning":"繁體中文意思"}]}. Sentence: ' + sentence;
+
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
+        body: JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:600}})
+      });
+      const data = await res.json();
+      if (data.error) return;
+      const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+      const analysis = JSON.parse(raw);
+      sentAnalysisCache[sentence] = analysis;
+      renderSentAnalysis(analysis);
+    } catch(e) {}
+  }
+
+  function renderSentAnalysis(a) {
+    if (a.translation) document.getElementById('sent-zh').textContent = a.translation;
+
+    if (a.grammar?.length) {
+      const grammarEl = document.getElementById('sent-grammar');
+      grammarEl.innerHTML = a.grammar.map(g =>
+        '<div class="grammar-row">' +
+          '<div style="flex:1;">' +
+            '<div class="grammar-part">' + g.part + '</div>' +
+            (g.note ? '<div class="grammar-note">' + g.note + '</div>' : '') +
+          '</div>' +
+          '<div class="grammar-role">' + g.role + '</div>' +
+        '</div>'
+      ).join('');
+      document.getElementById('sent-grammar-section').style.display = 'flex';
+    }
+
+    if (a.keyPhrases?.length) {
+      document.getElementById('sent-phrases').innerHTML = a.keyPhrases.map(p =>
+        '<div class="phrase-chip">' +
+          '<div class="phrase-en">' + p.phrase + '</div>' +
+          '<div class="phrase-zh">' + p.meaning + '</div>' +
+        '</div>'
+      ).join('');
+      document.getElementById('sent-phrases-section').style.display = 'flex';
+    }
+  }
+
+  // ── Phrase Detection ──
+  var phraseCache = {};
+
+  async function detectPhrase(word, sentence) {
+    const cacheKey = word + '|' + sentence.slice(0, 60);
+    if (phraseCache[cacheKey] !== undefined) {
+      if (phraseCache[cacheKey]) showPhraseInPopup(phraseCache[cacheKey]);
+      return;
+    }
+    try {
+      const prompt = 'In this sentence: "' + sentence + '" — is the word "' + word + '" part of a multi-word phrase, idiom, or phrasal verb (e.g. "take care of", "look forward to", "as well as")? If YES return JSON: {"isPhrase":true,"phrase":"the full phrase","meaning":"繁體中文意思"}. If NO return {"isPhrase":false}. No markdown.';
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
+        body: JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:80}})
+      });
+      const data = await res.json();
+      if (data.error) return;
+      const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+      const result = JSON.parse(raw);
+      phraseCache[cacheKey] = result.isPhrase ? result : null;
+      if (result.isPhrase && document.getElementById('popup-word').textContent === word) {
+        showPhraseInPopup(result);
+      }
+    } catch(e) {}
+  }
+
+  function showPhraseInPopup(result) {
+    const box = document.getElementById('popup-phrase-box');
+    document.getElementById('popup-phrase-en').textContent = result.phrase;
+    document.getElementById('popup-phrase-zh').textContent = result.meaning;
+    box.style.display = 'block';
+  }
+
   // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 </script>
-
 </body>
 </html>
