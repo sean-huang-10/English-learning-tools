@@ -2168,7 +2168,7 @@ Scientists have discovered that trees communicate through these underground netw
     });
 
     body.innerHTML = html;
-    document.getElementById('word-count').textContent = `${wordCount} 個單字`;
+    document.getElementById('word-count').textContent = wordCount + ' 個單字';
 
     // Reset translation panel
     const tSection = document.getElementById('translation-section');
@@ -2305,10 +2305,19 @@ Scientists have discovered that trees communicate through these underground netw
     syncPopupSpeed();
     overlay.classList.add('active');
 
-    // Get sentence context for phrase detection
-    const sentParent = document.querySelector('.sentence.selected') ||
-      Array.from(document.querySelectorAll('.sentence')).find(s => s.contains(document.querySelector('[data-word="' + word + '"]')));
-    const sentContext = sentParent?.dataset?.text || currentArticleText.slice(0, 300);
+    // Get sentence context from clicked word's data-start position
+    const clickedEl = document.querySelector('.word[data-word="' + word + '"]');
+    const sentParent = clickedEl?.closest('.sentence');
+    const sentContext = sentParent?.dataset?.text || (() => {
+      // Fallback: find sentence in text by word position
+      if (!clickedEl) return currentArticleText.slice(0, 200);
+      const pos = parseInt(clickedEl.dataset.start || 0);
+      const textBefore = currentArticleText.slice(Math.max(0, pos - 150), pos);
+      const textAfter  = currentArticleText.slice(pos, pos + 150);
+      const sentStart = Math.max(textBefore.lastIndexOf('.'), textBefore.lastIndexOf('!'), textBefore.lastIndexOf('?')) + 1;
+      const sentEnd   = Math.min(...[textAfter.indexOf('.'), textAfter.indexOf('!'), textAfter.indexOf('?')].filter(i => i >= 0).map(i => i + pos + 1), currentArticleText.length);
+      return currentArticleText.slice(pos - (150 - sentStart), sentEnd).trim();
+    })();
 
     Promise.all([translate(word), fetchDictionary(word)]).then(([translation, dict]) => {
       currentTranslation = translation;
@@ -3926,15 +3935,7 @@ ${convo}`;
   }, true);
 
   // ── Sentence Mode ──
-  function wrapSentences(html) {
-    // Split HTML by sentence boundaries (.!?) keeping punctuation
-    // Works on text nodes between span tags
-    return html.replace(/([^<>]+?)([.!?]+)(\s|<br|$)/g, (match, before, punct, after) => {
-      const full = (before + punct).trim();
-      if (full.length < 10) return match;
-      return '<span class="sentence" data-text="' + full.replace(/"/g, '&quot;') + '">' + before + punct + '</span>' + after;
-    });
-  }
+  // wrapSentences removed - sentences wrapped in renderArticle
 
   document.getElementById('mode-word-btn').addEventListener('click', () => {
     sentenceMode = false;
