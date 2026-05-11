@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
@@ -966,6 +967,15 @@
       font-size: 0.75rem;
       color: var(--ink-muted);
     }
+    .espn-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
     .rss-loading {
       text-align: center;
       padding: 20px;
@@ -1741,6 +1751,7 @@
       animation: savePulse 0.3s ease;
     }
   </style>
+
 </head>
 <body>
 
@@ -1769,112 +1780,117 @@
     </div>
     <div id="daily-articles"></div>
 
-    <!-- AI 新聞生成 -->
-    <div class="rss-header">
-      <div class="daily-title">📡 今日英文新聞</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <div class="news-source-toggle">
-          <button class="nsrc-btn active" data-src="guardian">🇬🇧 Guardian</button>
-          <button class="nsrc-btn" data-src="gemini">✨ AI</button>
-        </div>
-        <button class="daily-refresh" id="rss-refresh-btn">↺ 載入</button>
-      </div>
+```
+<!-- AI 新聞生成 -->
+<div class="rss-header">
+  <div class="daily-title">📡 今日英文新聞</div>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <div class="news-source-toggle">
+      <button class="nsrc-btn active" data-src="guardian">🇬🇧 Guardian</button>
+      <button class="nsrc-btn" data-src="gemini">✨ AI</button>
     </div>
-    <div class="filter-row" id="rss-source-filter" style="padding-bottom:2px;">
-      <button class="filter-btn active" data-topic="world" data-gemini-topic="World News">🌍 國際</button>
-      <button class="filter-btn" data-topic="lifeandstyle" data-gemini-topic="Health">🏥 健康</button>
-      <button class="filter-btn" data-topic="science" data-gemini-topic="Science">🔬 科學</button>
-      <button class="filter-btn" data-topic="technology" data-gemini-topic="Technology">💻 科技</button>
-      <button class="filter-btn" data-topic="business" data-gemini-topic="Business">💹 財經</button>
-      <button class="filter-btn" data-topic="culture" data-gemini-topic="Culture">🎭 文化</button>
-    </div>
-    <div id="rss-articles"></div>
+    <button class="daily-refresh" id="rss-refresh-btn">↺ 載入</button>
+  </div>
+</div>
+<div class="filter-row" id="rss-source-filter" style="padding-bottom:2px;">
+  <button class="filter-btn active" data-topic="world" data-gemini-topic="World News">🌍 國際</button>
+  <button class="filter-btn" data-topic="lifeandstyle" data-gemini-topic="Health">🏥 健康</button>
+  <button class="filter-btn" data-topic="science" data-gemini-topic="Science">🔬 科學</button>
+  <button class="filter-btn" data-topic="technology" data-gemini-topic="Technology">💻 科技</button>
+  <button class="filter-btn" data-topic="business" data-gemini-topic="Business">💹 財經</button>
+  <button class="filter-btn" data-topic="culture" data-gemini-topic="Culture">🎭 文化</button>
+  <button class="filter-btn" data-topic="nba" data-gemini-topic="NBA basketball">🏀 NBA</button>
+</div>
+<div id="rss-articles"></div>
 
-    <div class="gen-card" id="gen-section">
-      <div class="gen-title">✨ 用AI幫我生成文章</div>
-      <div class="gen-filters">
-        <select class="gen-select" id="gen-level">
-          <option value="A1">A1 入門</option>
-          <option value="A2">A2 基礎</option>
-          <option value="B1" selected>B1 中級</option>
-          <option value="B2">B2 中高級</option>
-          <option value="C1">C1 高級</option>
-        </select>
-        <select class="gen-select" id="gen-topic">
-          <optgroup label="── 新聞 / 雜誌 ──">
-          <option value="World News">🌍 世界新聞</option>
-          <option value="Business">💹 商業財經</option>
-          <option value="Health">🏥 健康醫療</option>
-          <option value="Lifestyle">✨ 生活風格</option>
-          <option value="Tech News">📱 科技新知</option>
-          </optgroup>
-          <optgroup label="── 一般主題 ──">
-          <option value="Science">🔬 科學</option>
-          <option value="Culture">🎭 文化</option>
-          <option value="Travel">✈️ 旅遊</option>
-          <option value="Food">🍜 飲食</option>
-          <option value="Nature">🌿 自然</option>
-          <option value="History">🏛️ 歷史</option>
-          <option value="Sports">⚽ 運動</option>
-          </optgroup>
-        </select>
-      </div>
-      <div class="api-key-row" id="api-key-row">
-        <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
-        <button class="api-key-save" id="api-key-save">儲存</button>
-      </div>
-      <div id="api-key-status"></div>
-      <div class="api-key-row" id="guardian-key-row">
-        <input type="password" id="guardian-key-input" class="api-key-input" placeholder="The Guardian API Key（選填）" autocomplete="off" />
-        <button class="api-key-save" id="guardian-key-save">儲存</button>
-      </div>
-      <div id="guardian-key-status"></div>
-      <button class="btn-primary" id="gen-btn" style="margin-top:0;">
-        <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
-      </button>
-    </div>
+<div class="gen-card" id="gen-section">
+  <div class="gen-title">✨ 用AI幫我生成文章</div>
+  <div class="gen-filters">
+    <select class="gen-select" id="gen-level">
+      <option value="A1">A1 入門</option>
+      <option value="A2">A2 基礎</option>
+      <option value="B1" selected>B1 中級</option>
+      <option value="B2">B2 中高級</option>
+      <option value="C1">C1 高級</option>
+    </select>
+    <select class="gen-select" id="gen-topic">
+      <optgroup label="── 新聞 / 雜誌 ──">
+      <option value="World News">🌍 世界新聞</option>
+      <option value="Business">💹 商業財經</option>
+      <option value="Health">🏥 健康醫療</option>
+      <option value="Lifestyle">✨ 生活風格</option>
+      <option value="Tech News">📱 科技新知</option>
+      </optgroup>
+      <optgroup label="── 一般主題 ──">
+      <option value="Science">🔬 科學</option>
+      <option value="Culture">🎭 文化</option>
+      <option value="Travel">✈️ 旅遊</option>
+      <option value="Food">🍜 飲食</option>
+      <option value="Nature">🌿 自然</option>
+      <option value="History">🏛️ 歷史</option>
+      <option value="Sports">⚽ 運動</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="api-key-row" id="api-key-row">
+    <input type="password" id="api-key-input" class="api-key-input" placeholder="輸入 Gemini API Key (AIza...)" autocomplete="off" />
+    <button class="api-key-save" id="api-key-save">儲存</button>
+  </div>
+  <div id="api-key-status"></div>
+  <div class="api-key-row" id="guardian-key-row">
+    <input type="password" id="guardian-key-input" class="api-key-input" placeholder="The Guardian API Key（選填）" autocomplete="off" />
+    <button class="api-key-save" id="guardian-key-save">儲存</button>
+  </div>
+  <div id="guardian-key-status"></div>
+  <button class="btn-primary" id="gen-btn" style="margin-top:0;">
+    <span id="gen-icon">✨</span> <span id="gen-label">生成文章</span>
+  </button>
+</div>
 
-    <!-- Paste custom -->
-    <details class="paste-section">
-      <summary>📋 貼上自己的文章</summary>
-      <div class="paste-inner">
-        <textarea id="article-input" placeholder="Paste your English article here..."></textarea>
-        <button class="btn-primary" id="start-btn"><span>📖</span> 開始閱讀</button>
-      </div>
-    </details>
+<!-- Paste custom -->
+<details class="paste-section">
+  <summary>📋 貼上自己的文章</summary>
+  <div class="paste-inner">
+    <textarea id="article-input" placeholder="Paste your English article here..."></textarea>
+    <button class="btn-primary" id="start-btn"><span>📖</span> 開始閱讀</button>
+  </div>
+</details>
 
-    <!-- Level filter -->
-    <div class="filter-row" id="level-filter">
-      <button class="filter-btn active" data-level="all">全部</button>
-      <button class="filter-btn" data-level="A1">A1</button>
-      <button class="filter-btn" data-level="A2">A2</button>
-      <button class="filter-btn" data-level="B1">B1</button>
-      <button class="filter-btn" data-level="B2">B2</button>
-      <button class="filter-btn" data-level="C1">C1</button>
-    </div>
+<!-- Level filter -->
+<div class="filter-row" id="level-filter">
+  <button class="filter-btn active" data-level="all">全部</button>
+  <button class="filter-btn" data-level="A1">A1</button>
+  <button class="filter-btn" data-level="A2">A2</button>
+  <button class="filter-btn" data-level="B1">B1</button>
+  <button class="filter-btn" data-level="B2">B2</button>
+  <button class="filter-btn" data-level="C1">C1</button>
+</div>
 
-    <!-- Topic filter -->
-    <div class="filter-row topic-filter" id="topic-filter">
-      <button class="filter-btn active" data-topic="all">全部</button>
-      <button class="filter-btn" data-topic="World News">🌍 新聞</button>
-      <button class="filter-btn" data-topic="Business">💹 財經</button>
-      <button class="filter-btn" data-topic="Health">🏥 健康</button>
-      <button class="filter-btn" data-topic="Lifestyle">✨ 生活</button>
-      <button class="filter-btn" data-topic="Tech News">📱 科技</button>
-      <button class="filter-btn" data-topic="Science">🔬 科學</button>
-      <button class="filter-btn" data-topic="Culture">🎭 文化</button>
-      <button class="filter-btn" data-topic="Travel">✈️ 旅遊</button>
-      <button class="filter-btn" data-topic="Food">🍜 飲食</button>
-      <button class="filter-btn" data-topic="Nature">🌿 自然</button>
-      <button class="filter-btn" data-topic="History">🏛️ 歷史</button>
-      <button class="filter-btn" data-topic="Sports">⚽ 運動</button>
-    </div>
+<!-- Topic filter -->
+<div class="filter-row topic-filter" id="topic-filter">
+  <button class="filter-btn active" data-topic="all">全部</button>
+  <button class="filter-btn" data-topic="World News">🌍 新聞</button>
+  <button class="filter-btn" data-topic="Business">💹 財經</button>
+  <button class="filter-btn" data-topic="Health">🏥 健康</button>
+  <button class="filter-btn" data-topic="Lifestyle">✨ 生活</button>
+  <button class="filter-btn" data-topic="Tech News">📱 科技</button>
+  <button class="filter-btn" data-topic="Science">🔬 科學</button>
+  <button class="filter-btn" data-topic="Culture">🎭 文化</button>
+  <button class="filter-btn" data-topic="Travel">✈️ 旅遊</button>
+  <button class="filter-btn" data-topic="Food">🍜 飲食</button>
+  <button class="filter-btn" data-topic="Nature">🌿 自然</button>
+  <button class="filter-btn" data-topic="History">🏛️ 歷史</button>
+  <button class="filter-btn" data-topic="Sports">⚽ 運動</button>
+</div>
 
-    <!-- Article list -->
-    <div id="article-list"></div>
+<!-- Article list -->
+<div id="article-list"></div>
+```
+
   </div>
 
   <!-- Read View -->
+
   <div id="read-view">
     <div class="article-header">
       <button class="back-btn" id="back-btn">← 返回</button>
@@ -1911,21 +1927,25 @@
     </div>
     <div id="article-body"></div>
 
-    <!-- Full Translation -->
-    <div id="translation-section" style="display:none;">
-      <div class="translation-divider">
-        <span>中文翻譯</span>
-      </div>
-      <div id="translation-body" class="translation-body"></div>
-    </div>
+```
+<!-- Full Translation -->
+<div id="translation-section" style="display:none;">
+  <div class="translation-divider">
+    <span>中文翻譯</span>
+  </div>
+  <div id="translation-body" class="translation-body"></div>
+</div>
 
-    <button class="translate-all-btn" id="translate-all-btn">
-      <span id="translate-all-icon">🌐</span>
-      <span id="translate-all-label">顯示全文翻譯</span>
-    </button>
+<button class="translate-all-btn" id="translate-all-btn">
+  <span id="translate-all-icon">🌐</span>
+  <span id="translate-all-label">顯示全文翻譯</span>
+</button>
+```
+
   </div>
 
   <!-- Vocab View -->
+
   <div id="vocab-view">
     <div class="vocab-count" id="vocab-count"></div>
     <div class="vocab-speed-bar">
@@ -1944,6 +1964,7 @@
   </div>
 
   <!-- Library View -->
+
   <div id="library-view">
     <div class="library-header">
       <div class="vocab-count" id="library-count"></div>
@@ -1958,35 +1979,39 @@
     </div>
     <div id="library-list"></div>
 
-    <!-- Flashcard overlay -->
-    <div id="flashcard-overlay" style="display:none;">
-      <div class="flashcard-wrap">
-        <div class="flashcard-progress">
-          <div class="flashcard-progress-bar" id="fc-progress-bar"></div>
-        </div>
-        <div id="flashcard" class="flashcard">
-          <div class="fc-front">
-            <div class="fc-word" id="fc-word"></div>
-            <div class="fc-phonetic" id="fc-phonetic"></div>
-            <div class="fc-tap-hint">點擊翻面</div>
-          </div>
-          <div class="fc-back" id="fc-back" style="display:none;">
-            <div class="fc-word" id="fc-word-back"></div>
-            <div class="fc-pos" id="fc-pos"></div>
-            <div class="fc-translation" id="fc-translation"></div>
-            <div class="fc-example" id="fc-example"></div>
-          </div>
-        </div>
-        <div class="fc-btn-row" id="fc-btn-row" style="display:none;">
-          <button class="fc-btn fc-wrong" id="fc-wrong">✗ 不熟</button>
-          <button class="fc-btn fc-right" id="fc-right">✓ 認識</button>
-        </div>
-        <button class="fc-close" id="fc-close">✕ 結束複習</button>
+```
+<!-- Flashcard overlay -->
+<div id="flashcard-overlay" style="display:none;">
+  <div class="flashcard-wrap">
+    <div class="flashcard-progress">
+      <div class="flashcard-progress-bar" id="fc-progress-bar"></div>
+    </div>
+    <div id="flashcard" class="flashcard">
+      <div class="fc-front">
+        <div class="fc-word" id="fc-word"></div>
+        <div class="fc-phonetic" id="fc-phonetic"></div>
+        <div class="fc-tap-hint">點擊翻面</div>
+      </div>
+      <div class="fc-back" id="fc-back" style="display:none;">
+        <div class="fc-word" id="fc-word-back"></div>
+        <div class="fc-pos" id="fc-pos"></div>
+        <div class="fc-translation" id="fc-translation"></div>
+        <div class="fc-example" id="fc-example"></div>
       </div>
     </div>
+    <div class="fc-btn-row" id="fc-btn-row" style="display:none;">
+      <button class="fc-btn fc-wrong" id="fc-wrong">✗ 不熟</button>
+      <button class="fc-btn fc-right" id="fc-right">✓ 認識</button>
+    </div>
+    <button class="fc-close" id="fc-close">✕ 結束複習</button>
+  </div>
+</div>
+```
+
   </div>
 
   <!-- Chat View -->
+
   <div id="chat-view">
     <div id="chat-home"></div>
     <div id="chat-screen" style="display:none;flex-direction:column;flex:1;">
@@ -2017,6 +2042,7 @@
 </main>
 
 <!-- Sentence Analysis Panel -->
+
 <div id="sent-panel" class="sent-panel" style="display:none;">
   <div class="sent-panel-handle"></div>
   <div class="sent-panel-header">
@@ -2045,6 +2071,7 @@
 <div id="sent-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:290;"></div>
 
 <!-- Popup -->
+
 <div id="popup-overlay">
   <div id="popup">
     <div class="popup-header">
@@ -3614,7 +3641,9 @@ ${convo}`;
   async function loadNews() {
     const cacheKey = activeNewsSource + '_' + activeNewsTopic;
     delete newsCache[cacheKey];
-    if (activeNewsSource === 'guardian') {
+    if (activeNewsTopic === 'nba') {
+      await loadESPNNews();
+    } else if (activeNewsSource === 'guardian') {
       await loadGuardianNews();
     } else {
       await generateAINews();
@@ -4068,10 +4097,72 @@ ${convo}`;
     box.style.display = 'block';
   }
 
+  // ── ESPN NBA News ──
+  async function loadESPNNews() {
+    const btn = document.getElementById('rss-refresh-btn');
+    const el = document.getElementById('rss-articles');
+    btn.classList.add('spinning'); btn.textContent = '載入中...';
+    el.innerHTML = '<div class="rss-loading">從 ESPN 載入 NBA 新聞...</div>';
+
+    try {
+      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/news?limit=10');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const articles = data.articles || [];
+      if (!articles.length) throw new Error('沒有新聞');
+
+      const items = articles.map((a, i) => ({
+        id: 'espn_' + i + '_' + Date.now(),
+        title: a.headline || '',
+        titleZh: '',
+        trailText: a.description || a.headline || '',
+        bodyText: '',
+        date: a.published ? a.published.slice(0,10) : new Date().toISOString().slice(0,10),
+        topic: 'nba',
+        icon: '🏀',
+        source: 'ESPN',
+        isReal: true,
+        imageUrl: a.images?.[0]?.url || '',
+      }));
+
+      newsCache['nba'] = items;
+      renderESPNItems(items);
+    } catch(e) {
+      el.innerHTML = '<div class="rss-loading">ESPN 載入失敗：' + e.message + '<br><span style="font-size:0.75rem;">請確認網路連線</span></div>';
+    }
+    btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
+  }
+
+  function renderESPNItems(items) {
+    const el = document.getElementById('rss-articles');
+    if (!items.length) { el.innerHTML = '<div class="rss-loading">沒有文章</div>'; return; }
+    el.innerHTML = items.map((item, i) =>
+      '<div class="rss-card espn-card" data-index="' + i + '" data-src="nba">' +
+        (item.imageUrl
+          ? '<div class="espn-img" style="background-image:url(' + item.imageUrl + ')"></div>'
+          : '<div class="rss-icon" style="background:linear-gradient(135deg,#c8102e,#1d428a);">🏀</div>') +
+        '<div style="flex:1;min-width:0;">' +
+          '<span class="art-style-badge badge-news">ESPN · NBA</span>' +
+          '<div class="rss-title">' + item.title + '</div>' +
+          (item.trailText && item.trailText !== item.title
+            ? '<div class="art-preview">' + item.trailText.slice(0,90) + '...</div>' : '') +
+          '<div class="rss-meta">' + item.date + ' · 🌐 真實新聞</div>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+    el.querySelectorAll('.espn-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const item = (newsCache['nba'] || [])[parseInt(card.dataset.index)];
+        if (item) openNewsArticle(item);
+      });
+    });
+  }
+
   // ── PWA Service Worker ──
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 </script>
+
 </body>
 </html>
