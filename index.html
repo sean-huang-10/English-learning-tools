@@ -3757,44 +3757,39 @@ ${convo}`;
   }
 
   async function openNewsArticle(item) {
-    // Use bodyText if long enough, otherwise expand with Gemini
     const rawText = (item.bodyText || item.trailText || '').trim();
-    if (rawText.length > 200) {
-      renderArticle(rawText);
-      switchTab('read');
-      document.getElementById('word-count').textContent = (item.source||'News') + '　' + item.date;
-      return;
-    }
+    const displayText = rawText || item.title;
+
+    // Show content immediately without generating
     switchTab('read');
-    document.getElementById('article-body').innerHTML = '<div class="translation-loading" style="padding:40px 0;">正在根據新聞標題生成完整文章...</div>';
-
-    if (!anthropicKey) {
-      renderArticle(rawText || item.title);
-      document.getElementById('word-count').textContent = (item.source||'News') + '　' + item.date;
-      return;
-    }
-    try {
-      const parts = [
-        'You are an English learning article writer.',
-        'Based on this real news headline, write a complete B1 CEFR English learning article (250-300 words).',
-        'Make it factual, clear, and educational.',
-        'Headline: ' + item.title,
-        item.trailText ? 'Context: ' + item.trailText : '',
-      ].filter(Boolean).join(' ');
-
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
-        body: JSON.stringify({contents:[{parts:[{text:parts}]}],generationConfig:{temperature:0.5,maxOutputTokens:600}})
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      const expanded = data.candidates[0].content.parts[0].text.trim();
-      renderArticle(expanded);
-    } catch(e) {
-      renderArticle(rawText || item.title);
-    }
+    renderArticle(displayText);
     document.getElementById('word-count').textContent = (item.source||'News') + '　' + item.date;
+
+    // If content is short, show an expand button below
+    if (displayText.length < 200 && anthropicKey) {
+      const expandBtn = document.createElement('button');
+      expandBtn.className = 'translate-all-btn';
+      expandBtn.innerHTML = '<span>✨</span> 用AI擴寫成完整學習文章';
+      expandBtn.style.marginTop = '0';
+      const articleBody = document.getElementById('article-body');
+      articleBody.parentNode.insertBefore(expandBtn, articleBody.nextSibling);
+
+      expandBtn.addEventListener('click', async () => {
+        expandBtn.remove();
+        document.getElementById('article-body').innerHTML += '<div class="translation-loading" style="padding:20px 0 0;">正在擴寫...</div>';
+        try {
+          const prompt = 'Write a B1 CEFR English learning article (250-300 words) based on this news. Headline: ' + item.title + (item.trailText ? '. Context: ' + item.trailText : '');
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
+            method:'POST',
+            headers:{'Content-Type':'application/json','x-goog-api-key':anthropicKey},
+            body: JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.5,maxOutputTokens:600}})
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error.message);
+          renderArticle(data.candidates[0].content.parts[0].text.trim());
+        } catch(e) { /* keep original */ }
+      });
+    }
   }
 
   document.getElementById('rss-articles').innerHTML =
@@ -4097,13 +4092,49 @@ ${convo}`;
     box.style.display = 'block';
   }
 
-  // ── ESPN NBA News ──
+  // ── NBA News ──
   async function loadESPNNews() {
     const btn = document.getElementById('rss-refresh-btn');
     const el = document.getElementById('rss-articles');
     btn.classList.add('spinning'); btn.textContent = '載入中...';
-    el.innerHTML = '<div class="rss-loading">從 ESPN 載入 NBA 新聞...</div>';
 
+    // If Guardian key exists, fetch full articles from Guardian
+    if (guardianKey) {
+      el.innerHTML = '<div class="rss-loading">從 The Guardian 載入 NBA 完整新聞...</div>';
+      try {
+        const url = 'https://content.guardianapis.com/search?format=json&order-by=newest&page-size=8' +
+          '&api-key=' + encodeURIComponent(guardianKey) +
+          '&q=NBA+basketball&show-fields=trailText%2Cbody';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const results = data.response?.results || [];
+        if (!results.length) throw new Error('沒有文章');
+
+        const items = results.map((r, i) => ({
+          id: 'gnba_' + i + '_' + Date.now(),
+          title: r.webTitle || '',
+          titleZh: '',
+          trailText: (r.fields?.trailText || '').replace(/<[^>]+>/g,'').trim(),
+          bodyText: (r.fields?.body || '').replace(/<[^>]+>/g,'').trim(),
+          date: (r.webPublicationDate || '').slice(0, 10),
+          topic: 'nba',
+          icon: '🏀',
+          source: 'The Guardian',
+          isReal: true,
+        }));
+
+        newsCache['nba'] = items;
+        renderNBAItems(items, 'guardian');
+        btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
+        return;
+      } catch(e) {
+        // fall through to ESPN
+      }
+    }
+
+    // Fallback: ESPN headlines only
+    el.innerHTML = '<div class="rss-loading">從 ESPN 載入 NBA 新聞標題...</div>';
     try {
       const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/news?limit=10');
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -4126,30 +4157,37 @@ ${convo}`;
       }));
 
       newsCache['nba'] = items;
-      renderESPNItems(items);
+      renderNBAItems(items, 'espn');
     } catch(e) {
-      el.innerHTML = '<div class="rss-loading">ESPN 載入失敗：' + e.message + '<br><span style="font-size:0.75rem;">請確認網路連線</span></div>';
+      el.innerHTML = '<div class="rss-loading">載入失敗：' + e.message + '</div>';
     }
     btn.classList.remove('spinning'); btn.textContent = '↺ 載入';
   }
 
-  function renderESPNItems(items) {
+  function renderNBAItems(items, src) {
     const el = document.getElementById('rss-articles');
     if (!items.length) { el.innerHTML = '<div class="rss-loading">沒有文章</div>'; return; }
-    el.innerHTML = items.map((item, i) =>
-      '<div class="rss-card espn-card" data-index="' + i + '" data-src="nba">' +
+
+    let notice = '';
+    if (src === 'espn') {
+      notice = '<div class="rss-loading" style="padding:8px 0;font-size:0.78rem;color:var(--ink-muted);">⚠️ ESPN 只有標題摘要。輸入 Guardian Key 可取得完整 NBA 文章。</div>';
+    }
+
+    el.innerHTML = notice + items.map((item, i) =>
+      '<div class="rss-card espn-card" data-index="' + i + '">' +
         (item.imageUrl
           ? '<div class="espn-img" style="background-image:url(' + item.imageUrl + ')"></div>'
           : '<div class="rss-icon" style="background:linear-gradient(135deg,#c8102e,#1d428a);">🏀</div>') +
         '<div style="flex:1;min-width:0;">' +
-          '<span class="art-style-badge badge-news">ESPN · NBA</span>' +
+          '<span class="art-style-badge badge-news">' + item.source + ' · NBA</span>' +
           '<div class="rss-title">' + item.title + '</div>' +
           (item.trailText && item.trailText !== item.title
-            ? '<div class="art-preview">' + item.trailText.slice(0,90) + '...</div>' : '') +
-          '<div class="rss-meta">' + item.date + ' · 🌐 真實新聞</div>' +
+            ? '<div class="art-preview">' + item.trailText.slice(0,100) + (item.trailText.length>100?'...':'') + '</div>' : '') +
+          '<div class="rss-meta">' + item.date + (item.bodyText.length > 200 ? ' · 📄 完整文章' : '') + '</div>' +
         '</div>' +
       '</div>'
     ).join('');
+
     el.querySelectorAll('.espn-card').forEach(card => {
       card.addEventListener('click', () => {
         const item = (newsCache['nba'] || [])[parseInt(card.dataset.index)];
